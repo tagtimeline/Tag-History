@@ -10,12 +10,9 @@ const PasswordForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your password validation logic here
-    if (password === 'test') {
+    if (password === process.env.NEXT_PUBLIC_SITE_PASSWORD) {
       setShowError(false);
-      // Store authentication state in localStorage
       localStorage.setItem('isAuthenticated', 'true');
-      // Redirect to timeline page
       await router.push('/timeline');
     } else {
       setShowError(true);

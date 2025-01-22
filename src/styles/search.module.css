@@ -1,0 +1,84 @@
+/* src/styles/search.module.css */
+
+/* Search Container */
+.searchContainer {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Common Input Styles */
+.searchInput {
+    height: 32px;
+    width: 200px;
+    padding: 8px;
+    font-family: "Minecraft", sans-serif;
+    background-color: #333;
+    border: 2px solid #555;
+    color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+    border-color: #888;
+}
+
+.searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: calc(100% - 4px);
+    max-height: 300px;
+    overflow-y: auto;
+    background: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    margin-top: 5px;
+    z-index: 1000;
+}
+  
+.resultItem {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+  
+.resultItem:hover {
+    background-color: #444;
+}
+  
+.resultTitle {
+    color: #fff;
+    font-size: 12px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+  
+.resultDate {
+    color: #888;
+    font-size: 10px;
+}
+
+.categoryColor {
+    width: 3px;
+    height: 16px;
+    flex-shrink: 0;
+}
+  
+.noResults {
+    padding: 12px;
+    color: #888;
+    text-align: center;
+    font-style: italic;
+}

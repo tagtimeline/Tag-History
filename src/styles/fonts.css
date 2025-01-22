@@ -1,0 +1,50 @@
+/* styles/fonts.css */
+
+/* Import Minecraft Fonts */
+/* Minecraft Regular */
+@font-face {
+    font-family: "Minecraft";
+    src: url("../assets/fonts/MinecraftRegular-Bmg3.otf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Minecraft Bold */
+@font-face {
+    font-family: "Minecraft";
+    src: url("../assets/fonts/MinecraftBold-nMK1.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Minecraft Italic */
+@font-face {
+    font-family: "Minecraft";
+    src: url("../assets/fonts/MinecraftItalic-R8Mo.otf") format("opentype");
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Minecraft Bold Italic */
+@font-face {
+    font-family: "Minecraft";
+    src: url("../assets/fonts/MinecraftBoldItalic-1y1e.otf") format("opentype");
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* Apply Minecraft Font Globally */
+body {
+    font-family: "Minecraft", "Courier New", Courier, monospace;
+}
+
+/* For specific styles */
+strong {
+    font-family: 'Minecraft'; 
+    font-weight: bold;
+}
+
+em {
+    font-family: 'Minecraft'; 
+    font-style: italic;
+}

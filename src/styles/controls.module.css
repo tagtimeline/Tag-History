@@ -1,0 +1,166 @@
+/* src/styles/controls.module.css */
+
+/* Header Controls Layout */
+.headerControls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+}
+
+/* Base Button Styles */
+.button {
+    font-family: 'Minecraft', sans-serif;
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    background-color: #333;
+    border: 2px solid #555;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.button:hover {
+    transform: scale(1.05);
+    background-color: #444;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.button:active {
+    transform: scale(0.95);
+}
+
+/* Dropdown Styles */
+.dropdown {
+    position: relative;
+    width: 200px;
+}
+
+.dropdownHeader {
+    height: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    border: 2px solid #555;
+    color: #727272;
+    padding: 0 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.label {
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: calc(100% - 4px);
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    margin-top: 5px;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+}
+
+.dropdownItem {
+    padding: 8px;
+    color: white;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+    transition: border-color 0.3s ease, background-color 0.2s;
+    text-align: left;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+}
+  
+.categoryColor {
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.dropdownItem:hover {
+    background-color: #444;
+}
+
+.selected {
+    background-color: #292929;
+    border-left: 3px solid #1a1a1a;
+}
+
+
+/* Info Button */
+.infoButton {
+    composes: button;
+    width: 64px;
+}
+
+/* Timeline Controls */
+.controls {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 90;
+}
+
+.invertTimeline {
+    composes: button;
+    width: auto;
+    padding: 4px 10px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.zoomIn {
+    composes: button;
+}
+
+.zoomOut {
+    composes: button;
+}
+
+.resetTimeline {
+    composes: button;
+}
+
+/* Filter Buttons */
+.filterBtn {
+    composes: button;
+    width: auto;
+    padding: 8px 16px;
+}
+
+.filterBtnActive {
+    background-color: #0047ab;
+    border-color: #002f6c;
+}
+
+/* Modal Close Button */
+.modalCloseBtn {
+    composes: button;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}

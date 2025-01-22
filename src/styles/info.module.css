@@ -1,0 +1,73 @@
+/* src/styles/info.module.css */
+
+.mainContent {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.spacing {
+    height: 50px;
+}
+
+.profileBox {
+    display: flex;
+    align-items: center;
+    background-color: #222;
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 0 auto;
+    width: 90%;
+    max-width: 250px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.profilePicture {
+    width: 64px;
+    height: 64px;
+    border-radius: 4px;
+    margin-right: 16px;
+    border: 2px solid #555;
+}
+
+.profileInfo {
+    text-align: left;
+    color: #d2d2d2;
+}
+
+.discordButton {
+    composes: button from './controls.module.css';
+    width: auto;
+    padding: 0 16px;
+    margin: auto;
+}
+
+.mainContent h1 {
+    font-size: 32px;
+    color: white;
+    margin: 0;
+}
+
+.mainContent h2 {
+    font-size: 24px;
+    color: white;
+    margin: 0;
+}
+
+.mainContent p {
+    font-size: 16px;
+    line-height: 1;
+    color: #d2d2d2;
+}
+
+.timelineButton {
+    composes: button from './controls.module.css';
+    width: 64px;
+}

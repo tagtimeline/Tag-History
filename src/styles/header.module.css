@@ -1,0 +1,49 @@
+/* src/styles/header.module.css */
+
+.header {
+    background-color: #151515;
+    color: white;
+    padding: 15px 20px;
+    border-bottom: 2px solid #505050;
+    height: var(--header-height);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 16px;
+    height: 100%;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.info-box {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    z-index: -5;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    color: #505050;
+    text-align: right;
+    max-width: 200px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}

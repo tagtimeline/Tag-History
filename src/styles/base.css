@@ -1,0 +1,132 @@
+/* styles/base.css */
+
+/* CSS Variables */
+:root {
+  --footer-height: 64px;
+  --header-height: 62px;
+}
+
+/* Base Reset */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body Styles */
+body {
+  font-family: "Minecraft", sans-serif;
+  background-color: #202020;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* selection styles */
+::selection {
+  background-color: #1a4a8e;
+  color: #fff;
+}
+
+::-moz-selection {
+  background-color: #1a4a8e;
+  color: #fff;
+}
+
+
+/* Main Content Area */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(var(--footer-height) + 20px); /* Add padding for footer */
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+main.centered {
+  justify-content: center;
+  align-items: center;
+  padding: 20px 40px;
+}
+
+/* Hide scrollbar while retaining functionality */
+main::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+main {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Global Scrollbar Styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #333;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: #333;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: #777; 
+}
+
+
+/* Global Link Styles */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:visited {
+  color: inherit;
+}
+
+a:hover, 
+a:active {
+  color: inherit;
+}
+
+/* Button Styles within Links */
+a button {
+  font-family: 'Minecraft', sans-serif;
+  border: none;
+  background: #444;
+  color: #fff;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+a button:hover {
+  background: #555;
+}
+
+a button:active {
+  background: #666;
+}

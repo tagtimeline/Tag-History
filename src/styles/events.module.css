@@ -1,0 +1,206 @@
+/* src/styles/events.module.css */
+
+/* Event Styles */
+.eventBox {
+    position: absolute;
+    width: 190px;
+    background: #333;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    z-index: 3;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eventBox:hover {
+    transform: scale(1.05);
+    background-color: #444;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.eventBox-left {
+  left: 210px;
+}
+
+.eventBox-right {
+  left: 430px;
+}
+
+.eventBox-far {
+  left: 650px;
+}
+
+.connectionLine {
+  position: absolute;
+  height: 2px;
+  background: #444;
+  transform-origin: left;
+  left: 100px;
+}
+
+.eventContent {
+    position: relative;
+}
+
+.eventTitle {
+    font-weight: normal;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+    font-size: 12px;
+}
+
+.eventDate {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+background: #1a1a1a;
+border-radius: 12px;
+padding: 24px;
+width: 90%;
+max-width: 600px;
+max-height: 80vh;
+overflow-y: auto;
+position: relative;
+border: 4px solid #333;
+}
+
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.eventType {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: #333;
+}
+
+.modalControls {
+display: flex;
+gap: 8px;
+}
+
+.openButton {
+border: none;
+color: #888;
+background: none;
+cursor: pointer;
+padding: 4px;
+font-size: 12px;
+}
+
+.openButton:hover {
+background: none;
+color: #fff;
+}
+
+.timelineButton {
+font-family: 'Minecraft', sans-serif;
+height: 32px;
+padding: 0 16px;
+font-size: 14px;
+background-color: #333;
+border: 2px solid #555;
+color: white;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.timelineButton:hover {
+background-color: #444;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.closeButton:hover {
+  color: #fff;
+}
+
+.modalTitle {
+  font-weight: normal;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+}
+
+.modalDate {
+  color: #888;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.modalSubtitle {
+  font-family: 'Minecraft', sans-serif;
+  color: #ffffff;
+  margin: 24px 0 12px 0;
+  font-size: 18px;
+}
+
+.modalText {
+color: #888;
+line-height: 1.2;
+margin: 0;
+white-space: pre-line;
+}
+
+.divider {
+border: none;
+border-top: 1px solid #333;
+margin: 20px 0;
+}
+
+.modalTags {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.tagLabel {
+color: #888;
+font-size: 10px;
+margin-bottom: 4px;
+}
+
+.tag {
+background: #333;
+color: #888;
+padding: 4px 12px;
+border-radius: 4px;
+font-size: 12px;
+}
+
+/* Event page specific styles */
+.eventPageContent {
+  top: 0px;
+  composes: modalContent;
+  max-width: 100%;
+  height: 100%;
+  
+}

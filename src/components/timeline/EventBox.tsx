@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '../../styles/events.module.css';
-import modalStyles from '../../styles/modal.module.css';
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
 import { getEventStyles } from '../../config/categories';

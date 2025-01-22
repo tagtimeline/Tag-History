@@ -43,7 +43,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
      position: totalHeight - 5
    });
    
-   let currentDate = new Date(2013, 9, 30);
+   const currentDate = new Date(2013, 9, 30);
    
    while (currentDate <= endDate) {
      const year = currentDate.getFullYear();
@@ -84,7 +84,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
    }
    
    return markers;
- }, []);
+  }, [monthSpacing, months]); 
 
  const getEventPosition = (eventDate: string) => {
    const date = new Date(eventDate);

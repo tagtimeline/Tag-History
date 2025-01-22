@@ -2,6 +2,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
+import Image from 'next/image';
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import styles from '../styles/info.module.css'
@@ -35,11 +36,13 @@ const InfoPage: NextPage = () => {
           </p>
           <section>
             <div className={styles.profileBox}>
-              <img
-                src="https://crafthead.net/avatar/flodlol/128"
-                alt="Minecraft Head of flodlol"
-                className={styles.profilePicture}
-              />
+            <Image
+              src="https://crafthead.net/avatar/flodlol/128"
+              alt="Minecraft Head of flodlol"
+              width={128}
+              height={128}
+              className={styles.profilePicture}
+            />
               <div className={styles.profileInfo}>
                 <p>
                   <b>flodlol</b><br />

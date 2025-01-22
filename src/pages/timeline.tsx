@@ -9,7 +9,7 @@ import headerStyles from '../styles/header.module.css'
 import searchStyles from '../styles/search.module.css'
 import { useState, useMemo, useEffect, useRef } from 'react'
 import withAuth from '../components/auth/withAuth'
-import { categories, getAllCategories, getCategoryColor } from '../config/categories'
+import { getAllCategories, getCategoryColor } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown'
 import { events, TimelineEvent } from '../data/events'
 import { searchEvents } from '../config/search'

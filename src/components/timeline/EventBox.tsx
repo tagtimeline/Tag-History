@@ -11,7 +11,7 @@ interface EventBoxProps {
  timelinePosition: number;
 }
 
-const EventBox: React.FC<EventBoxProps> = ({ event, position, column, timelinePosition }) => {
+const EventBox: React.FC<EventBoxProps> = ({ event, position, column }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [eventBoxHeight, setEventBoxHeight] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);

@@ -14,17 +14,17 @@ type MarkerType = {
   position: number;
 };
 
+const MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+] as const;
+
 const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
   const columns = Array.from({ length: 20 }, (_, i) => i);
   const calculateRowCount = (height: number) => Math.ceil(height / 100);
   
   const yearSpacing = 600;
   const monthSpacing = yearSpacing / 12;
-  
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
 
   const filteredEvents = useMemo(() => {
     const hasAll = visibleCategories.includes('all');
@@ -38,7 +38,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
     let totalHeight = 10;
 
     // Start from October 2013
-    let currentYear = 2013;
+    const currentYear = 2013;
     markers.push({
       type: 'year',
       label: currentYear,
@@ -54,7 +54,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
         // Add month marker
         markers.push({
           type: 'month',
-          label: months[month],
+          label: MONTHS[month],
           position: totalHeight
         });
 
@@ -83,7 +83,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
     }
     
     return markers;
-  }, [monthSpacing, months]);
+  }, [monthSpacing]);
 
   const getEventPosition = (eventDate: string) => {
     const date = new Date(eventDate);

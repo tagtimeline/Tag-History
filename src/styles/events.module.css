@@ -201,6 +201,44 @@ font-size: 12px;
   top: 0px;
   composes: modalContent;
   max-width: 100%;
-  height: 100%;
-  
+  height: calc(100vh - 340px);
+  overflow-y: auto;
+}
+
+.eventNavigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.navButton {
+  font-family: 'Minecraft', sans-serif;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  background-color: #333;
+  border: 2px solid #555;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.navButton:hover {
+  background-color: #444;
+}
+
+.navButtonDisabled {
+  background-color: #222;
+  border-color: #333;
+  color: #444;
+  cursor: not-allowed;
+}
+
+.navButtonDisabled:hover {
+  background-color: #222;
 }

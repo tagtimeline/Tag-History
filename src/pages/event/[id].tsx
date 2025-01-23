@@ -1,3 +1,4 @@
+// [id].tsx
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -13,7 +14,16 @@ import { getCategoryName, getCategoryColor } from '../../config/categories';
 const EventPage: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const event = events.find(e => e.id === id);
+  
+  const sortedEvents = [...events].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  const currentIndex = sortedEvents.findIndex(e => e.id === id);
+  const event = sortedEvents[currentIndex];
+  
+  const prevEvent = currentIndex > 0 ? sortedEvents[currentIndex - 1] : null;
+  const nextEvent = currentIndex < sortedEvents.length - 1 ? sortedEvents[currentIndex + 1] : null;
 
   if (!event) return null;
 
@@ -59,6 +69,21 @@ const EventPage: NextPage = () => {
               <span key={tag} className={styles.tag}>{tag}</span>
             ))}
           </div>
+        </div>
+        
+        <div className={styles.eventNavigation}>
+          <Link 
+            href={prevEvent ? `/event/${prevEvent.id}` : '#'}
+            className={`${styles.navButton} ${!prevEvent ? styles.navButtonDisabled : ''}`}
+          >
+            &lt;
+          </Link>
+          <Link 
+            href={nextEvent ? `/event/${nextEvent.id}` : '#'}
+            className={`${styles.navButton} ${!nextEvent ? styles.navButtonDisabled : ''}`}
+          >
+            &gt;
+          </Link>
         </div>
       </main>
 

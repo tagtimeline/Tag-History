@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
 import styles from '../../styles/events.module.css';  
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
@@ -22,7 +23,6 @@ const EventBox: React.FC<EventBoxProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
   const [eventBoxHeight, setEventBoxHeight] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
   const eventStyles = getEventStyles(event.category);
@@ -44,12 +44,14 @@ const EventBox: React.FC<EventBoxProps> = ({
     if (eventBoxRef.current && isDraggingEnabled) {
       const rect = eventBoxRef.current.getBoundingClientRect();
       setStartX(e.clientX - rect.left);
-      setStartY(e.clientY - rect.top);
+       
+
       setIsDragging(true);
     }
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       const deltaX = e.clientX - startX - leftPosition;
 
@@ -63,9 +65,9 @@ const EventBox: React.FC<EventBoxProps> = ({
         }
       }
     }
-  };
-
-  const handleMouseUp = (e: MouseEvent) => {
+  }, [isDragging, startX, leftPosition]);
+  
+  const handleMouseUp = useCallback((e: MouseEvent) => {
     if (isDragging) {
       setIsDragging(false);
       const finalX = e.clientX - startX;
@@ -87,7 +89,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         }
       }
     }
-  };
+  }, [isDragging, startX, baseOffset, columnWidth, column, event.id, position, onUpdateColumn, connectionLineWidth]);
 
   const handleClick = () => {
     if (!isDraggingEnabled && !isDragging) {

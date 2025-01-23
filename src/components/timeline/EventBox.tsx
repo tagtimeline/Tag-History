@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from '../../styles/events.module.css';
+import styles from '../../styles/events.module.css';  
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
 import { getEventStyles } from '../../config/categories';
@@ -8,7 +8,6 @@ interface EventBoxProps {
   event: TimelineEvent;
   position: number;
   column: number;
-  timelinePosition: number;
   isDraggingEnabled: boolean;
   onUpdateColumn: (eventId: string, newColumn: number, position: number) => void;
 }
@@ -17,7 +16,6 @@ const EventBox: React.FC<EventBoxProps> = ({
   event, 
   position, 
   column, 
-  timelinePosition,
   isDraggingEnabled,
   onUpdateColumn 
 }) => {
@@ -25,8 +23,6 @@ const EventBox: React.FC<EventBoxProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
-  const [currentX, setCurrentX] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
   const [eventBoxHeight, setEventBoxHeight] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
   const eventStyles = getEventStyles(event.category);
@@ -50,20 +46,14 @@ const EventBox: React.FC<EventBoxProps> = ({
       setStartX(e.clientX - rect.left);
       setStartY(e.clientY - rect.top);
       setIsDragging(true);
-      setCurrentX(rect.left);
-      setCurrentY(rect.top);
     }
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
-      const newX = e.clientX - startX;
-      const newY = e.clientY - startY;
-      setCurrentX(newX);
-      setCurrentY(newY);
-      
+      const deltaX = e.clientX - startX - leftPosition;
+
       if (eventBoxRef.current) {
-        const deltaX = e.clientX - startX - leftPosition;
         const connectorElement = eventBoxRef.current.previousElementSibling as HTMLElement;
         
         eventBoxRef.current.style.transform = `translateX(${deltaX}px)`;
@@ -114,7 +104,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
     <>

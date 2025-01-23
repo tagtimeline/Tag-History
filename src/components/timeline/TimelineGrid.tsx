@@ -226,7 +226,6 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggi
                 event={event}
                 position={position}
                 column={column}
-                timelinePosition={position}
                 isDraggingEnabled={isDraggingEnabled}
                 onUpdateColumn={handleUpdateColumn}
               />

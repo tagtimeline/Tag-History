@@ -11,12 +11,24 @@
     z-index: 3;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    cursor: grab;
 }
 
 .eventBox:hover {
     transform: scale(1.05);
     background-color: #444;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dragging {
+  z-index: 1000;
+  transition: none;
+  cursor: grabbing !important;
+}
+
+.dragging:hover {
+  transform: none;
 }
 
 .eventBox-left {
@@ -146,14 +158,14 @@ background-color: #444;
 .modalTitle {
   font-weight: normal;
   color: #ffffff;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   font-size: 24px;
 }
 
 .modalDate {
   color: #888;
   font-size: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 5px;
 }
 
 .modalSubtitle {
@@ -173,7 +185,7 @@ white-space: pre-line;
 .divider {
 border: none;
 border-top: 1px solid #333;
-margin: 20px 0;
+margin: 10px 0;
 }
 
 .modalTags {
@@ -202,8 +214,9 @@ font-size: 12px;
   composes: modalContent;
   max-width: 100%;
   height: calc(100vh - 340px);
-  overflow-y: auto;
-}
+  display: flex;
+  flex-direction: column;
+ }
 
 .eventNavigation {
   display: flex;
@@ -211,6 +224,20 @@ font-size: 12px;
   margin-top: 10px;
   gap: 5px;
 }
+
+.modalText {
+  color: #888;
+  line-height: 1.2;
+  margin: 0;
+  white-space: pre-line;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+ }
+
+.modalFooter {
+  margin-top: 5px;
+ }
 
 .navButton {
   font-family: 'Minecraft', sans-serif;

@@ -1,11 +1,17 @@
-// TimelineGrid.tsx
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import styles from '../../styles/timeline.module.css';
 import { TimelineEvent, events } from '../../data/events';
 import EventBox from './EventBox';
 
 interface TimelineGridProps {
   visibleCategories: string[];
+  isDraggingEnabled: boolean;
+}
+
+interface EventPosition {
+  event: TimelineEvent;
+  position: number;
+  column: number;
 }
 
 type MarkerType = {
@@ -19,7 +25,10 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ] as const;
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
+const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggingEnabled }) => {
+  const [customPositions, setCustomPositions] = useState<Record<string, number>>({});
+  const [eventColumns, setEventColumns] = useState<Record<string, number>>({});
+  
   const columns = Array.from({ length: 20 }, (_, i) => i);
   const calculateRowCount = (height: number) => Math.ceil(height / 100);
   
@@ -45,20 +54,17 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
       position: totalHeight
     });
 
-    // Generate markers from Oct 2013 to current date
     for (let year = 2013; year <= endDate.getFullYear(); year++) {
-      const startMonth = year === 2013 ? 9 : 0; // Start from October for 2013
+      const startMonth = year === 2013 ? 9 : 0;
       const endMonth = year === endDate.getFullYear() ? endDate.getMonth() : 11;
 
       for (let month = startMonth; month <= endMonth; month++) {
-        // Add month marker
         markers.push({
           type: 'month',
           label: MONTHS[month],
           position: totalHeight
         });
 
-        // Add year marker for January
         if (month === 0 && year > 2013) {
           markers.push({
             type: 'year',
@@ -67,7 +73,6 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
           });
         }
 
-        // Add 'now' marker if current month
         if (year === endDate.getFullYear() && month === endDate.getMonth()) {
           const daysInMonth = new Date(year, month + 1, 0).getDate();
           const dayProgress = endDate.getDate() / daysInMonth;
@@ -85,62 +90,84 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
     return markers;
   }, [monthSpacing]);
 
-  const getEventPosition = (eventDate: string) => {
+  const getEventPosition = useCallback((eventDate: string) => {
     const date = new Date(eventDate);
-    const startDate = new Date(2013, 9, 1); // October 1, 2013
+    const startDate = new Date(2013, 9, 1);
     
     const monthsDiff = 
       (date.getFullYear() - startDate.getFullYear()) * 12 + 
       (date.getMonth() - startDate.getMonth());
     
-    // Add day offset
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     const dayOffset = (date.getDate() / daysInMonth) * monthSpacing;
     
     return 10 + (monthsDiff * monthSpacing) + dayOffset;
-  };
+  }, [monthSpacing]);
 
-  const assignEventPositions = (events: TimelineEvent[]) => {
+  const handleUpdateColumn = useCallback((eventId: string, newColumn: number, position: number) => {
+    setEventColumns(prev => ({
+      ...prev,
+      [eventId]: newColumn
+    }));
+    setCustomPositions(prev => ({
+      ...prev,
+      [eventId]: position
+    }));
+  }, []);
+
+  const assignEventPositions = useCallback((events: TimelineEvent[]) => {
     const sortedEvents = [...events].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    const columns: { date: number, position: number }[][] = [];
-    const positions = [];
+    const positions: EventPosition[] = [];
+    const occupiedSpaces: Record<number, number[]> = {};
 
     for (const event of sortedEvents) {
-      const position = getEventPosition(event.date);
-      let colIndex = 0;
-      let placed = false;
-
-      while (!placed) {
-        if (!columns[colIndex]) {
-          columns[colIndex] = [];
-        }
-
-        const hasOverlap = columns[colIndex].some(existing => 
-          Math.abs(existing.position - position) < 100
-        );
+      const position = customPositions[event.id] || getEventPosition(event.date);
+      const existingColumn = eventColumns[event.id];
+      
+      if (existingColumn !== undefined) {
+        positions.push({
+          event,
+          position,
+          column: existingColumn
+        });
         
-        if (!hasOverlap) {
-          columns[colIndex].push({ 
-            date: new Date(event.date).getTime(), 
-            position 
-          });
-          positions.push({ 
-            event,
-            position,
-            column: colIndex 
-          });
-          placed = true;
-        } else {
-          colIndex++;
+        if (!occupiedSpaces[existingColumn]) {
+          occupiedSpaces[existingColumn] = [];
+        }
+        occupiedSpaces[existingColumn].push(position);
+      } else {
+        let colIndex = 0;
+        let placed = false;
+
+        while (!placed) {
+          const hasOverlap = occupiedSpaces[colIndex]?.some(existingPos => 
+            Math.abs(existingPos - position) < 100
+          );
+          
+          if (!hasOverlap) {
+            if (!occupiedSpaces[colIndex]) {
+              occupiedSpaces[colIndex] = [];
+            }
+            occupiedSpaces[colIndex].push(position);
+            
+            positions.push({
+              event,
+              position,
+              column: colIndex
+            });
+            placed = true;
+          } else {
+            colIndex++;
+          }
         }
       }
     }
 
     return positions;
-  };
+  }, [customPositions, eventColumns, getEventPosition]);
 
   const totalHeight = Math.max(
     timelineMarkers[timelineMarkers.length - 1]?.position + monthSpacing + 60 || 0,
@@ -200,11 +227,13 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories }) => {
                 position={position}
                 column={column}
                 timelinePosition={position}
+                isDraggingEnabled={isDraggingEnabled}
+                onUpdateColumn={handleUpdateColumn}
               />
             ))}
             
             <div className={styles.timelineEnd}>
-              <div className={styles.timelineArrow}></div>
+              <div className={styles.timelineArrow} />
               <div className={styles.timelineEndText}>
                 <em>Time continues...</em>
               </div>

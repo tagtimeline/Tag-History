@@ -138,23 +138,28 @@
 
 .zoomOut {
     composes: button;
+    width: auto;
+    padding: 4px 10px;
+    font-size: 12px;
+    text-align: center;
 }
 
 .resetTimeline {
     composes: button;
+    width: auto;
+    padding: 4px 10px;
+    font-size: 12px;
+    text-align: center;
 }
 
-/* Filter Buttons */
-.filterBtn {
+.settingsButton {
     composes: button;
     width: auto;
-    padding: 8px 16px;
-}
+    padding: 4px 10px;
+    font-size: 12px;
+    text-align: center;
+  }
 
-.filterBtnActive {
-    background-color: #0047ab;
-    border-color: #002f6c;
-}
 
 /* Modal Close Button */
 .modalCloseBtn {
@@ -164,3 +169,114 @@
     right: 10px;
     z-index: 1000;
 }
+  
+  .settingsOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .settingsPopup {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    border: 2px solid #333;
+  }
+  
+  .settingsTitle {
+    font-weight: normal;
+    color: #fff;
+    margin: 0 0 0 0;
+    font-size: 18px;
+  }
+  
+  .settingsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .settingGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .settingGroup label {
+    color: #888;
+    font-size: 14px;
+  }
+  
+  .settingSelect {
+    background: #333;
+    border: 2px solid #555;
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    font-family: 'Minecraft', sans-serif;
+    outline: none;
+  }
+
+  .settingSelect:focus {
+    border-color: #888;
+  }
+  
+  .settingsSave {
+    margin-top: 15px;
+    width: 300px;
+    composes: button
+  }
+  
+  .settingsSave:hover {
+    background: #444;
+  }
+
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 0;
+  }
+  
+  .checkboxLabel input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    appearance: none;
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    position: relative;
+  }
+  
+  .checkboxLabel input[type="checkbox"]:checked {
+    background-color: #444;
+  }
+  
+  .checkboxLabel input[type="checkbox"]:checked::after {
+    font-family: 'Minecraft', sans-serif;
+    content: "×";
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    top: 42.5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 15px 0;
+  }

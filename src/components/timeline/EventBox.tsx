@@ -54,12 +54,12 @@ const EventBox: React.FC<EventBoxProps> = ({
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       const deltaX = e.clientX - startX - leftPosition;
-
+  
       if (eventBoxRef.current) {
-        const connectorElement = eventBoxRef.current.previousElementSibling as HTMLElement;
+        const connectorElement = eventBoxRef.current.nextElementSibling as HTMLElement;
         
         eventBoxRef.current.style.transform = `translateX(${deltaX}px)`;
-        if (connectorElement) {
+        if (connectorElement && connectorElement.classList.contains(styles.connectionLine)) {
           const newWidth = leftPosition + deltaX - 100;
           connectorElement.style.width = `${newWidth}px`;
         }
@@ -83,8 +83,8 @@ const EventBox: React.FC<EventBoxProps> = ({
 
       if (eventBoxRef.current) {
         eventBoxRef.current.style.transform = 'none';
-        const connectorElement = eventBoxRef.current.previousElementSibling as HTMLElement;
-        if (connectorElement) {
+        const connectorElement = eventBoxRef.current.nextElementSibling as HTMLElement;
+        if (connectorElement && connectorElement.classList.contains(styles.connectionLine)) {
           connectorElement.style.width = `${connectionLineWidth}px`;
         }
       }
@@ -110,13 +110,6 @@ const EventBox: React.FC<EventBoxProps> = ({
 
   return (
     <>
-      <div
-        className={styles.connectionLine}
-        style={{
-          width: `${connectionLineWidth}px`,
-          top: `${position}px`
-        }}
-      />
       <div 
         ref={eventBoxRef}
         className={`${styles.eventBox} ${isDragging ? styles.dragging : ''}`}
@@ -137,6 +130,14 @@ const EventBox: React.FC<EventBoxProps> = ({
           </div>
         </div>
       </div>
+   
+      <div
+        className={styles.connectionLine}
+        style={{
+          width: `${connectionLineWidth}px`,
+          top: `${position}px`
+        }}
+      />
       
       {isModalOpen && (
         <EventModal 
@@ -145,7 +146,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         />
       )}
     </>
-  );
+   );
 };
 
 export default EventBox;

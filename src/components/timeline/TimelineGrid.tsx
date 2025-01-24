@@ -1,11 +1,14 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import styles from '../../styles/timeline.module.css';
 import { TimelineEvent, events } from '../../data/events';
 import EventBox from './EventBox';
+import { DEFAULT_YEAR_SPACING } from '../../config/timelineControls';
 
 interface TimelineGridProps {
   visibleCategories: string[];
   isDraggingEnabled: boolean;
+  yearSpacing: number;
+  onReset: number; // Reset key that changes to trigger reset
 }
 
 interface EventPosition {
@@ -25,14 +28,24 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ] as const;
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggingEnabled }) => {
+const TimelineGrid: React.FC<TimelineGridProps> = ({ 
+  visibleCategories, 
+  isDraggingEnabled,
+  yearSpacing,
+  onReset
+}) => {
   const [customPositions, setCustomPositions] = useState<Record<string, number>>({});
   const [eventColumns, setEventColumns] = useState<Record<string, number>>({});
   
+  // Reset effect
+  useEffect(() => {
+    setCustomPositions({});
+    setEventColumns({});
+  }, [onReset]);
+
   const columns = Array.from({ length: 20 }, (_, i) => i);
   const calculateRowCount = (height: number) => Math.ceil(height / 100);
   
-  const yearSpacing = 600;
   const monthSpacing = yearSpacing / 12;
 
   const filteredEvents = useMemo(() => {
@@ -109,11 +122,14 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggi
       ...prev,
       [eventId]: newColumn
     }));
+    
+    // Store normalized position relative to default spacing
+    const normalizedPosition = (position * DEFAULT_YEAR_SPACING) / yearSpacing;
     setCustomPositions(prev => ({
       ...prev,
-      [eventId]: position
+      [eventId]: normalizedPosition
     }));
-  }, []);
+  }, [yearSpacing]);
 
   const assignEventPositions = useCallback((events: TimelineEvent[]) => {
     const sortedEvents = [...events].sort((a, b) => 
@@ -124,7 +140,11 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggi
     const occupiedSpaces: Record<number, number[]> = {};
 
     for (const event of sortedEvents) {
-      const position = customPositions[event.id] || getEventPosition(event.date);
+      // Scale custom positions relative to the yearSpacing
+      const position = customPositions[event.id] 
+        ? (customPositions[event.id] * yearSpacing) / DEFAULT_YEAR_SPACING
+        : getEventPosition(event.date);
+      
       const existingColumn = eventColumns[event.id];
       
       if (existingColumn !== undefined) {
@@ -144,7 +164,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggi
 
         while (!placed) {
           const hasOverlap = occupiedSpaces[colIndex]?.some(existingPos => 
-            Math.abs(existingPos - position) < 100
+            Math.abs(existingPos - position) < 60
           );
           
           if (!hasOverlap) {
@@ -167,7 +187,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ visibleCategories, isDraggi
     }
 
     return positions;
-  }, [customPositions, eventColumns, getEventPosition]);
+  }, [customPositions, eventColumns, getEventPosition, yearSpacing]);
 
   const totalHeight = Math.max(
     timelineMarkers[timelineMarkers.length - 1]?.position + monthSpacing + 60 || 0,

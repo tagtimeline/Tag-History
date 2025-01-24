@@ -14,6 +14,7 @@ import { getAllCategories, getCategoryColor } from '../config/categories'
 import { ALL_EVENTS_OPTION } from '../config/dropdown'
 import { events, TimelineEvent } from '../data/events'
 import { searchEvents } from '../config/search'
+import { zoomIn, zoomOut, DEFAULT_YEAR_SPACING, getDefaultTimelineState } from '../config/timelineControls'
 
 const TimelinePage: NextPage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -22,8 +23,10 @@ const TimelinePage: NextPage = () => {
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [timelineOrder, setTimelineOrder] = useState<'ascending' | 'descending'>('ascending');
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
   const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allCategories = useMemo(() => [
     ALL_EVENTS_OPTION,
@@ -76,6 +79,21 @@ const TimelinePage: NextPage = () => {
     
     setSearchTerm('');
     setSearchResults([]);
+  };
+
+  const handleZoomIn = () => {
+    setYearSpacing(current => zoomIn(current));
+  };
+
+  const handleZoomOut = () => {
+    setYearSpacing(current => zoomOut(current));
+  };
+
+  const handleReset = () => {
+    const defaultState = getDefaultTimelineState();
+    setYearSpacing(defaultState.yearSpacing);
+    setSelectedCategories(defaultState.selectedCategories);
+    setResetKey(prev => prev + 1); // Increment reset key to trigger reset in TimelineGrid
   };
 
   return (
@@ -164,9 +182,9 @@ const TimelinePage: NextPage = () => {
 
       <main>
         <div className={controlStyles.controls}>
-          <button className={controlStyles.zoomIn}>+</button>
-          <button className={controlStyles.zoomOut}>-</button>
-          <button className={controlStyles.resetTimeline}>r</button>
+          <button className={controlStyles.zoomIn} onClick={handleZoomIn}>+</button>
+          <button className={controlStyles.zoomOut} onClick={handleZoomOut}>-</button>
+          <button className={controlStyles.resetTimeline} onClick={handleReset}>r</button>
           <button 
             className={controlStyles.settingsButton}
             onClick={() => setIsSettingsOpen(true)}
@@ -187,6 +205,8 @@ const TimelinePage: NextPage = () => {
           selectedCategories={selectedCategories} 
           isDraggingEnabled={isDraggingEnabled}
           timelineOrder={timelineOrder}
+          yearSpacing={yearSpacing}
+          onReset={resetKey}
         />
       </main>
 

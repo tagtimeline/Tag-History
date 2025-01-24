@@ -34,20 +34,6 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({
                 (Disables event modals)
               </div>
             </label>
-            <div className={controlStyles.settingGroup}>
-              <label>
-                Timeline Order<br></br>
-                (Currently not working)
-              </label>
-              <select 
-                className={controlStyles.settingSelect}
-                value={timelineOrder}
-                onChange={(e) => onTimelineOrderChange(e.target.value as 'ascending' | 'descending')}
-              >
-                <option value="ascending">Ascending (Oldest to Newest)</option>
-                <option value="descending">Descending (Newest to Oldest)</option>
-              </select>
-            </div>
           </div>
         </div>
         <hr className={controlStyles.divider} />

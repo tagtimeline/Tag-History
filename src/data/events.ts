@@ -21,7 +21,7 @@ export const events: TimelineEvent[] = [
   {
     id: 'initial-tnt-release',
     title: 'TNT Tag Released on Hypixel',
-    date: '2014-03-15',
+    date: '2013-10-20',
     category: 'hypixel',
     description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 

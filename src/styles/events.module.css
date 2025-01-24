@@ -1,5 +1,3 @@
-/* src/styles/events.module.css */
-
 /* Event Styles */
 .eventBox {
   position: absolute;
@@ -24,62 +22,132 @@
   transition: height 0.2s ease, background-color 0.2s ease;
 }
 
+.verticalLine {
+  position: absolute;
+  width: 2px;
+  background: #444;
+  transition: background-color 0.2s ease;
+}
+
+.horizontalStartLine, .horizontalEndLine {
+  position: absolute;
+  height: 2px;
+  background: #444;
+  left: 100px;
+  z-index: 1;
+  transition: background-color 0.2s ease;
+}
+
+.eventConnector {
+  position: absolute;
+  height: 2px;
+  background: #444;
+  z-index: 1;
+  transform-origin: left;
+  transition: background-color 0.2s ease;
+}
+ 
+ .dateMarker {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #444;
+  border-radius: 50%;
+  left: 96px;
+  z-index: 2;
+  transition: background-color 0.2s ease;
+ }
+
+ .eventConnections {
+  position: relative;
+}
+ 
 .eventBox:hover {
   transform: scale(1.05);
   background-color: #444;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.eventBox:has(+ .connectionLine:hover),
-.eventBox:hover + .connectionLine {
+.eventConnections {
+  position: relative;
+}
+
+/* Single day event hover effects */
+.eventBox:hover + .eventConnections .connectionLine {
   transform: scaleY(2);
   transform-origin: center;
   background-color: #555;
 }
 
+/* Multi-day event hover effects */
+.eventBox:hover + .eventConnections .horizontalStartLine,
+.eventBox:hover + .eventConnections .horizontalEndLine {
+  transform: scaleY(2);
+  transform-origin: center;
+  background-color: #555;
+}
+
+.eventBox:hover + .eventConnections .verticalLine {
+  transform: scaleX(2);
+  transform-origin: center;
+  background-color: #555;
+}
+
+.eventBox:hover + .eventConnections .eventConnector {
+  transform: scaleY(2);
+  transform-origin: center;
+  background-color: #555;
+}
+
+.eventBox:hover:not(.dragging) {
+  transform: scale(1.05) !important;
+  background-color: #444;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 4;
+}
+ 
 .dragging {
   z-index: 1000;
-  transition: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease; /* Short transition */
   cursor: grabbing !important;
 }
 
 .dragging:hover {
-  transform: none;
+  transform: scale(1.05);
+  background-color: #444;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
-
-.eventBox-left {
+ 
+ .eventBox-left {
   left: 210px;
-}
-
-.eventBox-right {
+ }
+ 
+ .eventBox-right {
   left: 430px;
-}
-
-.eventBox-far {
+ }
+ 
+ .eventBox-far {
   left: 650px;
-}
-
-.eventContent {
-    position: relative;
-}
-
-.eventTitle {
-    font-weight: normal;
-    color: #ffffff;
-    margin: 0 0 4px 0;
-    font-size: 12px;
-}
-
-.eventDate {
-    color: #888;
-    font-size: 12px;
-}
-
-
-
-
-/* Modal styles */
-.modalOverlay {
+ }
+ 
+ .eventContent {
+  position: relative;
+ }
+ 
+ .eventTitle {
+  font-weight: normal;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  font-size: 12px;
+ }
+ 
+ .eventDate {
+  color: #888;
+  font-size: 12px;
+ }
+ 
+ /* Modal styles */
+ .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -90,136 +158,134 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-}
-
-.modalContent {
-background: #1a1a1a;
-border-radius: 12px;
-padding: 24px;
-width: 90%;
-max-width: 600px;
-max-height: 60%;
-overflow-y: auto;
-position: relative;
-border: 4px solid #333;
-}
-
-
-.modalHeader {
+ }
+ 
+ .modalContent {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 60%;
+  overflow-y: auto;
+  position: relative;
+  border: 4px solid #333;
+ }
+ 
+ .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-}
-
-.eventType {
+ }
+ 
+ .eventType {
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 4px;
   background: #333;
-}
-
-.modalControls {
-display: flex;
-gap: 8px;
-}
-
-.openButton {
-border: none;
-color: #888;
-background: none;
-cursor: pointer;
-padding: 4px;
-font-size: 12px;
-}
-
-.openButton:hover {
-background: none;
-color: #fff;
-}
-
-.timelineButton {
-font-family: 'Minecraft', sans-serif;
-height: 32px;
-padding: 0 16px;
-font-size: 14px;
-background-color: #333;
-border: 2px solid #555;
-color: white;
-border-radius: 4px;
-cursor: pointer;
-}
-
-.timelineButton:hover {
-background-color: #444;
-}
-
-.modalTitle {
+ }
+ 
+ .modalControls {
+  display: flex;
+  gap: 8px;
+ }
+ 
+ .openButton {
+  border: none;
+  color: #888;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+ }
+ 
+ .openButton:hover {
+  background: none;
+  color: #fff;
+ }
+ 
+ .timelineButton {
+  font-family: 'Minecraft', sans-serif;
+  height: 32px;
+  padding: 0 16px;
+  font-size: 14px;
+  background-color: #333;
+  border: 2px solid #555;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+ }
+ 
+ .timelineButton:hover {
+  background-color: #444;
+ }
+ 
+ .modalTitle {
   font-weight: normal;
   color: #ffffff;
   margin: 0 0 4px 0;
   font-size: 24px;
-}
-
-.modalDate {
+ }
+ 
+ .modalDate {
   color: #888;
   font-size: 16px;
   margin-bottom: 5px;
-}
-
-.modalSubtitle {
+ }
+ 
+ .modalSubtitle {
   font-family: 'Minecraft', sans-serif;
   color: #ffffff;
   margin: 24px 0 12px 0;
   font-size: 18px;
-}
-
-.modalText {
-color: #888;
-line-height: 1.2;
-margin: 0;
-white-space: pre-line;
-}
-
-.divider {
-border: none;
-border-top: 1px solid #333;
-margin: 10px 0;
-}
-
-.modalTags {
-display: flex;
-gap: 8px;
-flex-wrap: wrap;
-}
-
-.tagLabel {
-color: #888;
-font-size: 10px;
-margin-bottom: 4px;
-}
-
-.tag {
-background: #333;
-color: #888;
-padding: 4px 12px;
-border-radius: 4px;
-font-size: 12px;
-}
-
-
-.sideEventsContainer {
+ }
+ 
+ .modalText {
+  color: #888;
+  line-height: 1.2;
+  margin: 0;
+  white-space: pre-line;
+ }
+ 
+ .divider {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 10px 0;
+ }
+ 
+ .modalTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+ }
+ 
+ .tagLabel {
+  color: #888;
+  font-size: 10px;
+  margin-bottom: 4px;
+ }
+ 
+ .tag {
+  background: #333;
+  color: #888;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+ }
+ 
+ .sideEventsContainer {
   display: flex;
   flex-direction: column;
   gap: 5px;
-}
-
-.sideEvent {
+ }
+ 
+ .sideEvent {
   border-radius: 4px;
   overflow: hidden;
-}
-
-.sideEventHeader {
+ }
+ 
+ .sideEventHeader {
   font-family: 'Minecraft', sans-serif;
   width: 100%;
   display: flex;
@@ -232,23 +298,22 @@ font-size: 12px;
   cursor: pointer;
   text-align: left;
   font-size: 14px;
-}
-
-.sideEventHeader:hover {
+ }
+ 
+ .sideEventHeader:hover {
   background: #444;
-}
-
-.sideEventContent {
+ }
+ 
+ .sideEventContent {
   padding: 1px 8px;
   background: #262626;
   color: #888;
   font-size: 14px;
   line-height: 1.2;
-}
-
-
-/* Event page specific styles */
-.eventPageContent {
+ }
+ 
+ /* Event page specific styles */
+ .eventPageContent {
   top: 0px;
   composes: modalContent;
   max-width: 100%;
@@ -256,15 +321,15 @@ font-size: 12px;
   display: flex;
   flex-direction: column;
  }
-
-.eventNavigation {
+ 
+ .eventNavigation {
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
   gap: 5px;
-}
-
-.modalText {
+ }
+ 
+ .modalText {
   color: #888;
   line-height: 1.2;
   margin: 0;
@@ -273,12 +338,12 @@ font-size: 12px;
   overflow-y: auto;
   padding-right: 10px;
  }
-
-.modalFooter {
+ 
+ .modalFooter {
   margin-top: 5px;
  }
-
-.navButton {
+ 
+ .navButton {
   font-family: 'Minecraft', sans-serif;
   width: 32px;
   height: 32px;
@@ -292,19 +357,19 @@ font-size: 12px;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-}
-
-.navButton:hover {
+ }
+ 
+ .navButton:hover {
   background-color: #444;
-}
-
-.navButtonDisabled {
+ }
+ 
+ .navButtonDisabled {
   background-color: #222;
   border-color: #333;
   color: #444;
   cursor: not-allowed;
-}
-
-.navButtonDisabled:hover {
+ }
+ 
+ .navButtonDisabled:hover {
   background-color: #222;
-}
+ }

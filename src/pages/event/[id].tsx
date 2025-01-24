@@ -65,6 +65,9 @@ const EventPage: NextPage = () => {
           <h2 className={styles.modalTitle}>{event.title}</h2>
           <div className={styles.modalDate}>
             {new Date(event.date).toLocaleDateString()}
+            {event.endDate && (
+              <span> - {new Date(event.endDate).toLocaleDateString()}</span>
+            )}
           </div>
           <hr className={styles.divider} />
           <div className={styles.modalText}>

@@ -40,8 +40,11 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
         </div>
         <h2 className={styles.modalTitle}>{event.title}</h2>
         <div className={styles.modalDate}>
-          {new Date(event.date).toLocaleDateString()}
-        </div>
+            {new Date(event.date).toLocaleDateString()}
+            {event.endDate && (
+              <span> - {new Date(event.endDate).toLocaleDateString()}</span>
+            )}
+          </div>
         <hr className={styles.divider} />
         <div className={styles.modalText}>
           {event.description.split('\n\n').map((paragraph, index) => (

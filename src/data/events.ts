@@ -11,6 +11,7 @@ export interface TimelineEvent {
   id: string;
   title: string;
   date: string;
+  endDate?: string;
   category: keyof typeof categories;
   description: string;
   sideEvents?: SideEvent[]; 
@@ -39,6 +40,7 @@ Features:
     id: "event1",
     title: "Fist Tag Feuds Main Event",
     date: "2014-01-24",
+    endDate: "2014-10-23",
     description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 
 Game Overview:

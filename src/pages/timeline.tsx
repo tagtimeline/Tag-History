@@ -22,7 +22,6 @@ const TimelinePage: NextPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [timelineOrder, setTimelineOrder] = useState<'ascending' | 'descending'>('ascending');
   const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
   const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
   const [resetKey, setResetKey] = useState(0);

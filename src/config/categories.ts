@@ -43,8 +43,8 @@ export const categories: Record<string, Category> = {
         color: '#ffd700',
         borderStyle: '3px solid',
         extraStyles: {
-            border: '3px solid #ffd700',
-            boxShadow: '0 0 2px rgba(255, 215, 0, 0.5), 0 0 5px rgba(255, 215, 0, 0.4)',
+            border: '2px solid #ffd700',
+            boxShadow: '0 0 1px rgba(255, 215, 0, 0.5), 0 0 5px rgba(255, 215, 0, 0.4)',
             zIndex: 10
         }
     }

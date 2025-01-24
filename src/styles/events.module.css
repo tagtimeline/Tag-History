@@ -154,18 +154,6 @@ cursor: pointer;
 background-color: #444;
 }
 
-.closeButton {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.closeButton:hover {
-  color: #fff;
-}
-
 .modalTitle {
   font-weight: normal;
   color: #ffffff;
@@ -218,6 +206,46 @@ padding: 4px 12px;
 border-radius: 4px;
 font-size: 12px;
 }
+
+
+.sideEventsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sideEvent {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sideEventHeader {
+  font-family: 'Minecraft', sans-serif;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  background: #333;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+}
+
+.sideEventHeader:hover {
+  background: #444;
+}
+
+.sideEventContent {
+  padding: 1px 8px;
+  background: #262626;
+  color: #888;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
 
 /* Event page specific styles */
 .eventPageContent {

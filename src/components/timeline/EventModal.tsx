@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link'
 import styles from '../../styles/events.module.css';
+import controlStyles from '../../styles/controls.module.css'
 import { TimelineEvent } from '../../data/events';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface EventModalProps {
   event: TimelineEvent;
@@ -10,6 +12,15 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
+  const [expandedSideEvents, setExpandedSideEvents] = useState<Record<string, boolean>>({});
+
+  const toggleSideEvent = (id: string) => {
+    setExpandedSideEvents(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -24,7 +35,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
             <Link href={`/event/${event.id}`} target="_blank">
               <button className={styles.openButton}>↗</button>
             </Link>
-            <button className={styles.closeButton} onClick={onClose}>×</button>
+            <button className={controlStyles.closeButton} onClick={onClose}>×</button>
           </div>
         </div>
         <h2 className={styles.modalTitle}>{event.title}</h2>
@@ -37,6 +48,36 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
             <p key={index}>{paragraph}</p>
           ))}
         </div>
+        
+        {event.sideEvents && event.sideEvents.length > 0 && (
+          <>
+            <br></br><br></br>
+            <div className={styles.sideEventsContainer}>
+              {event.sideEvents.map(sideEvent => (
+                <div key={sideEvent.id} className={styles.sideEvent}>
+                  <button 
+                    className={styles.sideEventHeader}
+                    onClick={() => toggleSideEvent(sideEvent.id)}
+                  >
+                    {expandedSideEvents[sideEvent.id] ? 
+                      <ChevronDown size={16} /> : 
+                      <ChevronRight size={16} />
+                    }
+                    <span>{sideEvent.title}</span>
+                  </button>
+                  {expandedSideEvents[sideEvent.id] && (
+                    <div className={styles.sideEventContent}>
+                      {sideEvent.description.split('\n\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        
         <hr className={styles.divider} />
         <div className={styles.tagLabel}>Tags:</div>
         <div className={styles.modalTags}>

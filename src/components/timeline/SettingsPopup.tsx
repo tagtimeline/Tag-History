@@ -15,7 +15,10 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({
   return (
     <div className={controlStyles.settingsOverlay} onClick={onClose}>
       <div className={controlStyles.settingsPopup} onClick={e => e.stopPropagation()}>
-        <h3 className={controlStyles.settingsTitle}>Timeline Settings</h3>
+        <div style={{ position: 'relative' }}>
+          <button className={controlStyles.closeButton} onClick={onClose} style={{ position: 'absolute', top: '0', right: '0' }}>×</button>
+          <h3 className={controlStyles.settingsTitle}>Timeline Settings</h3>
+        </div>
         <hr className={controlStyles.divider} />
         <div className={controlStyles.settingsContent}>
           <div className={controlStyles.settingGroup}>

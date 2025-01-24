@@ -196,15 +196,12 @@ const TimelinePage: NextPage = () => {
             onClose={() => setIsSettingsOpen(false)}
             isDraggingEnabled={isDraggingEnabled}
             onDraggingToggle={setIsDraggingEnabled}
-            timelineOrder={timelineOrder}
-            onTimelineOrderChange={setTimelineOrder}
           />
         )}
 
         <TimelineContainer 
           selectedCategories={selectedCategories} 
           isDraggingEnabled={isDraggingEnabled}
-          timelineOrder={timelineOrder}
           yearSpacing={yearSpacing}
           onReset={resetKey}
         />

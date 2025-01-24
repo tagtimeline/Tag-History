@@ -5,16 +5,12 @@ interface SettingsPopupProps {
   onClose: () => void;
   isDraggingEnabled: boolean;
   onDraggingToggle: (enabled: boolean) => void;
-  timelineOrder: 'ascending' | 'descending';
-  onTimelineOrderChange: (order: 'ascending' | 'descending') => void;
 }
 
 const SettingsPopup: React.FC<SettingsPopupProps> = ({ 
   onClose, 
   isDraggingEnabled, 
   onDraggingToggle,
-  timelineOrder,
-  onTimelineOrderChange 
 }) => {
   return (
     <div className={controlStyles.settingsOverlay} onClick={onClose}>

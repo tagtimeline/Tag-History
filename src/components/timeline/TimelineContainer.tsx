@@ -6,7 +6,6 @@ interface TimelineContainerProps {
   selectedCategories: string[];
   isDraggingEnabled: boolean;
   yearSpacing: number;
-  timelineOrder: 'ascending' | 'descending';
   onReset: number;
 }
 
@@ -14,7 +13,6 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
   selectedCategories, 
   isDraggingEnabled,
   yearSpacing,
-  timelineOrder,
   onReset
 }) => {
   return (

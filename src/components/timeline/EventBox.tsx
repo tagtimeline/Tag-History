@@ -58,7 +58,7 @@ const EventBox: React.FC<EventBoxProps> = ({
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging) {
+    if (isDragging && eventBoxRef.current) {
       const deltaX = e.clientX - startX - leftPosition;
   
       if (eventBoxRef.current) {
@@ -123,7 +123,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         }
       }
     }
-  }, [isDragging, startX, leftPosition, event, position, getEventPosition]);
+  }, [isDragging, startX, leftPosition, event, getEventPosition]);
   
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (isDragging) {

@@ -10,7 +10,7 @@ import styles from '../../styles/events.module.css';
 import headerStyles from '../../styles/header.module.css';
 import withAuth from '../../components/auth/withAuth';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventContent from '../../components/timeline/EventContent';
 
 
@@ -18,8 +18,7 @@ import EventContent from '../../components/timeline/EventContent';
 const EventPage: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [expandedSideEvents, setExpandedSideEvents] = useState<Record<string, boolean>>({});
-  
+
   const sortedEvents = [...events].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -30,12 +29,6 @@ const EventPage: NextPage = () => {
   const prevEvent = currentIndex > 0 ? sortedEvents[currentIndex - 1] : null;
   const nextEvent = currentIndex < sortedEvents.length - 1 ? sortedEvents[currentIndex + 1] : null;
 
-  const toggleSideEvent = (id: string) => {
-    setExpandedSideEvents(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
 
   if (!event) return null;
 

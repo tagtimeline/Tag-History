@@ -4,7 +4,6 @@ import styles from '../../styles/events.module.css';
 import controlStyles from '../../styles/controls.module.css'
 import { TimelineEvent } from '../../data/events';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import EventContent from './EventContent';
 
 interface EventModalProps {
@@ -13,15 +12,6 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
-  const [expandedSideEvents, setExpandedSideEvents] = useState<Record<string, boolean>>({});
-
-  const toggleSideEvent = (id: string) => {
-    setExpandedSideEvents(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>

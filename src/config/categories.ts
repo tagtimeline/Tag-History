@@ -47,6 +47,12 @@ export const getEventStyles = (categoryId: string, isSpecial?: boolean): React.C
         borderLeft: `${category.borderStyle} ${category.color}`
     };
 
+    if (isSpecial) {
+        return {
+            ...baseStyles,
+        };
+    }
+
     return baseStyles;
 };
 

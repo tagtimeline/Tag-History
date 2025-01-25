@@ -181,7 +181,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         }
       }
     }
-  }, [isDragging, startX, baseOffset, columnWidth, column, event.id, position, onUpdateColumn, connectionLineWidth]);
+  }, [isDragging, startX, baseOffset, columnWidth, column, event.id, event.endDate, getEventPosition, leftPosition, onUpdateColumn, connectionLineWidth]);
 
   const handleClick = () => {
     if (!isDraggingEnabled && !isDragging) {

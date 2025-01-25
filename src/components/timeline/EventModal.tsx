@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import Link from 'next/link'
 import styles from '../../styles/events.module.css';
 import controlStyles from '../../styles/controls.module.css'

@@ -13,6 +13,7 @@ export interface TimelineEvent {
   date: string;
   endDate?: string;
   category: keyof typeof categories;
+  isSpecial?: boolean;
   description: string;
   sideEvents?: SideEvent[]; 
   tags: string[];
@@ -24,6 +25,7 @@ export const events: TimelineEvent[] = [
     title: 'TNT Tag Released on Hypixel',
     date: '2013-10-20',
     category: 'hypixel',
+    isSpecial: true,
     description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 
 Game Overview:
@@ -69,7 +71,8 @@ Features:
   {
     id: 'first-guild-war',
     title: 'First Major Guild War: Shadow vs. Light',
-    date: '2014-08-22',
+    date: '2014-04-22',
+    endDate: '2015-02-13',
     category: 'guilds',
     description: `The first major guild war between Shadow Dynasty and Light Brigade erupted over control of the weekly leaderboards.
 
@@ -97,36 +100,32 @@ The war ended with Shadow Dynasty claiming victory by a narrow margin of 50 poin
     ]
   },
   {
-    id: 'halloween-update-2015',
-    title: 'Spooky TNT Tag Halloween Update',
-    date: '2015-10-31',
-    category: 'special',
-    description: `Special Halloween-themed update bringing spooky changes to TNT Tag!
+    id: "event2",
+    title: "Fist Tag Feuds Mini Event",
+    date: "2014-01-24",
+    endDate: "2016-10-23",
+    description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 
-New Features:
-- Ghost particles when tagged
-- Pumpkin head cosmetics
-- Haunted mansion map
-- Special Halloween sound effects
-- Limited-time achievements
+Game Overview:
+A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
 
-The update was available throughout the Halloween season and became one of the most popular seasonal events.`,
-    tags: ['update', 'seasonal'],
+Features:
+- Multiple maps designed for strategic gameplay
+- Power-ups and special abilities
+- Custom particle effects and sounds
+- Unique scoring system`,
+    category: "feuds",
+    tags: ["feuds", "main event"],
     sideEvents: [
       {
-        id: "side5",
-        title: "Pumpkin Tag Marathon",
-        description: "A marathon match where players competed to tag the most pumpkins in a single game."
+        id: "side1",
+        title: "Taggers' Gauntlet Showdown",
+        description: "Players compete in an intense gauntlet where the TNT explodes faster each round. Speed, strategy, and reflexes are key as the last player standing earns the ultimate bragging rights!"
       },
       {
-        id: "side6",
-        title: "Spooky Costume Contest",
-        description: "Players showed off their best Halloween-themed skins, with winners voted on by the community."
-      },
-      {
-        id: "side7",
-        title: "Community Draft Night",
-        description: "A fun-filled draft night where players not in the main event could form their own teams and compete in a parallel mini-tournament."
+        id: "side2",
+        title: "Timed Explosion Tournament",
+        description: "A high-stakes tournament where players have a set amount of time to pass the TNT before it detonates. With shorter rounds and shrinking safe zones, this event keeps everyone on their toes!"
       }
     ]
   },
@@ -194,6 +193,41 @@ The event brought the spirit of the holidays to the TNT Tag community and became
         id: "side9",
         title: "Ice Tag Relay",
         description: "Teams raced across icy maps, tagging teammates to keep their team in the game."
+      }
+    ]
+  },
+  {
+    id: 'halloween-update-2015',
+    title: 'Spooky TNT Tag Halloween Update',
+    date: '2019-10-31',
+    endDate: '2022-10-31',
+    category: 'guilds',
+    description: `Special Halloween-themed update bringing spooky changes to TNT Tag!
+
+New Features:
+- Ghost particles when tagged
+- Pumpkin head cosmetics
+- Haunted mansion map
+- Special Halloween sound effects
+- Limited-time achievements
+
+The update was available throughout the Halloween season and became one of the most popular seasonal events.`,
+    tags: ['update', 'seasonal'],
+    sideEvents: [
+      {
+        id: "side5",
+        title: "Pumpkin Tag Marathon",
+        description: "A marathon match where players competed to tag the most pumpkins in a single game."
+      },
+      {
+        id: "side6",
+        title: "Spooky Costume Contest",
+        description: "Players showed off their best Halloween-themed skins, with winners voted on by the community."
+      },
+      {
+        id: "side7",
+        title: "Community Draft Night",
+        description: "A fun-filled draft night where players not in the main event could form their own teams and compete in a parallel mini-tournament."
       }
     ]
   },

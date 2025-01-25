@@ -55,12 +55,20 @@ const EventPage: NextPage = () => {
       <main className="centered">
         <div className={styles.eventPageContent}>
           <div className={styles.modalHeader}>
+          <div className={styles.headerTags}>
             <div 
               className={styles.eventType}
               style={{ color: getCategoryColor(event.category) }}
             >
               {getCategoryName(event.category)}
             </div>
+            {event.isSpecial && (
+              <div className={styles.specialTag}>
+                <span className={styles.specialStar}>⭐</span>
+                <span className={styles.specialText}>Special</span>
+              </div>
+            )}
+          </div>
           </div>
           <h2 className={styles.modalTitle}>{event.title}</h2>
           <div className={styles.modalDate}>

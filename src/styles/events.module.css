@@ -117,6 +117,34 @@
   background-color: #444;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
+
+
+/* Special Star */
+.headerTags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.specialTag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+}
+
+.specialStar {
+  color: #ffd700;
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.specialText {
+  color: #ffd700;
+  font-size: 12px;
+}
+
+
  
  .eventBox-left {
   left: 210px;

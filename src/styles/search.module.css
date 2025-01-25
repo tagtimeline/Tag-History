@@ -65,10 +65,15 @@
     max-width: 160px;
 }
   
-.resultDate {
+.eventDate {
     color: #888;
     font-size: 10px;
 }
+
+.specialStar {
+    color: #ffd700;
+    margin-left: 4px;
+  }
 
 .categoryColor {
     width: 3px;

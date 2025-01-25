@@ -27,7 +27,7 @@ const EventBox: React.FC<EventBoxProps> = ({
   const [startX, setStartX] = useState(0);
   const [eventBoxHeight, setEventBoxHeight] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
-  const eventStyles = getEventStyles(event.category);
+  const eventStyles = getEventStyles(event.category, event.isSpecial);
   
   // Calculate initial card position only once
   const initialCardPosition = useMemo(() => {
@@ -284,12 +284,13 @@ const EventBox: React.FC<EventBoxProps> = ({
         data-event-id={event.id}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-      >
+        >
         <div className={styles.eventContent}>
           <h3 className={styles.eventTitle}>{event.title}</h3>
           <div className={styles.eventDate}>
             {new Date(event.date).toLocaleDateString()}
             {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+            {event.isSpecial && <span className={styles.specialStar}>⭐</span>}
           </div>
         </div>
       </div>

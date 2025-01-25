@@ -25,11 +25,19 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <div 
-            className={styles.eventType}
-            style={{ color: getCategoryColor(event.category) }}
-          >
-            {getCategoryName(event.category)}
+        <div className={styles.headerTags}>
+            <div 
+              className={styles.eventType}
+              style={{ color: getCategoryColor(event.category) }}
+            >
+              {getCategoryName(event.category)}
+            </div>
+            {event.isSpecial && (
+              <div className={styles.specialTag}>
+                <span className={styles.specialStar}>⭐</span>
+                <span className={styles.specialText}>Special</span>
+              </div>
+            )}
           </div>
           <div className={styles.modalControls}>
             <Link href={`/event/${event.id}`} target="_blank">

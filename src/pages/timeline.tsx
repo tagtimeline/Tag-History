@@ -154,8 +154,10 @@ const TimelinePage: NextPage = () => {
                     />
                     <div>
                       <div className={searchStyles.resultTitle}>{event.title}</div>
-                      <div className={searchStyles.resultDate}>
+                      <div className={searchStyles.eventDate}>
                         {new Date(event.date).toLocaleDateString()}
+                        {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                        {event.isSpecial && <span className={searchStyles.specialStar}>⭐</span>}
                       </div>
                     </div>
                   </div>

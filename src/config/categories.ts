@@ -36,35 +36,18 @@ export const categories: Record<string, Category> = {
         name: 'Other',
         color: '#ffffff',
         borderStyle: '3px solid'
-    },
-    special: {
-        id: 'special',
-        name: 'Special',
-        color: '#ffd700',
-        borderStyle: '3px solid',
-        extraStyles: {
-            border: '2px solid #ffd700',
-            boxShadow: '0 0 1px rgba(255, 215, 0, 0.5), 0 0 5px rgba(255, 215, 0, 0.4)',
-            zIndex: 10
-        }
     }
 };
 
-export const getEventStyles = (categoryId: string): React.CSSProperties => {
+export const getEventStyles = (categoryId: string, isSpecial?: boolean): React.CSSProperties => {
     const category = categories[categoryId];
     if (!category) return {};
 
-    if (categoryId === 'special') {
-        return {
-            border: category.extraStyles?.border,
-            boxShadow: category.extraStyles?.boxShadow,
-            zIndex: category.extraStyles?.zIndex
-        };
-    }
-
-    return {
+    const baseStyles = {
         borderLeft: `${category.borderStyle} ${category.color}`
     };
+
+    return baseStyles;
 };
 
 export const getCategoryColor = (categoryId: string): string => 

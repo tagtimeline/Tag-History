@@ -121,62 +121,83 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   }));
 }, [yearSpacing]);
 
- const assignEventPositions = useCallback((events: TimelineEvent[]) => {
-   const sortedEvents = [...events].sort((a, b) => 
-     new Date(a.date).getTime() - new Date(b.date).getTime()
-   );
+const assignEventPositions = useCallback((events: TimelineEvent[]) => {
+  const sortedEvents = [...events].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
-   const positions: EventPosition[] = [];
-   const occupiedSpaces: Record<number, number[]> = {};
+  const positions: EventPosition[] = [];
+  const occupiedSpaces: Record<number, Array<{startDate: Date, endDate: Date, position: number}>> = {};
 
-   for (const event of sortedEvents) {
-     const position = customPositions[event.id] 
-       ? (customPositions[event.id] * yearSpacing) / DEFAULT_YEAR_SPACING
-       : getEventPosition(event.date);
-     
-     const existingColumn = eventColumns[event.id];
-     
-     if (existingColumn !== undefined) {
-       positions.push({
-         event,
-         position,
-         column: existingColumn
-       });
-       
-       if (!occupiedSpaces[existingColumn]) {
-         occupiedSpaces[existingColumn] = [];
-       }
-       occupiedSpaces[existingColumn].push(position);
-     } else {
-       let colIndex = 0;
-       let placed = false;
+  for (const event of sortedEvents) {
+    const position = customPositions[event.id] 
+      ? (customPositions[event.id] * yearSpacing) / DEFAULT_YEAR_SPACING
+      : getEventPosition(event.date);
+    
+    const eventStartDate = new Date(event.date);
+    const eventEndDate = event.endDate ? new Date(event.endDate) : eventStartDate;
+    
+    const existingColumn = eventColumns[event.id];
+    
+    if (existingColumn !== undefined) {
+      positions.push({
+        event,
+        position,
+        column: existingColumn
+      });
+      
+      if (!occupiedSpaces[existingColumn]) {
+        occupiedSpaces[existingColumn] = [];
+      }
+      occupiedSpaces[existingColumn].push({
+        startDate: eventStartDate,
+        endDate: eventEndDate,
+        position
+      });
+    } else {
+      let colIndex = 0;
+      let placed = false;
 
-       while (!placed) {
-         const hasOverlap = occupiedSpaces[colIndex]?.some(existingPos => 
-           Math.abs(existingPos - position) < 60
-         );
-         
-         if (!hasOverlap) {
-           if (!occupiedSpaces[colIndex]) {
-             occupiedSpaces[colIndex] = [];
-           }
-           occupiedSpaces[colIndex].push(position);
-           
-           positions.push({
-             event,
-             position,
-             column: colIndex
-           });
-           placed = true;
-         } else {
-           colIndex++;
-         }
-       }
-     }
-   }
+      while (!placed) {
+        const hasOverlap = occupiedSpaces[colIndex]?.some(existing => {
+          // For single-day events, use position-based overlap check
+          if (!event.endDate && existing.endDate.getTime() === existing.startDate.getTime()) {
+            return Math.abs(existing.position - position) < 60;
+          }
+          
+          // For multi-day events, check date range overlap
+          const eventEnd = event.endDate ? new Date(event.endDate) : eventStartDate;
+          return (
+            (eventStartDate <= existing.endDate && eventEnd >= existing.startDate) ||
+            (existing.startDate <= eventEnd && existing.endDate >= eventStartDate)
+          );
+        });
+        
+        if (!hasOverlap) {
+          if (!occupiedSpaces[colIndex]) {
+            occupiedSpaces[colIndex] = [];
+          }
+          occupiedSpaces[colIndex].push({
+            startDate: eventStartDate,
+            endDate: eventEndDate,
+            position
+          });
+          
+          positions.push({
+            event,
+            position,
+            column: colIndex
+          });
+          placed = true;
+        } else {
+          colIndex++;
+        }
+      }
+    }
+  }
 
-   return positions;
- }, [customPositions, eventColumns, getEventPosition, yearSpacing]);
+  return positions;
+}, [customPositions, eventColumns, getEventPosition, yearSpacing]);
 
  const totalHeight = Math.max(
    timelineMarkers[timelineMarkers.length - 1]?.position + monthSpacing + 60 || 0,

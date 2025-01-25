@@ -102,7 +102,7 @@ The war ended with Shadow Dynasty claiming victory by a narrow margin of 50 poin
   {
     id: "event2",
     title: "Fist Tag Feuds Mini Event",
-    date: "2014-01-24",
+    date: "2015-01-24",
     endDate: "2016-10-23",
     description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 
@@ -132,7 +132,7 @@ Features:
   {
     id: 'first-tournament',
     title: 'First Official TNT Tag Tournament',
-    date: '2015-12-20',
+    date: '2016-12-20',
     category: 'hypixel',
     description: `The first officially sanctioned TNT Tag tournament hosted by Hypixel staff.
 

@@ -11,6 +11,8 @@ import headerStyles from '../../styles/header.module.css';
 import withAuth from '../../components/auth/withAuth';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import EventContent from '../../components/timeline/EventContent';
+
 
 
 const EventPage: NextPage = () => {
@@ -78,37 +80,7 @@ const EventPage: NextPage = () => {
             )}
           </div>
           <hr className={styles.divider} />
-          <div className={styles.modalText}>
-            {event.description.split('\n\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            <br></br><br></br>
-            {event.sideEvents && event.sideEvents.length > 0 && (
-              <div className={styles.sideEventsContainer}>
-                {event.sideEvents.map(sideEvent => (
-                  <div key={sideEvent.id} className={styles.sideEvent}>
-                    <button 
-                      className={styles.sideEventHeader}
-                      onClick={() => toggleSideEvent(sideEvent.id)}
-                    >
-                      {expandedSideEvents[sideEvent.id] ? 
-                        <ChevronDown size={16} /> : 
-                        <ChevronRight size={16} />
-                      }
-                      <span>{sideEvent.title}</span>
-                    </button>
-                    {expandedSideEvents[sideEvent.id] && (
-                      <div className={styles.sideEventContent}>
-                        {sideEvent.description.split('\n\n').map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <EventContent event={event} />
           
           <div className={styles.modalFooter}>
             <hr className={styles.divider} />

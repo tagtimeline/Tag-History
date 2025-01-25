@@ -5,6 +5,7 @@ import controlStyles from '../../styles/controls.module.css'
 import { TimelineEvent } from '../../data/events';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import EventContent from './EventContent';
 
 interface EventModalProps {
   event: TimelineEvent;
@@ -54,40 +55,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
             )}
           </div>
         <hr className={styles.divider} />
-        <div className={styles.modalText}>
-          {event.description.split('\n\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
-        
-        {event.sideEvents && event.sideEvents.length > 0 && (
-          <>
-            <br></br><br></br>
-            <div className={styles.sideEventsContainer}>
-              {event.sideEvents.map(sideEvent => (
-                <div key={sideEvent.id} className={styles.sideEvent}>
-                  <button 
-                    className={styles.sideEventHeader}
-                    onClick={() => toggleSideEvent(sideEvent.id)}
-                  >
-                    {expandedSideEvents[sideEvent.id] ? 
-                      <ChevronDown size={16} /> : 
-                      <ChevronRight size={16} />
-                    }
-                    <span>{sideEvent.title}</span>
-                  </button>
-                  {expandedSideEvents[sideEvent.id] && (
-                    <div className={styles.sideEventContent}>
-                      {sideEvent.description.split('\n\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <EventContent event={event} />
         
         <hr className={styles.divider} />
         <div className={styles.tagLabel}>Tags:</div>

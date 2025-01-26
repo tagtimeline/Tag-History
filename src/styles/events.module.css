@@ -192,12 +192,18 @@
   background: #1a1a1a;
   border-radius: 12px;
   padding: 24px;
-  width: 90%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 700px;
   max-height: 60%;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
   border: 4px solid #333;
+  scrollbar-gutter: stable;
+
+ }
+
+ .modalContent:hover {
+  overflow-y: auto;
  }
  
  .modalHeader {
@@ -280,6 +286,8 @@
   border: none;
   border-top: 1px solid #333;
   margin: 10px 0;
+  width: 100%;
+  box-sizing: border-box;
  }
  
  .modalTags {
@@ -303,6 +311,7 @@
  }
  
  .sideEventsContainer {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -410,8 +419,14 @@
   margin: 0;
   white-space: pre-line;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding-right: 10px;
+  scrollbar-gutter: stable;
+
+ }
+
+ .modalText:hover {
+  overflow-y: auto;
  }
  
  .modalFooter {

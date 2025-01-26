@@ -35,7 +35,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
             </Link>
             <button className={controlStyles.closeButton} onClick={onClose}>×</button>
           </div>
-        </div>
+          </div>
         <h2 className={styles.modalTitle}>{event.title}</h2>
         <div className={styles.modalDate}>
             {new Date(event.date).toLocaleDateString()}

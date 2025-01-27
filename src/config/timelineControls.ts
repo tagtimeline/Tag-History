@@ -1,6 +1,5 @@
 // src/config/timelineControls.ts
 export const EVENT_CARD_WIDTH = 200;
-export const GRID_COLUMN_WIDTH = EVENT_CARD_WIDTH + 20;
 
 export const DEFAULT_YEAR_SPACING = 600;
 export const MIN_YEAR_SPACING = 200;

@@ -3,7 +3,7 @@ import styles from '../../styles/events.module.css';
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
 import { getEventStyles } from '../../config/categories';
-import { EVENT_CARD_WIDTH, GRID_COLUMN_WIDTH } from '../../config/timelineControls';
+import { EVENT_CARD_WIDTH } from '../../config/timelineControls';
 
 interface EventBoxProps {
   event: TimelineEvent;

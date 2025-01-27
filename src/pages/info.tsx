@@ -34,24 +34,29 @@ const InfoPage: NextPage = () => {
             This website is an interactive timeline that aims to<br />
             document the history of TNT Tag on Hypixel.
           </p>
+          <div className={styles.spacing}></div>
           <section>
-            <div className={styles.profileBox}>
+          <div className={styles.profileBox}>
             <Image
-              src="https://crafthead.net/avatar/flodlol/128"
-              alt="Minecraft Head of flodlol"
-              width={128}
-              height={128}
+              src="https://visage.surgeplay.com/bust/c6fd06c5-c716-4e1a-923e-17b48b3f5226"
+              alt="Minecraft Character Bust"
+              width={200}
+              height={200}
               className={styles.profilePicture}
+              priority
+              quality={100}
             />
-              <div className={styles.profileInfo}>
-                <p>
-                  <b>flodlol</b><br />
-                  Developer<br />
-                  @.flod
-                </p>
-              </div>
+            <div className={styles.profileInfo}>
+              <p>
+                <b>flodlol</b><br />
+                @.flod<br></br>
+                <br></br>
+                <span className={styles.developerTag}>Developer</span><br />
+              </p>
             </div>
+          </div>
           </section>
+          <div className={styles.spacing}></div>
           <section>
             <p>
               Do you want to help us improve the timeline? <br />

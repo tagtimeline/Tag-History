@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
           <div>
             Created by flodlol
             <br />
-            @<b>.flod</b>
+            @.flod
           </div>
         </div>
       </div>

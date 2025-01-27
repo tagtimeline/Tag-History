@@ -7,13 +7,16 @@ interface TimelineContainerProps {
   isDraggingEnabled: boolean;
   yearSpacing: number;
   onReset: number;
+  showEventDates: boolean;
 }
+
 
 const TimelineContainer: React.FC<TimelineContainerProps> = ({ 
   selectedCategories, 
   isDraggingEnabled,
   yearSpacing,
-  onReset
+  onReset,
+  showEventDates
 }) => {
   return (
     <div className={styles.container}>
@@ -22,6 +25,7 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
         isDraggingEnabled={isDraggingEnabled}
         yearSpacing={yearSpacing}
         onReset={onReset}
+        showEventDates={showEventDates}
       />
     </div>
   );

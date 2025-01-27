@@ -17,14 +17,9 @@ import { searchEvents } from '../config/search'
 import { zoomIn, zoomOut, DEFAULT_YEAR_SPACING, getDefaultTimelineState } from '../config/timelineControls'
 
 const TimelinePage: NextPage = () => {
+  /* Category Dropdown */
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
-  const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allCategories = useMemo(() => [
@@ -32,6 +27,21 @@ const TimelinePage: NextPage = () => {
     ...getAllCategories()
   ], []);
 
+  /* Search */
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
+
+  /* Settings */
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
+  const [showEventDates, setShowEventDates] = useState(true);
+
+  /* Controls */
+  const [resetKey, setResetKey] = useState(0);
+  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
+
+
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -197,6 +207,8 @@ const TimelinePage: NextPage = () => {
             onClose={() => setIsSettingsOpen(false)}
             isDraggingEnabled={isDraggingEnabled}
             onDraggingToggle={setIsDraggingEnabled}
+            showEventDates={showEventDates}
+            onShowEventDatesToggle={setShowEventDates}
           />
         )}
 
@@ -205,6 +217,7 @@ const TimelinePage: NextPage = () => {
           isDraggingEnabled={isDraggingEnabled}
           yearSpacing={yearSpacing}
           onReset={resetKey}
+          showEventDates={showEventDates}
         />
       </main>
 

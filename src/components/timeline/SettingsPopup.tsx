@@ -5,12 +5,16 @@ interface SettingsPopupProps {
   onClose: () => void;
   isDraggingEnabled: boolean;
   onDraggingToggle: (enabled: boolean) => void;
+  showEventDates: boolean;
+  onShowEventDatesToggle: (show: boolean) => void;
 }
 
 const SettingsPopup: React.FC<SettingsPopupProps> = ({ 
   onClose, 
   isDraggingEnabled, 
   onDraggingToggle,
+  showEventDates,
+  onShowEventDatesToggle
 }) => {
   return (
     <div className={controlStyles.settingsOverlay} onClick={onClose}>
@@ -30,7 +34,17 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({
               />
               <div>
                 Enable event dragging<br></br>
-                (Disables event modals)
+                <i>* Disables event modals</i>
+              </div>
+            </label>
+            <label className={controlStyles.checkboxLabel}>
+              <input 
+                type="checkbox" 
+                checked={showEventDates}
+                onChange={(e) => onShowEventDatesToggle(e.target.checked)}
+              />
+              <div>
+                Show event dates
               </div>
             </label>
           </div>

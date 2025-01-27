@@ -1,14 +1,14 @@
 /* Event Styles */
 .eventBox {
   position: absolute;
-  width: 190px;
+  width: 300px;
   background: #333;
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 6px 8px;
   cursor: pointer;
   z-index: 3;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.1s ease;
   user-select: none;
   cursor: grab;
 }
@@ -63,10 +63,18 @@
 }
  
 .eventBox:hover {
-  transform: scale(1.05);
+  transform: scale(1.025);
   background-color: #444;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 5;
 }
+
+.eventBox:hover .eventTitleText {
+  width: auto;
+  overflow: visible;
+  text-overflow: unset;
+}
+
 
 .eventConnections {
   position: relative;
@@ -108,7 +116,7 @@
  
 .dragging {
   z-index: 1000;
-  transition: transform 0.1s ease, box-shadow 0.1s ease; /* Short transition */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
   cursor: grabbing !important;
 }
 
@@ -135,8 +143,8 @@
 
 .specialStar {
   color: #ffd700;
-  margin-left: 5px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .specialText {
@@ -160,14 +168,28 @@
  
  .eventContent {
   position: relative;
- }
+  width: 100%;
+}
  
- .eventTitle {
+.eventTitle {
   font-weight: normal;
   color: #ffffff;
-  margin: 0 0 4px 0;
+  margin: 0 0 1px 0;
   font-size: 12px;
- }
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.eventTitleText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  min-width: 0;
+  flex: 1;
+}
  
  .eventDate {
   color: #888;

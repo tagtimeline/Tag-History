@@ -9,6 +9,7 @@ interface TimelineGridProps {
  isDraggingEnabled: boolean;
  yearSpacing: number;
  onReset: number;
+ showEventDates: boolean;
 }
 
 interface EventPosition {
@@ -32,7 +33,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
  visibleCategories, 
  isDraggingEnabled,
  yearSpacing,
- onReset
+ onReset,
+ showEventDates
 }) => {
  const [customPositions, setCustomPositions] = useState<Record<string, number>>({});
  const [eventColumns, setEventColumns] = useState<Record<string, number>>({});
@@ -67,14 +69,16 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
    return events.filter(event => visibleCategories.includes(event.category));
  }, [visibleCategories]);
 
- const timelineMarkers = useMemo(() => {
-   const endDate = new Date();
-   const markers: MarkerType[] = [];
-   let totalHeight = 10;
+  const timelineMarkers = useMemo(() => {
+    const endDate = new Date();
+    const futureDate = new Date();
+    futureDate.setMonth(endDate.getMonth() + 5); // Show 5 months into the future
+    const markers: MarkerType[] = [];
+    let totalHeight = 10;
 
-   for (let year = 2013; year <= endDate.getFullYear(); year++) {
-     const startMonth = year === 2013 ? 9 : 0;
-     const endMonth = year === endDate.getFullYear() ? endDate.getMonth() : 11;
+    for (let year = 2013; year <= futureDate.getFullYear(); year++) {
+      const startMonth = year === 2013 ? 9 : 0;
+      const endMonth = year === futureDate.getFullYear() ? futureDate.getMonth() : 11;
 
      if (year === 2013 || startMonth === 0) {
        markers.push({
@@ -250,17 +254,18 @@ const assignEventPositions = useCallback((events: TimelineEvent[]) => {
              }
            })}
            
-           {assignEventPositions(filteredEvents).map(({ event, position, column }) => (
-             <EventBox
-               key={event.id}
-               event={event}
-               position={position}
-               column={column}
-               isDraggingEnabled={isDraggingEnabled}
-               onUpdateColumn={handleUpdateColumn}
-               getEventPosition={getEventPosition}
-             />
-           ))}
+          {assignEventPositions(filteredEvents).map(({ event, position, column }) => (
+          <EventBox
+            key={event.id}
+            event={event}
+            position={position}
+            column={column}
+            isDraggingEnabled={isDraggingEnabled}
+            onUpdateColumn={handleUpdateColumn}
+            getEventPosition={getEventPosition}
+            showEventDates={showEventDates}
+          />
+        ))}
            
            <div className={styles.timelineEnd}>
              <div className={styles.timelineArrow} />

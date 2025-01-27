@@ -3,13 +3,14 @@ import styles from '../../styles/events.module.css';
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
 import { getEventStyles } from '../../config/categories';
-
+import { EVENT_CARD_WIDTH, GRID_COLUMN_WIDTH } from '../../config/timelineControls';
 
 interface EventBoxProps {
   event: TimelineEvent;
   position: number;
   column: number;
   isDraggingEnabled: boolean;
+  showEventDates: boolean;
   onUpdateColumn: (eventId: string, newColumn: number, position: number) => void;
   getEventPosition?: (date: string) => number;
 }
@@ -20,28 +21,48 @@ const EventBox: React.FC<EventBoxProps> = ({
   column, 
   isDraggingEnabled,
   onUpdateColumn,
-  getEventPosition
+  getEventPosition,
+  showEventDates
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [eventBoxHeight, setEventBoxHeight] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [titleWidth, setTitleWidth] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const eventStyles = getEventStyles(event.category, event.isSpecial);
+
+  const TOTAL_PADDING = 16; // 8px padding on each side
+  const STAR_WIDTH = event.isSpecial ? 22 : 0; // Account for star + gap (16px + 6px gap)
+  const MIN_BOX_CONTENT_WIDTH = EVENT_CARD_WIDTH - TOTAL_PADDING - STAR_WIDTH;
+
+  // Effect to measure title width
+  useEffect(() => {
+    if (titleRef.current) {
+      // Get the text width without any truncation
+      const range = document.createRange();
+      range.selectNodeContents(titleRef.current);
+      const rect = range.getBoundingClientRect();
+      setTitleWidth(rect.width);
+    }
+  }, [event.title]);
   
   // Calculate initial card position only once
   const initialCardPosition = useMemo(() => {
     if (event.endDate && getEventPosition) {
       return (getEventPosition(event.date) + getEventPosition(event.endDate)) / 2 - (eventBoxHeight / 2);
     }
-    return position - (eventBoxHeight / 2);
-  }, [event, position, getEventPosition, eventBoxHeight]);
+    const offset = showEventDates ? eventBoxHeight / 3 : eventBoxHeight / 2;
+    return position - offset;
+  }, [event, position, getEventPosition, eventBoxHeight, showEventDates]);
 
   useEffect(() => {
     if (eventBoxRef.current) {
       setEventBoxHeight(eventBoxRef.current.offsetHeight);
     }
-  }, []);
+  }, [showEventDates]); // Add showEventDates as dependency
 
   const baseOffset = 210;
   const columnWidth = 220;
@@ -172,7 +193,7 @@ const EventBox: React.FC<EventBoxProps> = ({
             }
           }
         } else {
-          // Single-day event connector reset - EXACTLY like the original implementation
+          // Single-day event connector reset
           const connectorElement = eventBoxRef.current.nextElementSibling?.querySelector(`.${styles.connectionLine}`) as HTMLElement;
           if (connectorElement) {
             connectorElement.style.width = `${connectionLineWidth}px`;
@@ -183,7 +204,6 @@ const EventBox: React.FC<EventBoxProps> = ({
     }
   }, [isDragging, startX, baseOffset, columnWidth, column, event.id, event.endDate, getEventPosition, leftPosition, onUpdateColumn, connectionLineWidth]);
 
-  
   const handleClick = () => {
     if (!isDraggingEnabled && !isDragging) {
       setIsModalOpen(true);
@@ -200,9 +220,6 @@ const EventBox: React.FC<EventBoxProps> = ({
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  // Declare isHovered state at component level
-  const [isHovered, setIsHovered] = useState(false);
 
   // Render connections based on single or multi-day event
   const renderConnections = () => {
@@ -278,6 +295,10 @@ const EventBox: React.FC<EventBoxProps> = ({
           top: `${initialCardPosition}px`,
           left: `${leftPosition}px`,
           cursor: isDraggingEnabled ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
+          width: isHovered && titleWidth > MIN_BOX_CONTENT_WIDTH ? 
+            `${titleWidth}px` : 
+            `${EVENT_CARD_WIDTH}px`,
+          zIndex: isHovered ? 5 : 3,
           ...eventStyles
         }}
         onMouseDown={handleMouseDown}
@@ -285,14 +306,18 @@ const EventBox: React.FC<EventBoxProps> = ({
         data-event-id={event.id}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        >
+      >
         <div className={styles.eventContent}>
-          <h3 className={styles.eventTitle}>{event.title}</h3>
-          <div className={styles.eventDate}>
-            {new Date(event.date).toLocaleDateString()}
-            {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+          <h3 ref={titleRef} className={styles.eventTitle}>
             {event.isSpecial && <span className={styles.specialStar}>⭐</span>}
-          </div>
+            <span className={styles.eventTitleText}>{event.title}</span>
+          </h3>
+          {showEventDates && (
+            <div className={styles.eventDate}>
+              {new Date(event.date).toLocaleDateString()}
+              {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+            </div>
+          )}
         </div>
       </div>
      
@@ -305,7 +330,7 @@ const EventBox: React.FC<EventBoxProps> = ({
         />
       )}
     </>
-   );
+  );
 };
 
 export default EventBox;

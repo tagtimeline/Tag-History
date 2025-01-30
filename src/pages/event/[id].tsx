@@ -6,6 +6,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { events } from '../../data/events';
 import styles from '../../styles/events.module.css';
+import controlStyles from '../../styles/controls.module.css';
 import headerStyles from '../../styles/header.module.css';
 import withAuth from '../../components/auth/withAuth';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
@@ -39,9 +40,17 @@ const EventPage: NextPage = () => {
       </Head>
       
       <Header>
-        <Link href="/timeline">
-          <button className={styles.timelineButton}>Timeline</button>
-        </Link>
+        <div className={controlStyles.headerControls}>
+          <Link href="/timeline">
+            <button className={controlStyles.timelineButton}>Timeline</button>
+          </Link>
+          <Link href="/events">
+            <button className={controlStyles.eventsButton}>Events</button>
+          </Link>
+          <Link href="/info">
+            <button className={controlStyles.infoButton}>Info</button>
+          </Link>
+        </div>
       </Header>
 
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>

@@ -3,9 +3,10 @@
     top: 25px;
     padding: 5px;
     width: 100%;
-    height: calc(100vh - var(--footer-height) - 75px);
+    height: calc(100vh - var(--footer-height) - var(--header-height) - 25px);
     box-sizing: border-box;
     position: relative;
+    overflow: hidden;
 }
 
 .gridWrapper {

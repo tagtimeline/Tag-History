@@ -119,10 +119,20 @@
 }
 
 
-/* Info Button */
+/* Header Buttons */
 .infoButton {
     composes: button;
     width: 64px;
+}
+
+.timelineButton {
+  composes: button;
+  width: 64px;
+}
+
+.eventsButton {
+  composes: button;
+  width: 64px;
 }
 
 /* Timeline Controls */

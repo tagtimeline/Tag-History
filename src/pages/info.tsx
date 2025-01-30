@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import styles from '../styles/info.module.css'
+import controlStyles from '../styles/controls.module.css';
 import headerStyles from '../styles/header.module.css'
 import withAuth from '../components/auth/withAuth'
 
@@ -18,9 +19,14 @@ const InfoPage: NextPage = () => {
       </Head>
       
       <Header>
-        <Link href="/timeline">
-          <button className={styles.timelineButton}>Timeline</button>
-        </Link>
+        <div className={controlStyles.headerControls}>
+          <Link href="/timeline">
+            <button className={controlStyles.timelineButton}>Timeline</button>
+          </Link>
+          <Link href="/events">
+            <button className={controlStyles.eventsButton}>Events</button>
+          </Link>
+        </div>
       </Header>
       
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>

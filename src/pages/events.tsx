@@ -1,47 +1,32 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Link from 'next/link'
-import Header from '../components/layout/Header'
-import Footer from '../components/layout/Footer'
-import TimelineContainer from '../components/timeline/TimelineContainer'
-import SettingsPopup from '../components/timeline/SettingsPopup'
-import controlStyles from '../styles/controls.module.css'
-import headerStyles from '../styles/header.module.css'
-import searchStyles from '../styles/search.module.css'
-import { useState, useMemo, useEffect, useRef } from 'react'
-import withAuth from '../components/auth/withAuth'
-import { getAllCategories, getCategoryColor } from '../config/categories'
-import { ALL_EVENTS_OPTION } from '../config/dropdown'
-import { events, TimelineEvent } from '../data/events'
-import { searchEvents } from '../config/search'
-import { zoomIn, zoomOut, DEFAULT_YEAR_SPACING, getDefaultTimelineState } from '../config/timelineControls'
+// src/pages/events.tsx
+import type { NextPage } from 'next';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
+import EventModal from '../components/timeline/EventModal';
+import { events, TimelineEvent } from '../data/events';
+import styles from '../styles/eventsList.module.css';
+import eventStyles from '../styles/events.module.css';
+import controlStyles from '../styles/controls.module.css';
+import searchStyles from '../styles/search.module.css';
+import headerStyles from '../styles/header.module.css';
+import withAuth from '../components/auth/withAuth';
+import { getAllCategories, getCategoryColor, getCategoryName, getEventStyles } from '../config/categories';
+import { ALL_EVENTS_OPTION } from '../config/dropdown';
+import { searchEvents } from '../config/search';
 
-const TimelinePage: NextPage = () => {
-  /* Category Dropdown */
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const EventsPage: NextPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const allCategories = useMemo(() => [
-    ALL_EVENTS_OPTION,
-    ...getAllCategories()
-  ], []);
+  const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
 
-  /* Search */
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
-
-  /* Settings */
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
-  const [showEventDates, setShowEventDates] = useState(true);
-
-  /* Controls */
-  const [resetKey, setResetKey] = useState(0);
-  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
-
-
-  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -77,41 +62,24 @@ const TimelinePage: NextPage = () => {
     setSearchResults(searchEvents(events, value));
   };
 
-  const handleResultClick = (event: TimelineEvent) => {
-    const targetEvent = event;
-    const eventElement = document.querySelector(`[data-event-id="${targetEvent.id}"]`);
-    
-    if (eventElement) {
-      eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      (eventElement as HTMLElement).click();
-    }
-    
-    setSearchTerm('');
-    setSearchResults([]);
-  };
-
-  const handleZoomIn = () => {
-    setYearSpacing(current => zoomIn(current));
-  };
-
-  const handleZoomOut = () => {
-    setYearSpacing(current => zoomOut(current));
-  };
-
-  const handleReset = () => {
-    const defaultState = getDefaultTimelineState();
-    setYearSpacing(defaultState.yearSpacing);
-    setSelectedCategories(defaultState.selectedCategories);
-    setResetKey(prev => prev + 1); // Increment reset key to trigger reset in TimelineGrid
-  };
+  const filteredEvents = events
+    .filter(event => 
+      selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
+      selectedCategories.includes(event.category)
+    )
+    .filter(event => 
+      searchTerm === '' || 
+      searchEvents([event], searchTerm).length > 0
+    )
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <>
       <Head>
-        <title>Timeline - TNT Tag History</title>
-        <meta name="description" content="Browse through the history of TNT Tag on Hypixel" />
+        <title>Events - TNT Tag History</title>
+        <meta name="description" content="Browse all TNT Tag events" />
       </Head>
-      
+
       <Header>
         <div className={controlStyles.headerControls}>
           <div className={controlStyles.dropdown} ref={dropdownRef}>
@@ -156,7 +124,7 @@ const TimelinePage: NextPage = () => {
                   <div 
                     key={event.id} 
                     className={searchStyles.resultItem}
-                    onClick={() => handleResultClick(event)}
+                    onClick={() => setSelectedEvent(event)}
                   >
                     <span 
                       className={searchStyles.categoryColor}
@@ -183,8 +151,8 @@ const TimelinePage: NextPage = () => {
             )}
           </div>
 
-          <Link href="/events">
-            <button className={controlStyles.eventsButton}>Events</button>
+          <Link href="/timeline">
+            <button className={controlStyles.timelineButton}>Timeline</button>
           </Link>
           <Link href="/info">
             <button className={controlStyles.infoButton}>Info</button>
@@ -194,34 +162,45 @@ const TimelinePage: NextPage = () => {
 
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
-      <main>
-        <div className={controlStyles.controls}>
-          <button className={controlStyles.zoomIn} onClick={handleZoomIn}>+</button>
-          <button className={controlStyles.zoomOut} onClick={handleZoomOut}>-</button>
-          <button className={controlStyles.resetTimeline} onClick={handleReset}>r</button>
-          <button 
-            className={controlStyles.settingsButton}
-            onClick={() => setIsSettingsOpen(true)}
-          >s</button>
+      <main className={styles.mainContent}>
+        <div className={styles.eventsList}>
+          {filteredEvents.map(event => {
+            const eventStyle = getEventStyles(event.category, event.isSpecial);
+            return (
+                <div 
+                key={event.id}
+                className={`${styles.eventBox} ${eventStyles.eventBox}`}
+                onClick={() => setSelectedEvent(event)}
+                style={{
+                  ...eventStyle,
+                  position: 'relative',
+                  left: 0,
+                  top: 0,
+                  width: '100%',
+                  cursor: 'pointer',
+                }}
+              >
+                <div className={eventStyles.eventContent}>
+                  <h3 className={eventStyles.eventTitle} style={{ fontSize: '14px', marginBottom: '4px' }}>  {/* Increased font size */}
+                    {event.isSpecial && <span className={eventStyles.specialStar} style={{ fontSize: '14px' }}>⭐</span>}
+                    <span className={eventStyles.eventTitleText}>{event.title}</span>
+                  </h3>
+                  <div className={eventStyles.eventDate} style={{ fontSize: '12px' }}> {/* Increased font size */}
+                    {new Date(event.date).toLocaleDateString()}
+                    {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        
-        {isSettingsOpen && (
-          <SettingsPopup 
-            onClose={() => setIsSettingsOpen(false)}
-            isDraggingEnabled={isDraggingEnabled}
-            onDraggingToggle={setIsDraggingEnabled}
-            showEventDates={showEventDates}
-            onShowEventDatesToggle={setShowEventDates}
+
+        {selectedEvent && (
+          <EventModal 
+            event={selectedEvent} 
+            onClose={() => setSelectedEvent(null)} 
           />
         )}
-
-        <TimelineContainer 
-          selectedCategories={selectedCategories} 
-          isDraggingEnabled={isDraggingEnabled}
-          yearSpacing={yearSpacing}
-          onReset={resetKey}
-          showEventDates={showEventDates}
-        />
       </main>
 
       <Footer />
@@ -229,4 +208,4 @@ const TimelinePage: NextPage = () => {
   );
 };
 
-export default withAuth(TimelinePage);
+export default withAuth(EventsPage);

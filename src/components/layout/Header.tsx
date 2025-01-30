@@ -1,5 +1,6 @@
 // src/components/layout/Header.tsx
 import React, { ReactNode } from 'react';
+import Link from 'next/link';
 import styles from '../../styles/header.module.css';
 
 interface HeaderProps {
@@ -11,7 +12,9 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
     <header className={styles.header}>
       <div className={styles['header-content']}>
         <div className={styles['header-left']}>
-          TNT Tag History
+          <Link href="/timeline">
+            TNT Tag History
+          </Link>
         </div>
         {children && (
           <div className={styles['header-right']}>

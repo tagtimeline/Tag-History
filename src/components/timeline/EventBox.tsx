@@ -54,15 +54,19 @@ const EventBox: React.FC<EventBoxProps> = ({
     if (event.endDate && getEventPosition) {
       return (getEventPosition(event.date) + getEventPosition(event.endDate)) / 2 - (eventBoxHeight / 2);
     }
-    const offset = showEventDates ? eventBoxHeight / 3 : eventBoxHeight / 2;
-    return position - offset;
-  }, [event, position, getEventPosition, eventBoxHeight, showEventDates]);
+    // For single day events, center on the position
+    return position - (eventBoxHeight / 2);
+  }, [event, position, getEventPosition, eventBoxHeight]);
 
   useEffect(() => {
     if (eventBoxRef.current) {
-      setEventBoxHeight(eventBoxRef.current.offsetHeight);
+      // Force recalculation of height
+      const height = eventBoxRef.current.offsetHeight;
+      if (height !== eventBoxHeight) {
+        setEventBoxHeight(height);
+      }
     }
-  }, [showEventDates]); // Add showEventDates as dependency
+  }, [eventBoxHeight, showEventDates]);
 
   const baseOffset = 210;
   const columnWidth = 220;
@@ -220,6 +224,7 @@ const EventBox: React.FC<EventBoxProps> = ({
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
 
   // Render connections based on single or multi-day event
   const renderConnections = () => {

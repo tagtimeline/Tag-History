@@ -126,30 +126,16 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-
-/* Special Star */
 .headerTags {
   display: flex;
-  gap: 8px;
   align-items: center;
-}
-
-.specialTag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 4px;
+  position: relative;
 }
 
 .specialStar {
   color: #ffd700;
-  font-size: 12px;
+  font-size: 16px;
   flex-shrink: 0;
-}
-
-.specialText {
-  color: #ffd700;
-  font-size: 12px;
 }
 
 
@@ -235,12 +221,44 @@
   margin-bottom: 16px;
  }
  
- .eventType {
+ .eventTypeWrapper {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 150px;
+}
+
+.eventType {
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 4px;
   background: #333;
- }
+  display: flex;
+  align-items: center;
+}
+
+.discordLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  color: #5865F2 !important;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(88, 101, 242, 0.1);
+  transition: opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.eventTypeWrapper:hover .discordLink {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.discordLink:hover {
+  background: rgba(88, 101, 242, 0.2);
+}
  
  .modalControls {
   display: flex;
@@ -282,7 +300,10 @@
   color: #ffffff;
   margin: 0 0 4px 0;
   font-size: 24px;
- }
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
  
  .modalDate {
   color: #888;

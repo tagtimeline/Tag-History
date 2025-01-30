@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ExternalLink } from 'lucide-react';
 import styles from '../../styles/events.module.css';
 import controlStyles from '../../styles/controls.module.css'
 import { TimelineEvent } from '../../data/events';
@@ -14,29 +15,36 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-        <div className={styles.headerTags}>
-            <div 
-              className={styles.eventType}
-              style={{ color: getCategoryColor(event.category) }}
+      <div className={styles.modalHeader}>
+        <div className={styles.eventTypeWrapper}>
+          <div 
+            className={styles.eventType}
+            style={{ color: getCategoryColor(event.category) }}
+          >
+            {getCategoryName(event.category)}
+          </div>
+          {event.category === 'feuds' && (
+            <Link 
+              href="https://discord.gg/pvhW64Jhbu" 
+              target="_blank" 
+              className={styles.discordLink}
             >
-              {getCategoryName(event.category)}
-            </div>
-            {event.isSpecial && (
-              <div className={styles.specialTag}>
-                <span className={styles.specialStar}>⭐</span>
-                <span className={styles.specialText}>Special</span>
-              </div>
-            )}
-          </div>
-          <div className={styles.modalControls}>
-            <Link href={`/event/${event.id}`} target="_blank">
-              <button className={styles.openButton}>↗</button>
+              <ExternalLink size={12} />
+              <span>Tag Feuds Discord</span>
             </Link>
-            <button className={controlStyles.closeButton} onClick={onClose}>×</button>
-          </div>
-          </div>
-        <h2 className={styles.modalTitle}>{event.title}</h2>
+          )}
+        </div>
+        <div className={styles.modalControls}>
+          <Link href={`/event/${event.id}`} target="_blank">
+            <ExternalLink className={styles.openButton} size={12} />
+          </Link>
+          <button className={controlStyles.closeButton} onClick={onClose}>×</button>
+        </div>
+      </div>
+      <h2 className={styles.modalTitle}>
+        {event.isSpecial && <span className={styles.specialStar}>⭐</span>}
+        {event.title}
+      </h2>
         <div className={styles.modalDate}>
             {new Date(event.date).toLocaleDateString()}
             {event.endDate && (

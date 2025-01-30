@@ -1,6 +1,7 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/router';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -57,23 +58,32 @@ const EventPage: NextPage = () => {
       
       <main className="centered">
         <div className={styles.eventPageContent}>
-          <div className={styles.modalHeader}>
+        <div className={styles.modalHeader}>
           <div className={styles.headerTags}>
-            <div 
-              className={styles.eventType}
-              style={{ color: getCategoryColor(event.category) }}
-            >
-              {getCategoryName(event.category)}
-            </div>
-            {event.isSpecial && (
-              <div className={styles.specialTag}>
-                <span className={styles.specialStar}>⭐</span>
-                <span className={styles.specialText}>Special</span>
+            <div className={styles.eventTypeWrapper}>
+              <div 
+                className={styles.eventType}
+                style={{ color: getCategoryColor(event.category) }}
+              >
+                {getCategoryName(event.category)}
               </div>
-            )}
+              {event.category === 'feuds' && (
+                <Link 
+                  href="https://discord.gg/pvhW64Jhbu" 
+                  target="_blank" 
+                  className={styles.discordLink}
+                >
+                  <ExternalLink size={12} />
+                  <span>Tag Feuds Discord</span>
+                </Link>
+              )}
+            </div>
           </div>
-          </div>
-          <h2 className={styles.modalTitle}>{event.title}</h2>
+        </div>
+        <h2 className={styles.modalTitle}>
+          {event.isSpecial && <span className={styles.specialStar}>⭐</span>}
+          {event.title}
+        </h2>
           <div className={styles.modalDate}>
             {new Date(event.date).toLocaleDateString()}
             {event.endDate && (

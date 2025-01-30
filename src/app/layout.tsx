@@ -2,6 +2,7 @@
 import type { Metadata } from 'next'
 import '../styles/base.css'
 import '../styles/fonts.css'
+import '../styles/*'
 
 export const metadata: Metadata = {
   title: 'TNT Tag History',
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
         url: '/favicon.png',
         width: 64,
         height: 64,
-        alt: 'TNT Tag History Logo'
+        alt: 'TNT Tag History'
       }
     ],
   },

@@ -130,3 +130,63 @@ a button:hover {
 a button:active {
   background: #666;
 }
+
+
+/* Link Style */
+.inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #5865F2;
+  text-decoration: none;
+  font-size: inherit;
+  margin: 0 1px;
+  border-radius: 3px;
+  background: rgba(88, 101, 242, 0.1);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: "Minecraft";
+}
+
+.inline-link:hover,
+.inline-link:visited:hover {
+  background: rgba(88, 101, 242, 0.2);
+  color: #5865F2;
+}
+
+.inline-link:visited {
+  color: #5865F2;
+}
+
+
+/* Text Formatting Styles */
+.bold {
+  font-weight: bold;
+  font-family: 'Minecraft'; 
+}
+
+.italic {
+  font-style: italic;
+  font-family: 'Minecraft'; 
+}
+
+.bold-italic {
+  font-weight: bold;
+  font-style: italic;
+  font-family: 'Minecraft'; 
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+}
+
+.subtext {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: -8px;
+  opacity: 0.8;
+}

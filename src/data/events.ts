@@ -63,13 +63,16 @@ Features:
     description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
 
 Game Overview:
-A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
+A fast-paced game of hot potato with TNT, see [test link](https://example.com). One player starts with TNT and must tag other players before it explodes. Last player standing wins!
 
 Features:
 - Multiple maps designed for strategic gameplay
-- Power-ups and special abilities
+- Power-ups and **special abilities**
 - Custom particle effects and sounds
-- Unique scoring system`,
+- Unique scoring system
+
+-# This event was the first from many, the Tag Feuds legacy started.
+`,
     category: "feuds",
     tags: ["feuds", "main event"],
     sideEvents: [

@@ -13,7 +13,7 @@ import controlStyles from '../styles/controls.module.css';
 import searchStyles from '../styles/search.module.css';
 import headerStyles from '../styles/header.module.css';
 import withAuth from '../components/auth/withAuth';
-import { getAllCategories, getCategoryColor, getCategoryName, getEventStyles } from '../config/categories';
+import { getAllCategories, getCategoryColor, getEventStyles } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown';
 import { searchEvents } from '../config/search';
 

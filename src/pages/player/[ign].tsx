@@ -373,4 +373,4 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
   }
 };
 
-export default withAuth(PlayerPage);
+export default withAuth<PlayerPageProps>(PlayerPage);

@@ -5,7 +5,7 @@ import { TimelineEvent } from '../../data/events';
 import EventTable from './EventTable';
 import styles from '../../styles/events.module.css';
 import formatStyles from '../../styles/formatting.module.css';
-import { formatText, extractLinks, isSubtext, getSubtextContent,isHeadertext,getHeadertextContent,getClass} from '../../config/formatting';
+import { formatText, extractLinks, isSubtext, getSubtextContent, isHeadertext, getHeadertextContent, getClass } from '../../config/formatting';
 
 interface EventContentProps {
   event: TimelineEvent;
@@ -16,6 +16,7 @@ const renderTextWithLinks = (text: string) => {
   const parts = [];
   let lastIndex = 0;
 
+  // First handle all links
   links.forEach((link, index) => {
     if (link.index > lastIndex) {
       const beforeText = text.slice(lastIndex, link.index);
@@ -42,14 +43,52 @@ const renderTextWithLinks = (text: string) => {
     lastIndex = link.index + link.length;
   });
 
+  // Handle remaining text and look for player tags
   if (lastIndex < text.length) {
     const remainingText = text.slice(lastIndex);
-    parts.push(
-      <span 
-        key="text-end" 
-        dangerouslySetInnerHTML={{ __html: formatText(remainingText) }} 
-      />
-    );
+    const playerPattern = /<([^>]+)>/g;
+    const parts2 = [];
+    let lastPlayerIndex = 0;
+    let playerMatch;
+
+    while ((playerMatch = playerPattern.exec(remainingText)) !== null) {
+      // Add text before the player tag
+      if (playerMatch.index > lastPlayerIndex) {
+        const beforeText = remainingText.slice(lastPlayerIndex, playerMatch.index);
+        parts2.push(
+          <span 
+            key={`text-p-${lastPlayerIndex}`} 
+            dangerouslySetInnerHTML={{ __html: formatText(beforeText) }} 
+          />
+        );
+      }
+
+      // Add player link
+      parts2.push(
+        <Link
+          key={`player-${lastPlayerIndex}`}
+          href={`/player/${playerMatch[1]}`}
+          className={formatStyles.playerLink}
+        >
+          {playerMatch[1]}
+        </Link>
+      );
+
+      lastPlayerIndex = playerMatch.index + playerMatch[0].length;
+    }
+
+    // Add any remaining text after the last player tag
+    if (lastPlayerIndex < remainingText.length) {
+      const afterText = remainingText.slice(lastPlayerIndex);
+      parts2.push(
+        <span 
+          key={`text-end`} 
+          dangerouslySetInnerHTML={{ __html: formatText(afterText) }} 
+        />
+      );
+    }
+
+    parts.push(...parts2);
   }
 
   return parts;

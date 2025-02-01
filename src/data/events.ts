@@ -48,6 +48,8 @@ export const events: TimelineEvent[] = [
 Game Overview:
 A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
 
+Notable player (test): <floldlol>
+
 Features:
 - Multiple maps designed for strategic gameplay
 - Power-ups and special abilities
@@ -65,6 +67,8 @@ TNT Tag was officially released on the Hypixel Network as a new minigame!
 
 Game Overview:
 A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
+
+Notable player (test): <flodlol>
 
 Features:
 - Multiple maps designed for strategic gameplay
@@ -110,7 +114,7 @@ tables: [
         { content: 
  `ShadowHunter
  BlazeMaster
- LavaFury
+ <flodlol>
  SkySurfer
  FrostBite
  NightCrawler
@@ -151,6 +155,8 @@ tables: [
 Game Overview:
 A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
 
+Notable player (test): <flodlol>
+
 Features:
 - Multiple maps designed for strategic gameplay
 - Power-ups and special abilities
@@ -184,6 +190,8 @@ Tournament Structure:
 - Best of 5 matches per round
 - Custom tournament lobby
 
+Notable player (test): <flodlol>
+
 Prize Pool:
 - 1st Place: 100,000 Hypixel Coins + Exclusive Tag
 - 2nd Place: 50,000 Hypixel Coins
@@ -204,6 +212,8 @@ The Technique:
 - Combining jumps with precise timing
 - Allowing for new escape routes and tag strategies
 
+Notable player (test): <flodlol>
+
 Impact:
 This discovery led to a complete meta shift in high-level play, with players incorporating wall-jumping into their standard strategies. The technique was later officially acknowledged by Hypixel staff as a legitimate strategy.
 
@@ -222,6 +232,8 @@ Highlights:
 - Christmas tree cosmetics
 - Snowball power-up
 - Limited-time challenges and achievements
+
+Notable player (test): <flodlol>
 
 The event brought the spirit of the holidays to the TNT Tag community and became a fan favorite.`,
     tags: ['holiday', 'seasonal'],
@@ -252,6 +264,8 @@ New Features:
 - Haunted mansion map
 - Special Halloween sound effects
 - Limited-time achievements
+
+Notable player (test): <flodlol>
 
 The update was available throughout the Halloween season and became one of the most popular seasonal events.`,
     tags: ['update', 'seasonal'],
@@ -292,6 +306,8 @@ Captains will select their teams in a public voice channel of the people that qu
 
 Bracket Stage:
 The teams will enter a double-elimination bracket.
+
+Notable players (test): <flodlol> and <suzt>
 
 Prizes
 A huge thanks to our generous sponsors!

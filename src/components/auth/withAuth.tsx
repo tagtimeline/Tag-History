@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 
-const withAuth = (WrappedComponent: NextPage) => {
-  const AuthComponent: NextPage = (props) => {
+const withAuth = <P extends {}>(WrappedComponent: NextPage<P>): NextPage<P> => {
+  const AuthComponent: NextPage<P> = (props) => {
     const router = useRouter();
 
     useEffect(() => {
@@ -19,6 +19,11 @@ const withAuth = (WrappedComponent: NextPage) => {
 
     return <WrappedComponent {...props} />;
   };
+
+  // Copy getInitialProps and getServerSideProps from WrappedComponent
+  if ((WrappedComponent as any).getInitialProps) {
+    AuthComponent.getInitialProps = (WrappedComponent as any).getInitialProps;
+  }
 
   return AuthComponent;
 };

@@ -80,3 +80,15 @@
 .inlineLink:visited {
     color: #5865F2;
 }
+
+.playerLink {
+    color: #4a9eff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.playerLink:hover {
+    color: #2486ff;
+    text-decoration: underline;
+}

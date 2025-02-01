@@ -1,20 +1,23 @@
-/* timeline.module.css */
+/* src/styles/timeline.module.css */
+
+/* Main Container */
 .container {
-    top: 25px;
-    padding: 5px;
-    width: 100%;
-    height: calc(100vh - var(--footer-height) - var(--header-height) - 25px);
     box-sizing: border-box;
-    position: relative;
+    height: calc(100vh - var(--footer-height) - var(--header-height) - 25px);
     overflow: hidden;
+    padding: 5px;
+    position: relative;
+    top: 25px;
+    width: 100%;
 }
 
+/* Grid Layout */
 .gridWrapper {
-    width: 100%;
     height: 100%;
     overflow: auto;
     position: relative;
     scrollbar-width: none;
+    width: 100%;
     -ms-overflow-style: none;
 }
 
@@ -34,10 +37,10 @@
 }
 
 .cell {
-    flex: 0 0 220px;
-    min-height: 100px;
     border-right: 1px solid #333;
     box-sizing: border-box;
+    flex: 0 0 220px;
+    min-height: 100px;
     position: relative;
 }
 
@@ -45,109 +48,115 @@
     border-right: none;
 }
 
+/* Timeline Component */
 .timeline {
-    position: absolute;
+    font-family: 'Minecraft', sans-serif;
+    height: calc(100%);
     left: 10px;
+    position: absolute;
     top: 0;
     width: 100px;
-    height: calc(100%);
     z-index: 10;
-    font-family: 'Minecraft', sans-serif;
 }
 
+/* Timeline Bar */
 .timelineBar {
-    position: absolute;
-    top: 0;
-    right: -2px;
-    bottom: 20px;
-    width: 5px;
     background-color: #505050;
+    bottom: 20px;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 5px;
 }
 
+/* Timeline Markers */
 .yearMarker {
+    background-color: #333;
+    border-radius: 4px;
+    color: #888;
+    font-size: 14px;
+    padding: 4px 8px;
     position: absolute;
     right: -25px;
-    background-color: #333;
-    color: #888;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 14px;
     text-align: center;
     z-index: 2;
 }
 
 .monthMarker {
-    position: absolute;
-    left: 15px;
-    display: flex;
     align-items: center;
     color: #666;
+    display: flex;
     font-size: 12px;
-    width: 40px;
     justify-content: flex-end;
+    left: 15px;
+    position: absolute;
+    width: 40px;
 }
 
 .monthMarker::after {
-    content: '';
-    position: absolute;
-    left: 50px;
-    top: 50%;
-    width: 15px;
-    height: 2px;
     background-color: #666;
+    content: '';
+    height: 2px;
+    left: 50px;
+    position: absolute;
+    top: 50%;
     transform: translateY(-50%);
+    width: 15px;
 }
 
+/* Timeline Content */
 .timelineContent {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
     height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
 }
 
+/* Timeline End */
 .timelineEnd {
-    position: absolute;
-    bottom: 10px;
-    right: -5.25px;
-    display: flex;
     align-items: center;
+    bottom: 10px;
     color: #666;
+    display: flex;
     font-size: 14px;
+    position: absolute;
+    right: -5.25px;
 }
 
 .timelineArrow {
-    width: 0;
-    height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 12px solid #505050;
+    height: 0;
+    width: 0;
 }
 
 .timelineEndText {
-    position: absolute;
-    left: 20px;
     bottom: 0px;
-    white-space: nowrap;
     color: #888;
+    left: 20px;
+    position: absolute;
+    white-space: nowrap;
 }
 
+/* Now Marker */
 .nowMarker {
-    position: absolute;
-    text-align: left;
-    left: 140px;
-    white-space: nowrap;
     color: #00ff08;
     font-size: 12px;
+    left: 140px;
+    position: absolute;
+    text-align: left;
+    white-space: nowrap;
 }
 
 .nowMarker::after {
-    content: '';
-    position: absolute;
-    left: -20px;
-    top: 50%;
-    width: 15px;
-    height: 2px;
     background-color: #00ff08;
+    content: '';
+    height: 2px;
+    left: -20px;
+    position: absolute;
+    top: 50%;
     transform: translateY(-50%);
+    width: 15px;
 }

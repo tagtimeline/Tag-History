@@ -60,14 +60,15 @@ Features:
     title: "Fist Tag Feuds Main Event",
     date: "2014-01-24",
     endDate: "2014-10-23",
-    description: `TNT Tag was officially released on the Hypixel Network as a new minigame!
+    description: `
+TNT Tag was officially released on the Hypixel Network as a new minigame!
 
 Game Overview:
-A fast-paced game of hot potato with TNT, see [test link](https://example.com). One player starts with TNT and must tag other players before it explodes. Last player standing wins!
+A fast-paced game of hot potato with TNT. One player starts with TNT and must tag other players before it explodes. Last player standing wins!
 
 Features:
 - Multiple maps designed for strategic gameplay
-- Power-ups and **special abilities**
+- Power-ups and special abilities
 - Custom particle effects and sounds
 - Unique scoring system
 
@@ -97,9 +98,9 @@ Features:
     description: `The first major guild war between The Incredibles and Hightspeed erupted over control of the weekly leaderboards.
 
 The conflict lasted for 3 weeks, with both guilds competing intensely in TNT Tag matches. Members from both sides showed exceptional skill and strategy.
-\n\n
+
 [TABLE]
-\n\n
+
 The war ended with Shadow Dynasty claiming victory by a narrow margin of 50 points.`,
 tables: [
   {

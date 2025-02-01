@@ -1,508 +1,470 @@
-/* Event Styles */
+/* src/styles/events.module.css */
+
+/* Event Box Base */
 .eventBox {
-  position: absolute;
-  width: 300px;
-  background: #333;
-  border-radius: 4px;
-  padding: 6px 8px;
-  cursor: pointer;
-  z-index: 3;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: all 0.1s ease;
-  user-select: none;
-  cursor: grab;
+    background: #333;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    padding: 6px 8px;
+    position: absolute;
+    transition: all 0.1s ease;
+    user-select: none;
+    width: 300px;
+    z-index: 3;
 }
 
+/* Connection Lines */
 .connectionLine {
-  position: absolute;
-  height: 2px;
-  background: #444;
-  transform-origin: left;
-  left: 100px;
-  transition: height 0.2s ease, background-color 0.2s ease;
+    background: #444;
+    height: 2px;
+    left: 100px;
+    position: absolute;
+    transform-origin: left;
+    transition: height 0.2s ease, background-color 0.2s ease;
 }
 
 .verticalLine {
-  position: absolute;
-  width: 2px;
-  background: #444;
-  transition: background-color 0.2s ease;
+    background: #444;
+    position: absolute;
+    transition: background-color 0.2s ease;
+    width: 2px;
 }
 
-.horizontalStartLine, .horizontalEndLine {
-  position: absolute;
-  height: 2px;
-  background: #444;
-  left: 100px;
-  z-index: 1;
-  transition: background-color 0.2s ease;
+.horizontalStartLine,
+.horizontalEndLine {
+    background: #444;
+    height: 2px;
+    left: 100px;
+    position: absolute;
+    transition: background-color 0.2s ease;
+    z-index: 1;
 }
 
 .eventConnector {
-  position: absolute;
-  height: 2px;
-  background: #444;
-  z-index: 1;
-  transform-origin: left;
-  transition: background-color 0.2s ease;
-}
- 
- .dateMarker {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: #444;
-  border-radius: 50%;
-  left: 96px;
-  z-index: 2;
-  transition: background-color 0.2s ease;
- }
-
- .eventConnections {
-  position: relative;
-}
- 
-.eventBox:hover {
-  transform: scale(1.025);
-  background-color: #444;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  z-index: 5;
+    background: #444;
+    height: 2px;
+    position: absolute;
+    transform-origin: left;
+    transition: background-color 0.2s ease;
+    z-index: 1;
 }
 
-.eventBox:hover .eventTitleText {
-  width: auto;
-  overflow: visible;
-  text-overflow: unset;
+.dateMarker {
+    background: #444;
+    border-radius: 50%;
+    height: 8px;
+    left: 96px;
+    position: absolute;
+    transition: background-color 0.2s ease;
+    width: 8px;
+    z-index: 2;
 }
 
-
-.eventConnections {
-  position: relative;
+/* Event Positioning */
+.eventBox-left {
+    left: 210px;
 }
 
-/* Single day event hover effects */
-.eventBox:hover + .eventConnections .connectionLine {
-  transform: scaleY(2);
-  transform-origin: center;
-  background-color: #555;
+.eventBox-right {
+    left: 430px;
 }
 
-/* Multi-day event hover effects */
-.eventBox:hover + .eventConnections .horizontalStartLine,
-.eventBox:hover + .eventConnections .horizontalEndLine {
-  transform: scaleY(2);
-  transform-origin: center;
-  background-color: #555;
+.eventBox-far {
+    left: 650px;
 }
 
-.eventBox:hover + .eventConnections .verticalLine {
-  transform: scaleX(2);
-  transform-origin: center;
-  background-color: #555;
+/* Event Content */
+.eventContent {
+    position: relative;
+    width: 100%;
 }
 
-.eventBox:hover + .eventConnections .eventConnector {
-  transform: scaleY(2);
-  transform-origin: center;
-  background-color: #555;
-}
-
-.eventBox:hover:not(.dragging) {
-  transform: scale(1.05) !important;
-  background-color: #444;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  z-index: 4;
-}
- 
-.dragging {
-  z-index: 1000;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-  cursor: grabbing !important;
-}
-
-.dragging:hover {
-  transform: scale(1.05);
-  background-color: #444;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.headerTags {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.specialStar {
-  color: #ffd700;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-
- 
- .eventBox-left {
-  left: 210px;
- }
- 
- .eventBox-right {
-  left: 430px;
- }
- 
- .eventBox-far {
-  left: 650px;
- }
- 
- .eventContent {
-  position: relative;
-  width: 100%;
-}
- 
 .eventTitle {
-  font-weight: normal;
-  color: #ffffff;
-  margin: 0 0 1px 0;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+    align-items: center;
+    color: #ffffff;
+    display: flex;
+    font-size: 12px;
+    font-weight: normal;
+    gap: 6px;
+    margin: 0 0 1px 0;
+    min-width: 0;
 }
 
 .eventTitleText {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: all 0.3s ease;
-  min-width: 0;
-  flex: 1;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
- 
- .eventDate {
-  color: #888;
-  font-size: 12px;
- }
- 
- /* Modal styles */
- .modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
- }
- 
- .modalContent {
-  background: #1a1a1a;
-  border-radius: 12px;
-  padding: 24px;
-  width: 95%;
-  max-width: 700px;
-  max-height: 60%;
-  overflow-y: hidden;
-  position: relative;
-  border: 4px solid #333;
-  scrollbar-gutter: stable;
 
- }
+.eventDate {
+    color: #888;
+    font-size: 12px;
+}
 
- .modalContent:hover {
-  overflow-y: auto;
- }
- 
- .modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
- }
- 
- .eventTypeWrapper {
-  display: inline-flex;
-  align-items: center;
-  padding-right: 150px;
+/* Event Interactions */
+.eventBox:hover {
+    background-color: #444;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transform: scale(1.025);
+    z-index: 5;
+}
+
+.eventBox:hover .eventTitleText {
+    overflow: visible;
+    text-overflow: unset;
+    width: auto;
+}
+
+.eventBox:hover + .eventConnections .connectionLine {
+    background-color: #555;
+    transform: scaleY(2);
+    transform-origin: center;
+}
+
+.eventBox:hover + .eventConnections .horizontalStartLine,
+.eventBox:hover + .eventConnections .horizontalEndLine,
+.eventBox:hover + .eventConnections .eventConnector {
+    background-color: #555;
+    transform: scaleY(2);
+    transform-origin: center;
+}
+
+.eventBox:hover + .eventConnections .verticalLine {
+    background-color: #555;
+    transform: scaleX(2);
+    transform-origin: center;
+}
+
+.dragging {
+    cursor: grabbing !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    z-index: 1000;
+}
+
+.dragging:hover {
+    background-color: #444;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+/* Modal Styles */
+.modalOverlay {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: #1a1a1a;
+    border: 4px solid #333;
+    border-radius: 12px;
+    max-height: 60%;
+    max-width: 700px;
+    overflow-y: hidden;
+    padding: 24px;
+    position: relative;
+    scrollbar-gutter: stable;
+    width: 95%;
+}
+
+.modalContent:hover {
+    overflow-y: auto;
+}
+
+.modalHeader {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+/* Event Type Styles */
+.eventTypeWrapper {
+    align-items: center;
+    display: inline-flex;
+    padding-right: 150px;
 }
 
 .eventType {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  background: #333;
-  display: flex;
-  align-items: center;
+    align-items: center;
+    background: #333;
+    border-radius: 4px;
+    display: flex;
+    font-size: 12px;
+    padding: 4px 12px;
 }
 
 .discordLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 8px;
-  color: #5865F2 !important;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  background: rgba(88, 101, 242, 0.1);
-  transition: opacity 0.2s ease;
-  opacity: 0;
-  pointer-events: none;
+    align-items: center;
+    background: rgba(88, 101, 242, 0.1);
+    border-radius: 3px;
+    color: #5865F2 !important;
+    display: inline-flex;
+    font-size: 11px;
+    gap: 4px;
+    margin-left: 8px;
+    opacity: 0;
+    padding: 2px 6px;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 
 .eventTypeWrapper:hover .discordLink {
-  opacity: 1;
-  pointer-events: all;
+    opacity: 1;
+    pointer-events: all;
 }
 
 .discordLink:hover {
-  background: rgba(88, 101, 242, 0.2);
-}
- 
- .modalControls {
-  display: flex;
-  gap: 8px;
- }
- 
- .openButton {
-  border: none;
-  color: #888;
-  background: none;
-  cursor: pointer;
-  padding: 4px;
-  font-size: 12px;
- }
- 
- .openButton:hover {
-  background: none;
-  color: #fff;
- }
- 
- .timelineButton {
-  font-family: 'Minecraft', sans-serif;
-  height: 32px;
-  padding: 0 16px;
-  font-size: 14px;
-  background-color: #333;
-  border: 2px solid #555;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
- }
- 
- .timelineButton:hover {
-  background-color: #444;
- }
- 
- .modalTitle {
-  font-weight: normal;
-  color: #ffffff;
-  margin: 0 0 4px 0;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
- 
- .modalDate {
-  color: #888;
-  font-size: 16px;
-  margin-bottom: 5px;
- }
- 
- .modalSubtitle {
-  font-family: 'Minecraft', sans-serif;
-  color: #ffffff;
-  margin: 24px 0 12px 0;
-  font-size: 18px;
- }
- 
- .modalText {
-  color: #888;
-  line-height: 1.2;
-  margin: 0;
-  white-space: pre-line;
- }
- 
- .divider {
-  border: none;
-  border-top: 1px solid #333;
-  margin: 10px 0;
-  width: 100%;
-  box-sizing: border-box;
- }
- 
- .modalTags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
- }
- 
- .tagLabel {
-  color: #888;
-  font-size: 10px;
-  margin-bottom: 4px;
- }
- 
- .tag {
-  background: #333;
-  color: #888;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
- }
- 
- .sideEventsContainer {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
- }
- 
- .sideEvent {
-  border-radius: 4px;
-  overflow: hidden;
- }
- 
- .sideEventHeader {
-  font-family: 'Minecraft', sans-serif;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px;
-  background: #333;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  text-align: left;
-  font-size: 14px;
- }
- 
- .sideEventHeader:hover {
-  background: #444;
- }
- 
- .sideEventContent {
-  padding: 1px 8px;
-  background: #262626;
-  color: #888;
-  font-size: 14px;
-  line-height: 1.2;
- }
-
-
- .modalText table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 25px 0;
-  border: 1px solid #444;
+    background: rgba(88, 101, 242, 0.2);
 }
 
-.modalText th, .modalText td {
-  border: 1px solid #444;
-  padding: 8px 12px;
-  text-align: left;
+/* Modal Controls */
+.modalControls {
+    display: flex;
+    gap: 8px;
+}
+
+.openButton {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px;
+}
+
+.openButton:hover {
+    background: none;
+    color: #fff;
+}
+
+.timelineButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    height: 32px;
+    padding: 0 16px;
+}
+
+.timelineButton:hover {
+    background-color: #444;
+}
+
+/* Modal Content Styles */
+.modalTitle {
+    align-items: center;
+    color: #ffffff;
+    display: flex;
+    font-size: 24px;
+    font-weight: normal;
+    gap: 6px;
+    margin: 0 0 4px 0;
+}
+
+.modalDate {
+    color: #888;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #333;
+    box-sizing: border-box;
+    margin: 10px 0;
+    width: 100%;
+}
+
+/* Tag Styles */
+.modalTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tagLabel {
+    color: #888;
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+.tag {
+    background: #333;
+    border-radius: 4px;
+    color: #888;
+    font-size: 12px;
+    padding: 4px 12px;
+}
+
+/* Side Events Styles */
+.sideEventsContainer {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+    gap: 5px;
+    width: 100%;
+}
+
+.inlineSideEventContainer {
+    margin: 1em 0;
+}
+
+.sideEvent {
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sideEventHeader {
+    align-items: center;
+    background: #333;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    gap: 8px;
+    padding: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+.sideEventHeader:hover {
+    background: #444;
+}
+
+.sideEventContent {
+    background: #262626;
+    color: #888;
+    font-size: 14px;
+    line-height: 1.2;
+    padding: 8px 8px;
+}
+
+/* Table Styles */
+.modalText table {
+    border: 1px solid #444;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.modalText th,
+.modalText td {
+    border: 1px solid #444;
+    padding: 8px 12px;
+    text-align: left;
 }
 
 .modalText th {
-  background: #333;
-  color: #fff;
-  font-weight: normal;
+    background: #333;
+    color: #fff;
+    font-weight: normal;
 }
 
 .modalText td {
-  color: #888;
-  position: relative;
-  transition: background-color 0.2s;
+    color: #888;
+    position: relative;
+    transition: background-color 0.2s;
 }
 
-
 .copyButton {
-  font-family: 'Minecraft', sans-serif;
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #333;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 12px;
-  color: #888;
-  cursor: pointer;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #888;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 12px;
+    padding: 2px 6px;
+    position: absolute;
+    right: 4px;
+    top: 4px;
 }
 
 .copyButton:hover {
-  background: #444;
-  color: #fff;
+    background: #444;
+    color: #fff;
 }
 
- 
- /* Event page specific styles */
- .eventPageContent {
-  top: 0px;
-  composes: modalContent;
-  max-width: 100%;
-  height: calc(100vh - 340px);
-  display: flex;
-  flex-direction: column;
- }
- 
- .eventNavigation {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  gap: 5px;
- }
- 
- .modalText {
-  color: #888;
-  line-height: 1.2;
-  margin: 0;
-  white-space: pre-line;
-  flex: 1;
-  overflow-y: hidden;
-  padding-right: 10px;
-  scrollbar-gutter: stable;
+/* Event Page Styles */
+.eventPageContent {
+    composes: modalContent;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 340px);
+    max-width: 100%;
+    top: 0px;
+}
 
- }
+.eventNavigation {
+    display: flex;
+    gap: 5px;
+    justify-content: space-between;
+    margin-top: 10px;
+}
 
- .modalText:hover {
-  overflow-y: auto;
- }
- 
- .modalFooter {
-  margin-top: 5px;
- }
- 
- .navButton {
-  font-family: 'Minecraft', sans-serif;
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-  background-color: #333;
-  border: 2px solid #555;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
- }
- 
- .navButton:hover {
-  background-color: #444;
- }
- 
- .navButtonDisabled {
-  background-color: #222;
-  border-color: #333;
-  color: #444;
-  cursor: not-allowed;
- }
- 
- .navButtonDisabled:hover {
-  background-color: #222;
- }
+.modalText {
+    color: #888;
+    flex: 1;
+    line-height: 1.2;
+    margin: 0;
+    overflow-y: hidden;
+    padding-right: 10px;
+    scrollbar-gutter: stable;
+    white-space: pre-line;
+}
+
+.modalText:hover {
+    overflow-y: auto;
+}
+
+.modalFooter {
+    margin-top: 5px;
+}
+
+/* Navigation Buttons */
+.navButton {
+    align-items: center;
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 16px;
+    height: 32px;
+    justify-content: center;
+    text-decoration: none;
+    width: 32px;
+}
+
+.navButton:hover {
+    background-color: #444;
+}
+
+.navButtonDisabled {
+    background-color: #222;
+    border-color: #333;
+    color: #444;
+    cursor: not-allowed;
+}
+
+.navButtonDisabled:hover {
+    background-color: #222;
+}

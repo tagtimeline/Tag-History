@@ -2,7 +2,6 @@
 import type { Metadata } from 'next'
 import '../styles/base.css'
 import '../styles/fonts.css'
-import '../styles/*'
 
 export const metadata: Metadata = {
   title: 'TNT Tag History',

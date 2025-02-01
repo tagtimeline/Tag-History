@@ -2,10 +2,9 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
-import type { AppProps } from 'next/app';
 
 const withAuth = <P extends Record<string, unknown>>(
-  WrappedComponent: NextPage<P & AppProps['pageProps']>
+  WrappedComponent: NextPage<P>
 ): NextPage<P> => {
   const AuthComponent: NextPage<P> = (props) => {
     const router = useRouter();
@@ -23,7 +22,8 @@ const withAuth = <P extends Record<string, unknown>>(
     return <WrappedComponent {...props} />;
   };
 
-  if (WrappedComponent.getInitialProps) {
+  // Copy getInitialProps from WrappedComponent
+  if ('getInitialProps' in WrappedComponent) {
     AuthComponent.getInitialProps = WrappedComponent.getInitialProps;
   }
 

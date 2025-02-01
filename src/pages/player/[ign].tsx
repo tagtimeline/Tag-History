@@ -21,7 +21,7 @@ import { searchEvents } from '../../config/search';
 import { TimelineEvent } from '../../data/events';
 import EventModal from '../../components/timeline/EventModal';
 
-interface PlayerPageProps {
+interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
   currentIgn: string | null;
   allUsernames: string[];

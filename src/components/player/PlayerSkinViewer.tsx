@@ -1,6 +1,7 @@
 // src/components/player/PlayerSkinViewer.tsx
 import React, { useEffect, useRef } from 'react';
 import * as skinview3d from "skinview3d";
+import type { SkinViewer } from "skinview3d";
 import { PlayerProfile } from '../../config/players';
 import styles from '../../styles/player.module.css';
 
@@ -10,7 +11,7 @@ interface PlayerSkinViewerProps {
 
 const PlayerSkinViewer: React.FC<PlayerSkinViewerProps> = ({ playerData }) => {
   const skinViewerRef = useRef<HTMLDivElement>(null);
-  let skinViewerInstance: any = null;
+  const skinViewerInstanceRef = useRef<SkinViewer | null>(null);
 
   useEffect(() => {
     if (skinViewerRef.current) {
@@ -20,7 +21,7 @@ const PlayerSkinViewer: React.FC<PlayerSkinViewerProps> = ({ playerData }) => {
       }
   
       // Create and configure new skin viewer
-      skinViewerInstance = new skinview3d.SkinViewer({
+      skinViewerInstanceRef.current = new skinview3d.SkinViewer({
         canvas: document.createElement('canvas'),
         width: 300,
         height: 400,
@@ -29,23 +30,23 @@ const PlayerSkinViewer: React.FC<PlayerSkinViewerProps> = ({ playerData }) => {
       });
   
       // Append the canvas to our container
-      skinViewerRef.current.appendChild(skinViewerInstance.canvas);
+      skinViewerRef.current.appendChild(skinViewerInstanceRef.current.canvas);
   
       // Configure camera - rotate slightly to the left
-      skinViewerInstance.camera.position.set(30, 0, 45);
-      skinViewerInstance.camera.lookAt(0, 0, 0);
+      skinViewerInstanceRef.current.camera.position.set(30, 0, 45);
+      skinViewerInstanceRef.current.camera.lookAt(0, 0, 0);
       
       // Disable zoom controls
-      skinViewerInstance.controls.enableZoom = false;
+      skinViewerInstanceRef.current.controls.enableZoom = false;
       
       // Add slow rotation
-      skinViewerInstance.autoRotateSpeed = 0.5;
-      skinViewerInstance.autoRotate = true;
+      skinViewerInstanceRef.current.autoRotateSpeed = 0.5;
+      skinViewerInstanceRef.current.autoRotate = true;
   
       // Clean up
       return () => {
-        if (skinViewerInstance) {
-          skinViewerInstance.dispose();
+        if (skinViewerInstanceRef.current) {
+          skinViewerInstanceRef.current.dispose();
         }
       };
     }

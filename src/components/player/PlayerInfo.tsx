@@ -33,7 +33,7 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
     const player = playerData.hypixel;
     if (!player) return { rankDisplay: null, nameColor: '#AAAAAA' };
 
-    let plusColor = player.rankPlusColor ? 
+    const plusColor = player.rankPlusColor ? 
       colorMap[player.rankPlusColor] || '#FF5555' : 
       '#FF5555';
 

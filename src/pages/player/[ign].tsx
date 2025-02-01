@@ -100,9 +100,9 @@ const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allU
         <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
         <main className="centered">
           <div className={styles.playerPageContent}>
-            <div className={styles.errorMessage}>
-              Player "{historicalIgn}" not found
-            </div>
+          <div className={styles.errorMessage}>
+            Player &quot;{historicalIgn}&quot; not found
+          </div>
           </div>
         </main>
         <Footer />
@@ -252,7 +252,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     const profileData = await profileResponse.json();
 
     // Decode the base64 texture data
-    const textureProperty = profileData.properties.find((p: any) => p.name === 'textures');
+    const textureProperty = profileData.properties.find((p: { name: string, value: string }) => p.name === 'textures');
     const textureData = JSON.parse(Buffer.from(textureProperty.value, 'base64').toString());
 
     // Prepare the player data with official texture URLs

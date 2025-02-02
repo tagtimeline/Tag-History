@@ -108,7 +108,7 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
       }
 
       setFormData(initialFormData);
-    } catch (err) {
+    } catch {
       onError('Failed to save event. Please try again.');
     }
   };

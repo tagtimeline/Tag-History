@@ -46,7 +46,7 @@ export default function Admin() {
         .map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent))
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setEvents(eventData);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch events');
     }
   };
@@ -56,7 +56,7 @@ export default function Admin() {
     try {
       await signOut(auth);
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('Failed to logout. Please try again.');
     }
   };

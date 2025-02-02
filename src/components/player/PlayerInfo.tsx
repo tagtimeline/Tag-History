@@ -26,10 +26,9 @@ const colorMap: { [key: string]: string } = {
 interface PlayerInfoProps {
   currentIgn: string;
   playerData: PlayerProfile;
-  allUsernames: string[];
 }
 
-const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUsernames }) => {
+const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
   const getRankDisplay = () => {
     const player = playerData.hypixel;
     if (!player) return { rankDisplay: null, nameColor: '#AAAAAA' };

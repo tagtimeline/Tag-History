@@ -48,6 +48,7 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
 
   /* Firebase Real-time Updates */
   useEffect(() => {
+    setIsLoading(true);
     const unsubscribe = onSnapshot(
       collection(db, 'events'),
       (snapshot) => {
@@ -59,13 +60,15 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
         setEvents(updatedEvents.sort((a, b) => 
           new Date(a.date).getTime() - new Date(b.date).getTime()
         ));
+        setIsLoading(false);
       },
       (error) => {
         console.error('Error listening to events:', error);
         setError('Failed to load updates. Please refresh the page.');
+        setIsLoading(false);
       }
     );
-
+  
     return () => unsubscribe();
   }, []);
 

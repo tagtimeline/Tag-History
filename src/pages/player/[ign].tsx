@@ -235,7 +235,6 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
             <PlayerInfo 
               currentIgn={currentIgn}
               playerData={playerData}
-              allUsernames={allUsernames}
             />
 
             <div className={styles.eventsSection}>

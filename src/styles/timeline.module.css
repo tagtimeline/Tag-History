@@ -38,6 +38,7 @@
 
 .cell {
     border-right: 1px solid #333;
+    opacity: 50%;
     box-sizing: border-box;
     flex: 0 0 220px;
     min-height: 100px;

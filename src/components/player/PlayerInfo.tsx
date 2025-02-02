@@ -163,18 +163,10 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
             <span key={role} className={styles.roleContainer}>
                 <span className={styles.rolePrefix}>Timeline: </span>
                 <span style={{ color: getRoleColor(role) }}>
-                    {role}
+                    {role === 'HeadDeveloper' ? 'Head Developer' : role}
                 </span>
             </span>
         ))}
-        {allUsernames.length > 1 && (
-          <p className={styles.previousNames}>
-            Previous names: {allUsernames
-              .filter(name => name !== currentIgn)
-              .sort((a, b) => a.localeCompare(b))
-              .join(', ')}
-          </p>
-        )}
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ interface EventsListProps {
 export default function EventsList({ events, onEventSelect }: EventsListProps) {
   return (
     <div className={styles.eventsList}>
-      <h2 className={styles.subtitle}>Existing Events</h2>
+      <div className={styles.title}>Existing Events</div>
       <div className={styles.eventsGrid}>
         {events.map((event) => {
           const eventStyle = {

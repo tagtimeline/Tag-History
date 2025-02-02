@@ -30,6 +30,7 @@
     height: 450px;
     position: sticky;
     height: fit-content;
+    overflow: visible;
 }
 
 .skinViewerSection {
@@ -52,6 +53,9 @@
     font-style: normal;
     font-size: 32px;
     margin: 0;
+    white-space: nowrap;
+    overflow: visible;
+    width: fit-content; 
 }
 
 .playerAccountAge,

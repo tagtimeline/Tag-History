@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import EventModal from '../components/timeline/EventModal';
-import { events, TimelineEvent } from '../data/events';
+import { TimelineEvent } from '../data/events';
 import styles from '../styles/eventsList.module.css';
 import eventStyles from '../styles/events.module.css';
 import controlStyles from '../styles/controls.module.css';
@@ -16,16 +16,48 @@ import withAuth from '../components/auth/withAuth';
 import { getAllCategories, getCategoryColor, getEventStyles } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown';
 import { searchEvents } from '../config/search';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebaseConfig';
+import { getAllEvents } from '../../lib/eventUtils';
 
-const EventsPage: NextPage = () => {
+interface EventsPageProps extends Record<string, unknown> {
+  initialEvents: TimelineEvent[];
+}
+
+const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
+  const [events, setEvents] = useState<TimelineEvent[]>(initialEvents);
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
+
+  // Set up real-time listener for events
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'events'),
+      (snapshot) => {
+        const updatedEvents = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as TimelineEvent[];
+        
+        setEvents(updatedEvents.sort((a, b) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+        ));
+      },
+      (error) => {
+        console.error('Error listening to events:', error);
+        setError('Failed to load updates');
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,7 +94,7 @@ const EventsPage: NextPage = () => {
     setSearchResults(searchEvents(events, value));
   };
 
-  const filteredEvents = events
+  const filteredEvents = events ? events
     .filter(event => 
       selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
       selectedCategories.includes(event.category)
@@ -71,7 +103,8 @@ const EventsPage: NextPage = () => {
       searchTerm === '' || 
       searchEvents([event], searchTerm).length > 0
     )
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    : [];
 
   return (
     <>
@@ -162,12 +195,22 @@ const EventsPage: NextPage = () => {
 
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
+      {error && (
+        <div className="error-message" style={{ 
+          color: 'red', 
+          textAlign: 'center', 
+          padding: '10px' 
+        }}>
+          {error}
+        </div>
+      )}
+
       <main className={styles.mainContent}>
         <div className={styles.eventsList}>
           {filteredEvents.map(event => {
             const eventStyle = getEventStyles(event.category, event.isSpecial);
             return (
-                <div 
+              <div 
                 key={event.id}
                 className={`${styles.eventBox} ${eventStyles.eventBox}`}
                 onClick={() => setSelectedEvent(event)}
@@ -181,11 +224,11 @@ const EventsPage: NextPage = () => {
                 }}
               >
                 <div className={eventStyles.eventContent}>
-                  <h3 className={eventStyles.eventTitle} style={{ fontSize: '14px', marginBottom: '4px' }}>  {/* Increased font size */}
+                  <h3 className={eventStyles.eventTitle} style={{ fontSize: '14px', marginBottom: '4px' }}>
                     {event.isSpecial && <span className={eventStyles.specialStar} style={{ fontSize: '14px' }}>⭐</span>}
                     <span className={eventStyles.eventTitleText}>{event.title}</span>
                   </h3>
-                  <div className={eventStyles.eventDate} style={{ fontSize: '12px' }}> {/* Increased font size */}
+                  <div className={eventStyles.eventDate} style={{ fontSize: '12px' }}>
                     {new Date(event.date).toLocaleDateString()}
                     {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
                   </div>
@@ -208,4 +251,23 @@ const EventsPage: NextPage = () => {
   );
 };
 
-export default withAuth(EventsPage);
+export async function getServerSideProps() {
+  try {
+    const events = await getAllEvents();
+    
+    return {
+      props: {
+        initialEvents: events
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching initial events:', error);
+    return {
+      props: {
+        initialEvents: []
+      }
+    };
+  }
+}
+
+export default withAuth<EventsPageProps>(EventsPage);

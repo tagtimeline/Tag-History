@@ -2,10 +2,10 @@
 import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-import { events } from '../../data/events';
+import { TimelineEvent } from '../../data/events';
 import styles from '../../styles/player.module.css';
 import controlStyles from '../../styles/controls.module.css';
 import headerStyles from '../../styles/header.module.css';
@@ -18,14 +18,17 @@ import PlayerSearch from '../../components/player/PlayerSearch';
 import { getAllCategories } from '../../config/categories';
 import { ALL_EVENTS_OPTION } from '../../config/dropdown';
 import { searchEvents } from '../../config/search';
-import { TimelineEvent } from '../../data/events';
 import EventModal from '../../components/timeline/EventModal';
+import { getAllEvents } from '../../../lib/eventUtils';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../../lib/firebaseConfig';
 
 interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
   currentIgn: string | null;
   allUsernames: string[];
   playerData: PlayerProfile | null;
+  initialEvents: TimelineEvent[];
 }
 
 interface GuildMember {
@@ -33,15 +36,57 @@ interface GuildMember {
   rank?: string;
 }
 
-const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allUsernames, playerData }) => {
+const PlayerPage: NextPage<PlayerPageProps> = ({ 
+  historicalIgn, 
+  currentIgn, 
+  allUsernames, 
+  playerData,
+  initialEvents
+}) => {
+  const [events, setEvents] = useState<TimelineEvent[]>(initialEvents);
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
+
+  // Set up real-time listener for events
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'events'),
+      (snapshot) => {
+        const updatedEvents = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as TimelineEvent[];
+        
+        setEvents(updatedEvents.sort((a, b) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+        ));
+      },
+      (error) => {
+        console.error('Error listening to events:', error);
+        setError('Failed to load updates');
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategories(prev => {
@@ -68,7 +113,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allU
   };
 
   const playerEvents = useMemo(() => {
-    if (!allUsernames || allUsernames.length === 0) return [];
+    if (!allUsernames || allUsernames.length === 0 || !events) return [];
     
     return events.filter(event => 
       allUsernames.some(username => 
@@ -84,7 +129,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allU
       searchEvents([event], searchTerm).length > 0
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [allUsernames, selectedCategories, searchTerm]);
+}, [allUsernames, selectedCategories, searchTerm, events]);
 
   if (!currentIgn || !playerData) {
     return (
@@ -172,6 +217,16 @@ const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allU
       </Header>
 
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
+
+      {error && (
+        <div className="error-message" style={{ 
+          color: 'red', 
+          textAlign: 'center', 
+          padding: '10px' 
+        }}>
+          {error}
+        </div>
+      )}
       
       <main className="centered">
         <div className={styles.playerPageContent}>
@@ -186,7 +241,10 @@ const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allU
             <div className={styles.eventsSection}>
               <div className={styles.eventsTitle}>Player History</div>
               {playerEvents.length > 0 ? (
-                <PlayerEventsList events={playerEvents} />
+                <PlayerEventsList 
+                  events={playerEvents}
+                  onEventSelect={setSelectedEvent}
+                />
               ) : (
                 <div className={styles.noEvents}>
                   No recorded events for this player
@@ -219,7 +277,8 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
           historicalIgn: '',
           currentIgn: null,
           allUsernames: [],
-          playerData: null
+          playerData: null,
+          initialEvents: []
         }
       };
     }
@@ -233,10 +292,14 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
           historicalIgn: ign,
           currentIgn: null,
           allUsernames: [],
-          playerData: null
+          playerData: null,
+          initialEvents: []
         }
       };
     }
+
+    // Fetch initial events for SSR
+    const events = await getAllEvents();
 
     const ashconData = await ashconResponse.json();
     const currentIgn = ashconData.username;
@@ -284,7 +347,6 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       throw new Error('Hypixel API key not configured');
     }
 
-
     // Fetch Hypixel data
     try {
       const hypixelResponse = await fetch(`https://api.hypixel.net/player?uuid=${ashconData.uuid}`, {
@@ -313,12 +375,9 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
         // Extract TNT Games stats with fallbacks
         const tntGames = player.stats?.TNTGames || {};
         const tntWins = tntGames.wins_tntag || 0;
-
         const tntKills = tntGames.kills_tntag || 0;
         const tntDeaths = tntGames.deaths_tntag || 0;
         const tntKdr = tntDeaths === 0 ? tntKills : Number((tntKills / tntDeaths).toFixed(2));
-
-
         const tntPlaytimeMinutes = player.achievements?.tntgames_tnt_triathlon || null;
         const tntPlaytime = tntPlaytimeMinutes ? Math.round(tntPlaytimeMinutes / 60) : 'N/A';
 
@@ -335,14 +394,10 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
             const guildLookupData = await guildLookupResponse.json();
             
             if (guildLookupData.success && guildLookupData.guild) {
-              // Remove hyphens from UUID to match Hypixel's format
               const hypixelUuid = ashconData.uuid.replace(/-/g, '');
-              
-              // Find the member in the guild members array
               const member = guildLookupData.guild.members.find(
                 (m: GuildMember) => m.uuid === hypixelUuid
               );
-              
 
               guildInfo = {
                 name: guildLookupData.guild.name,
@@ -369,7 +424,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
             wins_tntag: tntWins,
             playtime: tntPlaytime,
             kdr: tntKdr
-        },
+          },
           discord: player.socialMedia?.links?.DISCORD || null
         };
       }
@@ -383,7 +438,8 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
         historicalIgn: ign,
         currentIgn,
         allUsernames,
-        playerData
+        playerData,
+        initialEvents: events
       }
     };
   } catch (error) {
@@ -393,7 +449,8 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
         historicalIgn: params?.ign as string,
         currentIgn: null,
         allUsernames: [],
-        playerData: null
+        playerData: null,
+        initialEvents: []
       }
     };
   }

@@ -6,9 +6,10 @@ import { getEventStyles } from '../../config/categories';
 
 interface PlayerEventsListProps {
   events: TimelineEvent[];
+  onEventSelect?: (event: TimelineEvent) => void;
 }
 
-const PlayerEventsList: React.FC<PlayerEventsListProps> = ({ events }) => {
+const PlayerEventsList: React.FC<PlayerEventsListProps> = ({ events, onEventSelect }) => {
   return (
     <div className={styles.playerEventsSection}>
       <div className={styles.eventsList}>
@@ -18,6 +19,7 @@ const PlayerEventsList: React.FC<PlayerEventsListProps> = ({ events }) => {
             <div 
               key={event.id}
               className={`${styles.eventBox} ${eventStyles.eventBox}`}
+              onClick={() => onEventSelect?.(event)}
               style={{
                 ...eventStyle,
                 position: 'relative',

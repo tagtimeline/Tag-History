@@ -1,3 +1,4 @@
+// pages/timeline.tsx
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -12,14 +13,32 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import withAuth from '../components/auth/withAuth'
 import { getAllCategories, getCategoryColor } from '../config/categories'
 import { ALL_EVENTS_OPTION } from '../config/dropdown'
-import { events, TimelineEvent } from '../data/events'
+import { TimelineEvent } from '../data/events'
 import { searchEvents } from '../config/search'
 import { zoomIn, zoomOut, DEFAULT_YEAR_SPACING, getDefaultTimelineState } from '../config/timelineControls'
+import { getAllEvents } from '../../lib/eventUtils'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../../lib/firebaseConfig'
 
-const TimelinePage: NextPage = () => {
-  /* Category Dropdown */
+interface TimelinePageProps extends Record<string, unknown> {
+  initialEvents: TimelineEvent[];
+}
+
+const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
+  /* State Management */
+  const [events, setEvents] = useState<TimelineEvent[]>(initialEvents);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
+  const [showEventDates, setShowEventDates] = useState(true);
+  const [resetKey, setResetKey] = useState(0);
+  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allCategories = useMemo(() => [
@@ -27,21 +46,30 @@ const TimelinePage: NextPage = () => {
     ...getAllCategories()
   ], []);
 
-  /* Search */
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
+  /* Firebase Real-time Updates */
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'events'),
+      (snapshot) => {
+        const updatedEvents = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as TimelineEvent[];
+        
+        setEvents(updatedEvents.sort((a, b) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+        ));
+      },
+      (error) => {
+        console.error('Error listening to events:', error);
+        setError('Failed to load updates. Please refresh the page.');
+      }
+    );
 
-  /* Settings */
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDraggingEnabled, setIsDraggingEnabled] = useState(false);
-  const [showEventDates, setShowEventDates] = useState(true);
+    return () => unsubscribe();
+  }, []);
 
-  /* Controls */
-  const [resetKey, setResetKey] = useState(0);
-  const [yearSpacing, setYearSpacing] = useState(DEFAULT_YEAR_SPACING);
-
-
-  
+  /* Click Outside Handler */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -53,6 +81,7 @@ const TimelinePage: NextPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /* Event Handlers */
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategories(prev => {
       if (categoryId === ALL_EVENTS_OPTION.id) {
@@ -78,8 +107,7 @@ const TimelinePage: NextPage = () => {
   };
 
   const handleResultClick = (event: TimelineEvent) => {
-    const targetEvent = event;
-    const eventElement = document.querySelector(`[data-event-id="${targetEvent.id}"]`);
+    const eventElement = document.querySelector(`[data-event-id="${event.id}"]`);
     
     if (eventElement) {
       eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -102,8 +130,12 @@ const TimelinePage: NextPage = () => {
     const defaultState = getDefaultTimelineState();
     setYearSpacing(defaultState.yearSpacing);
     setSelectedCategories(defaultState.selectedCategories);
-    setResetKey(prev => prev + 1); // Increment reset key to trigger reset in TimelineGrid
+    setResetKey(prev => prev + 1);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -194,6 +226,16 @@ const TimelinePage: NextPage = () => {
 
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
+      {error && (
+        <div className="error-message" style={{ 
+          color: 'red', 
+          textAlign: 'center', 
+          padding: '10px' 
+        }}>
+          {error}
+        </div>
+      )}
+
       <main>
         <div className={controlStyles.controls}>
           <button className={controlStyles.zoomIn} onClick={handleZoomIn}>+</button>
@@ -216,6 +258,7 @@ const TimelinePage: NextPage = () => {
         )}
 
         <TimelineContainer 
+          events={events}
           selectedCategories={selectedCategories} 
           isDraggingEnabled={isDraggingEnabled}
           yearSpacing={yearSpacing}
@@ -229,4 +272,23 @@ const TimelinePage: NextPage = () => {
   );
 };
 
-export default withAuth(TimelinePage);
+export async function getServerSideProps() {
+  try {
+    const events = await getAllEvents();
+    
+    return {
+      props: {
+        initialEvents: events
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching initial events:', error);
+    return {
+      props: {
+        initialEvents: []
+      }
+    };
+  }
+}
+
+export default withAuth<TimelinePageProps>(TimelinePage);

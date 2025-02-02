@@ -12,7 +12,7 @@
 
   
 .header {
-    width: 734px;
+    width: 684px;
     margin-bottom: 10px;
     display: flex;
     flex-direction: row;
@@ -46,7 +46,7 @@
 }
   
 .form {
-    width: 700px;
+    width: 650px;
     background-color: #151515;
     border: 2px solid #505050;
     border-radius: 4px;

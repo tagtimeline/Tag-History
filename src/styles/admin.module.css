@@ -1,0 +1,450 @@
+/* src/styles/admin.module.css */
+
+.mainContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    height: auto;
+    padding-bottom: 100px;
+}
+
+  
+.header {
+    width: 734px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+  .addEventButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    height: 40px;
+    padding: 0 16px;
+    transition: all 0.2s ease;
+    width: fit-content;
+  }
+  
+  .addEventButton:hover {
+    background-color: #444;
+    transform: scale(1.02);
+  }
+  
+  .title {
+    font-size: 18px;
+    margin: 0;
+    color: #fff;
+  }
+  
+  .form {
+    width: 700px;
+    background-color: #151515;
+    border: 2px solid #505050;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 15px;
+}
+  
+  .formSection {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .formSection label {
+    margin-bottom: 0px;
+    font-size: 14px;
+    color: #888;
+  }
+  
+  .formSection.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .formSection.full-width.title-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.formSection.full-width.title-row .input-container {
+    width: 100%;
+}
+  
+/* Checkbox Styles */
+.checkboxLabel {
+    position: absolute;
+    right: 0;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    gap: 4px;
+    outline: none;
+}
+
+.checkboxLabel input[type="checkbox"] {
+    appearance: none;
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 15px;
+    outline: none;
+    position: relative;
+    width: 15px;
+}
+
+.checkboxLabel input[type="checkbox"]:checked {
+    background-color: #444;
+}
+
+.checkboxLabel input[type="checkbox"]:checked::after {
+    color: white;
+    content: "×";
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    left: 50%;
+    position: absolute;
+    top: 35%;
+    transform: translate(-50%, -50%);
+}
+
+  .dateGroup {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .inputGroup label {
+    display: block;
+    margin-bottom: 5px;
+    color: #888;
+  }
+  
+  .input {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-family: "Minecraft", sans-serif;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .input, .textarea {
+    margin-top: 5px;
+  }
+  
+  .textarea {
+    composes: input;
+    height: auto;
+    min-height: 120px;
+    resize: vertical;
+    max-height: 500px;
+  }
+  
+  .addEventButton,
+  .submitButton, 
+  .addButton, 
+  .removeButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    height: 30px;
+    padding: 0 12px;
+    transition: all 0.2s ease;
+    width: fit-content;
+  }
+  
+  .submitButton {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 10px;
+  }
+  
+  .addEventButton:hover,
+  .submitButton:hover,
+  .addButton:hover,
+  .removeButton:hover {
+    background-color: #444;
+    transform: scale(1.02);
+  }
+  
+  .sideEvents {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .tablesHeader,
+  .sideEventsHeader {
+    display: flex;
+    margin: 0;
+    color: white;
+    margin-top: 5px;
+    font-size: 18px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  
+  .sideEventGroup {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .success {
+    background-color: rgba(0, 255, 0, 0.1);
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    grid-column: 1 / -1;
+  }
+  
+  .error {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff0000;
+    color: #ff0000;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    grid-column: 1 / -1;
+  }
+  
+  .subtitle {
+    font-size: 20px;
+    margin: 30px 0 20px 0;
+    color: #fff;
+  }
+  
+  .removeButton {
+    align-self: flex-start;
+  }
+  
+  /* Select styling */
+  .input[type="date"] {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Focus states */
+  .input:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: #777;
+  }
+  
+  /* Placeholder styling */
+  .input::placeholder,
+  .textarea::placeholder {
+    color: #777;
+  }
+
+  
+  .eventsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 800px;
+    margin: 20px auto;
+    padding-bottom: 40px;
+  }
+  
+  .eventItem {
+    background-color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+    width: 500px !important;
+    margin: 0 auto;
+  }
+  
+  .eventItem:hover {
+    background-color: #444;
+    transform: scale(1.02);
+  }
+
+
+  
+
+/* Table Manager Styles */
+.tableWrapper {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 15px;
+  }
+
+  .tableButton,
+  .alignDropdown {
+    composes: addButton;
+    width: 32.75%;
+  }
+
+
+  .tableControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+.tables {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  
+  .tableContainer {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 15px;
+  }
+  
+  .controlGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .tableEditor {
+    background: #242424;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+  }
+  
+  .tableGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  
+  .headerRow {
+    display: contents;
+  }
+  
+  .headerCell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+  }
+  
+  .widthInput {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .widthInput input {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-family: "Minecraft", sans-serif;
+    padding: 4px;
+    width: 50px;
+  }
+
+  .removeTableButton {
+    composes: removeButton;
+    margin-top: 10px;
+    align-self: flex-start;
+  }
+  
+  .removeColumnButton,
+  .removeRowButton {
+    position: absolute;
+    top: 0px;
+    right: -5px;
+    background: #444;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    height: 15px;
+    width: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  
+  .tableRow {
+    display: contents;
+  }
+  
+  .tableCell {
+    position: relative;
+  }
+  
+  .tableCell textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+  }
+  
+  /* Additional utility classes */
+  .flexRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .flexColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .fullWidth {
+    width: 100%;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .alignRight {
+    margin-left: auto;
+  }

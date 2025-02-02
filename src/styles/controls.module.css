@@ -135,6 +135,11 @@
     width: 64px;
 }
 
+.logoutButton {
+    composes: button;
+    width: 64px;
+}
+
 /* Timeline Controls */
 .controls {
     display: flex;

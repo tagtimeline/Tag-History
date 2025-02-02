@@ -28,6 +28,11 @@ interface PlayerPageProps extends Record<string, unknown> {
   playerData: PlayerProfile | null;
 }
 
+interface GuildMember {
+  uuid: string;
+  rank?: string;
+}
+
 const PlayerPage: NextPage<PlayerPageProps> = ({ historicalIgn, currentIgn, allUsernames, playerData }) => {
   const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -335,8 +340,8 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
               
               // Find the member in the guild members array
               const member = guildLookupData.guild.members.find(
-                (m: any) => m.uuid === hypixelUuid
-              );
+                (m: GuildMember) => m.uuid === hypixelUuid
+              );              
 
               guildInfo = {
                 name: guildLookupData.guild.name,

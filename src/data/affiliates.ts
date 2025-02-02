@@ -49,7 +49,7 @@ export const roleColors = {
   
   // Helper function to get all developers
   export const getDevelopers = (): [string, Affiliate][] => {
-    return Object.entries(affiliates).filter(([_, data]) => 
+    return Object.entries(affiliates).filter(([, data]) =>
       data.roles.includes('Developer')
     );
   };

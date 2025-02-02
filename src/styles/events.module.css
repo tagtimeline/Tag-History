@@ -382,23 +382,16 @@
     transition: background-color 0.2s;
 }
 
-.copyButton {
-    background: #333;
-    border: 1px solid #444;
-    border-radius: 4px;
-    color: #888;
-    cursor: pointer;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 12px;
-    padding: 2px 6px;
-    position: absolute;
-    right: 4px;
-    top: 4px;
+.modalText td a,
+.modalText td a.playerLink {
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-.copyButton:hover {
-    background: #444;
-    color: #fff;
+.modalText td a:hover,
+.modalText td a.playerLink:hover {
+    color: #4499ff;
+    text-decoration: underline;
 }
 
 /* Event Page Styles */

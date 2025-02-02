@@ -294,14 +294,6 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       }
 
       const hypixelData = await hypixelResponse.json();
-
-      // Add this log statement right here
-      console.log('TNT Games Data:', {
-        username: currentIgn,
-        tntGames: hypixelData.player?.stats.achievements || 'No TNT Games stats found',
-        timestamp: new Date().toISOString()
-      });
-
       
       if (!hypixelData.success || !hypixelData.player) {
         console.warn('No Hypixel data found for player');
@@ -328,21 +320,32 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
         // Handle guild data separately with explicit null handling
         let guildInfo = null;
         try {
-          const guildResponse = await fetch(`https://api.hypixel.net/guild?player=${ashconData.uuid}`, {
+          const guildLookupResponse = await fetch(`https://api.hypixel.net/guild?player=${ashconData.uuid}`, {
             headers: {
               'API-Key': HYPIXEL_API_KEY
             }
           });
 
-          if (guildResponse.ok) {
-            const guildData = await guildResponse.json();
-            if (guildData.success && guildData.guild) {
-              guildInfo = { name: guildData.guild.name };
+          if (guildLookupResponse.ok) {
+            const guildLookupData = await guildLookupResponse.json();
+            
+            if (guildLookupData.success && guildLookupData.guild) {
+              // Remove hyphens from UUID to match Hypixel's format
+              const hypixelUuid = ashconData.uuid.replace(/-/g, '');
+              
+              // Find the member in the guild members array
+              const member = guildLookupData.guild.members.find(
+                (m: any) => m.uuid === hypixelUuid
+              );
+
+              guildInfo = {
+                name: guildLookupData.guild.name,
+                rank: member?.rank || null
+              };
             }
           }
         } catch (guildError) {
           console.error('Error fetching guild data:', guildError);
-          // Continue without guild data
         }
 
         // Set hypixel data with all fields explicitly defined

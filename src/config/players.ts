@@ -1,5 +1,10 @@
 // src/config/players.ts
 
+interface GuildInfo {
+    name: string;
+    rank?: string;
+  }
+
 export interface PlayerProfile {
     username: string;
     uuid: string;
@@ -24,9 +29,7 @@ export interface PlayerProfile {
       monthlyPackageRank: string;
       newPackageRank: string;
       networkLevel: number;
-      guild: {
-        name: string;
-      } | null;
+      guild: GuildInfo | null;
       tntGames: {
         wins_tntag: number;
         playtime: number | string;

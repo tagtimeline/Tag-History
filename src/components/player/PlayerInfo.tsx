@@ -130,10 +130,13 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
             <p className={styles.playerStats}>
               Network Level: {playerData.hypixel.networkLevel}
             </p>
-            {playerData.hypixel.guild && (
-              <p className={styles.playerStats}>
+            {playerData.hypixel?.guild && (
+            <p className={styles.playerStats}>
                 Guild: {playerData.hypixel.guild.name}
-              </p>
+                {playerData.hypixel.guild.rank === 'Guild Master' && (
+                <span className={styles.guildMasterTag}> [GM]</span>
+                )}
+            </p>
             )}
             <br></br>
             <p className={styles.playerStats}>
@@ -150,7 +153,7 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
             <br></br>
             {playerData.hypixel.discord && (
               <p className={styles.playerDiscord}>
-                Discord: {playerData.hypixel.discord}
+                Discord: @{playerData.hypixel.discord}
               </p>
             )}
           </div>

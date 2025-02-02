@@ -36,6 +36,8 @@ export interface TimelineEvent {
   tags: string[];
 }
 
+
+
 export const events: TimelineEvent[] = [
   {
     id: 'initial-tnt-release',
@@ -115,7 +117,7 @@ tables: [
  `ShadowHunter
  BlazeMaster
  <flodlol>
- SkySurfer
+ <farned>
  FrostBite
  NightCrawler
  StormChaser` 

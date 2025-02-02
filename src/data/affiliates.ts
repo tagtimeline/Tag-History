@@ -30,7 +30,6 @@ export const roleColors = {
       discord: '@flqw3d',
       roles: ['Staff'],
     },
-    // Add more affiliates as needed
   };
   
   // Helper function to get role color

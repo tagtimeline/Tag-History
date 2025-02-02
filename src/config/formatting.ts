@@ -11,6 +11,7 @@ const patterns = {
   headertext: /^# (.+)$/,
   subtext: /^-# (.+)$/,
   link: /\[([^\]]+)\]\(([^)]+)\)/g,
+  playerMention: /<([^>]+)>/g,
 } as const;
 
 // CSS classes for formatting
@@ -23,18 +24,22 @@ const classes = {
   headertext: 'headertext',
   subtext: 'subtext',
   link: 'inline-link',
+  playerLink: 'playerLink',
 } as const;
 
 // Format text with HTML spans
 export const formatText = (text: string): string => {
-  return text
-    .replace(patterns.boldItalics, `<span class="${classes.boldItalic}">$1</span>`)
-    .replace(patterns.bold, `<span class="${classes.bold}">$1</span>`)
-    .replace(patterns.italics, `<span class="${classes.italic}">$1</span>`)
-    .replace(patterns.italicsUnderscore, `<span class="${classes.italic}">$1</span>`)
-    .replace(patterns.underline, `<span class="${classes.underline}">$1</span>`)
-    .replace(patterns.strikethrough, `<span class="${classes.strikethrough}">$1</span>`);
-};
+    return text
+      .replace(patterns.boldItalics, `<span class="${classes.boldItalic}">$1</span>`)
+      .replace(patterns.bold, `<span class="${classes.bold}">$1</span>`)
+      .replace(patterns.italics, `<span class="${classes.italic}">$1</span>`)
+      .replace(patterns.italicsUnderscore, `<span class="${classes.italic}">$1</span>`)
+      .replace(patterns.underline, `<span class="${classes.underline}">$1</span>`)
+      .replace(patterns.strikethrough, `<span class="${classes.strikethrough}">$1</span>`)
+      .replace(patterns.playerMention, (match, username) => 
+        `<a href="/player/${username}" class="${classes.playerLink}">${match}</a>`
+      );
+  };
 
 // Check if a line is subtext
 export const isSubtext = (text: string): boolean => {

@@ -28,9 +28,10 @@ export interface PlayerProfile {
         name: string;
       } | null;
       tntGames: {
-        wins: number;
-        playtime: number;
-      };
+        wins_tntag: number;
+        playtime: number | string;
+        kdr: number;
+    };
       discord: string | null;
     } | null;
 }

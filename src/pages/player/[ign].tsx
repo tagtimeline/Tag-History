@@ -279,6 +279,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       throw new Error('Hypixel API key not configured');
     }
 
+
     // Fetch Hypixel data
     try {
       const hypixelResponse = await fetch(`https://api.hypixel.net/player?uuid=${ashconData.uuid}`, {
@@ -293,6 +294,14 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       }
 
       const hypixelData = await hypixelResponse.json();
+
+      // Add this log statement right here
+      console.log('TNT Games Data:', {
+        username: currentIgn,
+        tntGames: hypixelData.player?.stats.achievements || 'No TNT Games stats found',
+        timestamp: new Date().toISOString()
+      });
+
       
       if (!hypixelData.success || !hypixelData.player) {
         console.warn('No Hypixel data found for player');
@@ -306,8 +315,15 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
 
         // Extract TNT Games stats with fallbacks
         const tntGames = player.stats?.TNTGames || {};
-        const tntWins = tntGames.wins_tntgtag || 0;
-        const tntPlaytime = Math.round((tntGames.playtime_tntgtag || 0) / 3600);
+        const tntWins = tntGames.wins_tntag || 0;
+
+        const tntKills = tntGames.kills_tntag || 0;
+        const tntDeaths = tntGames.deaths_tntag || 0;
+        const tntKdr = tntDeaths === 0 ? tntKills : Number((tntKills / tntDeaths).toFixed(2));
+
+
+        const tntPlaytimeMinutes = player.achievements?.tntgames_tnt_triathlon || null;
+        const tntPlaytime = tntPlaytimeMinutes ? Math.round(tntPlaytimeMinutes / 60) : 'N/A';
 
         // Handle guild data separately with explicit null handling
         let guildInfo = null;
@@ -341,9 +357,10 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
           networkLevel: networkLevel,
           guild: guildInfo,
           tntGames: {
-            wins: tntWins,
-            playtime: tntPlaytime
-          },
+            wins_tntag: tntWins,
+            playtime: tntPlaytime,
+            kdr: tntKdr
+        },
           discord: player.socialMedia?.links?.DISCORD || null
         };
       }

@@ -134,12 +134,19 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
                 Guild: {playerData.hypixel.guild.name}
               </p>
             )}
+            <br></br>
             <p className={styles.playerStats}>
-              TNT Tag Wins: {playerData.hypixel.tntGames.wins}
+                TNT Tag Wins: {playerData.hypixel.tntGames.wins_tntag}
             </p>
             <p className={styles.playerStats}>
-              TNT Tag Hours: {playerData.hypixel.tntGames.playtime}
+                TNT Tag KDR: {playerData.hypixel.tntGames.kdr}
             </p>
+            <p className={styles.playerStats}>
+                TNT Tag Hours: {typeof playerData.hypixel.tntGames.playtime === 'number' 
+                    ? playerData.hypixel.tntGames.playtime 
+                    : 'N/A'}
+            </p>
+            <br></br>
             {playerData.hypixel.discord && (
               <p className={styles.playerDiscord}>
                 Discord: {playerData.hypixel.discord}

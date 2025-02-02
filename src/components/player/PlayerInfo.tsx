@@ -2,6 +2,7 @@
 import React from 'react';
 import { PlayerProfile } from '../../config/players';
 import styles from '../../styles/player.module.css';
+import { getAffiliateRoles, getRoleColor } from '../../data/affiliates';
 
 const colorMap: { [key: string]: string } = {
   RED: '#FF5555',
@@ -153,7 +154,16 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData, allUser
               </p>
             )}
           </div>
+
         )}
+        {getAffiliateRoles(currentIgn).map((role) => (
+            <span key={role} className={styles.roleContainer}>
+                <span className={styles.rolePrefix}>Timeline: </span>
+                <span style={{ color: getRoleColor(role) }}>
+                    {role}
+                </span>
+            </span>
+        ))}
         {allUsernames.length > 1 && (
           <p className={styles.previousNames}>
             Previous names: {allUsernames

@@ -9,6 +9,7 @@ import styles from '../styles/info.module.css'
 import controlStyles from '../styles/controls.module.css';
 import headerStyles from '../styles/header.module.css'
 import withAuth from '../components/auth/withAuth'
+import { getDevelopers, getRoleColor } from '../data/affiliates';
 
 const InfoPage: NextPage = () => {
   return (
@@ -42,25 +43,32 @@ const InfoPage: NextPage = () => {
           </p>
           <div className={styles.spacing}></div>
           <section>
-          <div className={styles.profileBox}>
-            <Image
-              src="https://visage.surgeplay.com/bust/c6fd06c5-c716-4e1a-923e-17b48b3f5226"
-              alt="Minecraft Character Bust"
-              width={200}
-              height={200}
-              className={styles.profilePicture}
-              priority
-              quality={100}
-            />
-            <div className={styles.profileInfo}>
-              <p>
-                <b>flodlol</b><br />
-                @.flod<br></br>
-                <br></br>
-                <span className={styles.developerTag}>Developer</span><br />
-              </p>
+          {getDevelopers().map(([ign, data]) => (
+            <div key={ign} className={styles.profileBox}>
+              <Image
+                src={`https://visage.surgeplay.com/bust/${data.uuid}`}
+                alt={`${ign}'s Minecraft Character`}
+                width={200}
+                height={200}
+                className={styles.profilePicture}
+                priority
+                quality={100}
+              />
+              <div className={styles.profileInfo}>
+                <p>
+                  <b>{ign}</b><br />
+                  {data.discord}<br /><br />
+                  <span 
+                    className={styles.developerTag}
+                    style={{ color: getRoleColor('Developer') }}
+                  >
+                    Developer
+                  </span>
+                  <br />
+                </p>
+              </div>
             </div>
-          </div>
+          ))}
           </section>
           <div className={styles.spacing}></div>
           <section>

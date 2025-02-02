@@ -49,11 +49,6 @@
     margin: 0;
 }
 
-/* Tag Styles */
-.developerTag {
-    color: #ff4444;
-}
-
 /* Button Styles */
 .discordButton {
     composes: button from './controls.module.css';

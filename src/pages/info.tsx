@@ -42,32 +42,37 @@ const InfoPage: NextPage = () => {
             document the history of TNT Tag on Hypixel.
           </p>
           <div className={styles.spacing}></div>
-          <section>
-          {getDevelopers().map(([ign, data]) => (
-            <div key={ign} className={styles.profileBox}>
-              <Image
-                src={`https://visage.surgeplay.com/bust/${data.uuid}`}
-                alt={`${ign}'s Minecraft Character`}
-                width={200}
-                height={200}
-                className={styles.profilePicture}
-                priority
-                quality={100}
-              />
-              <div className={styles.profileInfo}>
-                <p>
-                  <b>{ign}</b><br />
-                  {data.discord}<br /><br />
-                  <span 
-                    className={styles.developerTag}
-                    style={{ color: getRoleColor('Developer') }}
-                  >
-                    Developer
-                  </span>
-                  <br />
-                </p>
+          <section className={styles.profileSection}>
+            {getDevelopers().map(([ign, data]) => (
+              <div key={ign} className={styles.profileBox}>
+                <Image
+                  src={`https://visage.surgeplay.com/bust/${data.uuid}`}
+                  alt={`${ign}'s Minecraft Character`}
+                  width={200}
+                  height={200}
+                  className={styles.profilePicture}
+                  priority
+                  quality={100}
+                  onError={(e) => {
+                    // Fallback to crafthead.net if visage.surgeplay.com fails
+                    const imgElement = e.target as HTMLImageElement;
+                    imgElement.src = `https://crafthead.net/avatar/${data.uuid}`;
+                  }}
+                />
+                <div className={styles.profileInfo}>
+                  <p>
+                    <b>{ign}</b><br />
+                    {data.discord}<br /><br />
+                    <span 
+                      className={styles.developerTag}
+                      style={{ color: getRoleColor(data.roles.includes('HeadDeveloper') ? 'HeadDeveloper' : 'Developer') }}
+                    >
+                      {data.roles.includes('HeadDeveloper') ? 'Head Developer' : 'Developer'}
+                    </span>
+                    <br />
+                  </p>
+                </div>
               </div>
-            </div>
           ))}
           </section>
           <div className={styles.spacing}></div>

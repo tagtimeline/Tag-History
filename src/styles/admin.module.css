@@ -20,7 +20,7 @@
     align-items: center;
 }
   
-  .addEventButton {
+.addEventButton {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -32,20 +32,20 @@
     padding: 0 16px;
     transition: all 0.2s ease;
     width: fit-content;
-  }
+}
   
-  .addEventButton:hover {
+.addEventButton:hover {
     background-color: #444;
     transform: scale(1.02);
-  }
+}
   
-  .title {
+.title {
     font-size: 18px;
     margin: 0;
     color: #fff;
-  }
+}
   
-  .form {
+.form {
     width: 700px;
     background-color: #151515;
     border: 2px solid #505050;
@@ -57,22 +57,22 @@
     gap: 5px 15px;
 }
   
-  .formSection {
+.formSection {
     display: flex;
     flex-direction: column;
-  }
+}
 
-  .formSection label {
+.formSection label {
     margin-bottom: 0px;
     font-size: 14px;
     color: #888;
-  }
+}
   
-  .formSection.full-width {
+.formSection.full-width {
     grid-column: 1 / -1;
-  }
+}
 
-  .formSection.full-width.title-row {
+.formSection.full-width.title-row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -126,20 +126,20 @@
     transform: translate(-50%, -50%);
 }
 
-  .dateGroup {
+.dateGroup {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
-  }
+}
   
-  .inputGroup label {
+.inputGroup label {
     display: block;
     margin-bottom: 5px;
     color: #888;
-  }
+}
   
-  .input {
+.input {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -148,24 +148,24 @@
     padding: 5px;
     width: 100%;
     box-sizing: border-box;
-  }
+}
 
-  .input, .textarea {
+.input, .textarea {
     margin-top: 5px;
-  }
+}
   
-  .textarea {
+.textarea {
     composes: input;
     height: auto;
     min-height: 120px;
     resize: vertical;
     max-height: 500px;
-  }
+}
   
-  .addEventButton,
-  .submitButton, 
-  .addButton, 
-  .removeButton {
+.addEventButton,
+.submitButton, 
+.addButton, 
+.removeButton {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -177,31 +177,31 @@
     padding: 0 12px;
     transition: all 0.2s ease;
     width: fit-content;
-  }
+}
   
-  .submitButton {
+.submitButton {
     grid-column: 1 / -1;
     justify-self: start;
     margin-top: 10px;
-  }
+}
   
-  .addEventButton:hover,
-  .submitButton:hover,
-  .addButton:hover,
-  .removeButton:hover {
+.addEventButton:hover,
+.submitButton:hover,
+.addButton:hover,
+.removeButton:hover {
     background-color: #444;
     transform: scale(1.02);
-  }
+}
   
-  .sideEvents {
+.sideEvents {
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     gap: 5px;
-  }
+}
   
-  .tablesHeader,
-  .sideEventsHeader {
+.tablesHeader,
+.sideEventsHeader {
     display: flex;
     margin: 0;
     color: white;
@@ -209,10 +209,10 @@
     font-size: 18px;
     justify-content: space-between;
     align-items: center;
-  }
+}
   
   
-  .sideEventGroup {
+.sideEventGroup {
     background-color: #1a1a1a;
     border: 1px solid #444;
     border-radius: 4px;
@@ -220,9 +220,9 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-  }
+}
   
-  .success {
+.success {
     background-color: rgba(0, 255, 0, 0.1);
     border: 1px solid #00ff00;
     color: #00ff00;
@@ -230,9 +230,9 @@
     border-radius: 4px;
     margin-bottom: 20px;
     grid-column: 1 / -1;
-  }
+}
   
-  .error {
+.error {
     background-color: rgba(255, 0, 0, 0.1);
     border: 1px solid #ff0000;
     color: #ff0000;
@@ -240,48 +240,48 @@
     border-radius: 4px;
     margin-bottom: 20px;
     grid-column: 1 / -1;
-  }
+}
   
-  .subtitle {
+.subtitle {
     font-size: 20px;
     margin: 30px 0 20px 0;
     color: #fff;
-  }
+}
   
-  .removeButton {
+.removeButton {
     align-self: flex-start;
-  }
+}
   
-  /* Select styling */
-  .input[type="date"] {
+/* Select styling */
+.input[type="date"] {
     position: relative;
     z-index: 1;
-  }
+}
   
-  /* Focus states */
-  .input:focus,
-  .textarea:focus {
+/* Focus states */
+.input:focus,
+.textarea:focus {
     outline: none;
     border-color: #777;
-  }
+}
   
-  /* Placeholder styling */
-  .input::placeholder,
-  .textarea::placeholder {
+/* Placeholder styling */
+.input::placeholder,
+.textarea::placeholder {
     color: #777;
-  }
+}
 
   
-  .eventsGrid {
+.eventsGrid {
     display: flex;
     flex-direction: column;
     gap: 10px;
     max-width: 800px;
     margin: 20px auto;
     padding-bottom: 40px;
-  }
+}
   
-  .eventItem {
+.eventItem {
     background-color: #333;
     border-radius: 4px;
     cursor: pointer;
@@ -289,12 +289,12 @@
     transition: all 0.2s ease;
     width: 500px !important;
     margin: 0 auto;
-  }
+}
   
-  .eventItem:hover {
+.eventItem:hover {
     background-color: #444;
     transform: scale(1.02);
-  }
+}
 
 
   
@@ -305,76 +305,76 @@
     border: 1px solid #444;
     border-radius: 4px;
     padding: 15px;
-  }
+}
 
-  .tableButton,
-  .alignDropdown {
+.tableButton,
+.alignDropdown {
     composes: addButton;
     width: 32.75%;
-  }
+}
 
 
-  .tableControls {
+.tableControls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-  }
+}
 
 .tables {
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     gap: 5px;
-  }
+}
   
   
-  .tableContainer {
+.tableContainer {
     background-color: #1a1a1a;
     border: 1px solid #444;
     border-radius: 4px;
     padding: 15px;
-  }
+}
   
-  .controlGrid {
+.controlGrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 10px;
-  }
+}
   
-  .tableEditor {
+.tableEditor {
     background: #242424;
     border: 1px solid #333;
     border-radius: 4px;
     padding: 10px;
     overflow-x: auto;
-  }
+}
   
-  .tableGrid {
+.tableGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px;
-  }
+}
   
-  .headerRow {
+.headerRow {
     display: contents;
-  }
+}
   
-  .headerCell {
+.headerCell {
     display: flex;
     flex-direction: column;
     gap: 5px;
     position: relative;
-  }
+}
   
-  .widthInput {
+.widthInput {
     display: flex;
     align-items: center;
     gap: 5px;
-  }
+}
   
-  .widthInput input {
+.widthInput input {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -382,16 +382,16 @@
     font-family: "Minecraft", sans-serif;
     padding: 4px;
     width: 50px;
-  }
+}
 
-  .removeTableButton {
+.removeTableButton {
     composes: removeButton;
     margin-top: 10px;
     align-self: flex-start;
-  }
+}
   
-  .removeColumnButton,
-  .removeRowButton {
+.removeColumnButton,
+.removeRowButton {
     position: absolute;
     top: 0px;
     right: -5px;
@@ -407,44 +407,44 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-  }
+}
   
-  .tableRow {
+.tableRow {
     display: contents;
-  }
+}
   
-  .tableCell {
+.tableCell {
     position: relative;
-  }
+}
   
-  .tableCell textarea {
+.tableCell textarea {
     width: 100%;
     min-height: 60px;
     resize: vertical;
-  }
+}
   
-  /* Additional utility classes */
-  .flexRow {
+/* Additional utility classes */
+.flexRow {
     display: flex;
     gap: 10px;
     align-items: center;
-  }
+}
   
-  .flexColumn {
+.flexColumn {
     display: flex;
     flex-direction: column;
     gap: 5px;
-  }
+}
   
-  .fullWidth {
+.fullWidth {
     width: 100%;
-  }
+}
   
-  .buttonGroup {
+.buttonGroup {
     display: flex;
     gap: 5px;
-  }
+}
   
-  .alignRight {
+.alignRight {
     margin-left: auto;
-  }
+}

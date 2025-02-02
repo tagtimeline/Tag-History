@@ -341,7 +341,8 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
               // Find the member in the guild members array
               const member = guildLookupData.guild.members.find(
                 (m: GuildMember) => m.uuid === hypixelUuid
-              );              
+              );
+              
 
               guildInfo = {
                 name: guildLookupData.guild.name,

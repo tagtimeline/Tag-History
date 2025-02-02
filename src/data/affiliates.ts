@@ -2,6 +2,7 @@
 
 // Define the possible roles and their colors
 export const roleColors = {
+    HeadDeveloper: '#6b00ff',
     Developer: '#6b00ff',
     Staff: '#4177ff',
     Sponsor: '#a331ff',
@@ -23,6 +24,11 @@ export const roleColors = {
     'flodlol': {
       uuid: 'c6fd06c5-c716-4e1a-923e-17b48b3f5226',
       discord: '@.flod',
+      roles: ['HeadDeveloper'],
+    },
+    'handsniper': {
+      uuid: '871a18c8-01c6-4c94-ab45-a8dce668f09f',
+      discord: '@handsniper',
       roles: ['Developer'],
     },
     'flqw3d': {
@@ -50,6 +56,6 @@ export const roleColors = {
   // Helper function to get all developers
   export const getDevelopers = (): [string, Affiliate][] => {
     return Object.entries(affiliates).filter(([, data]) =>
-      data.roles.includes('Developer')
+      data.roles.includes('Developer') || data.roles.includes('HeadDeveloper')
     );
   };

@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
     domains: [
       'crafthead.net', 
       'visage.surgeplay.com',
-      'textures.minecraft.net'
+      'textures.minecraft.net',
+      'api.hypixel.net'
     ],
   },
   webpack: (config) => {

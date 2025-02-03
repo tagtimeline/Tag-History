@@ -14,7 +14,7 @@ const withAuth = <P extends Record<string, unknown>>(
       if (typeof window !== 'undefined') {
         const isAuthenticated = localStorage.getItem('isAuthenticated');
         if (!isAuthenticated) {
-          router.replace('/');
+          router.replace('/password');
         }
       }
     }, [router]);

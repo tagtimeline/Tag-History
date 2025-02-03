@@ -55,6 +55,14 @@ const PlayerSearch: React.FC = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      router.push(`/player/${searchTerm.trim()}`);
+      setSearchTerm('');
+      setSearchResults([]);
+    }
+  };
+
   const handleResultClick = (playerIgn: string) => {
     router.push(`/player/${playerIgn}`);
     setSearchTerm('');
@@ -69,6 +77,7 @@ const PlayerSearch: React.FC = () => {
         placeholder="Search players..." 
         value={searchTerm}
         onChange={handleSearchChange}
+        onKeyPress={handleKeyPress}
       />
       {isLoading ? (
         <div className={searchStyles.playerSearchResults}> 
@@ -97,8 +106,7 @@ const PlayerSearch: React.FC = () => {
             ))
           ) : (
             <div className={searchStyles.noResults}>
-              Player not in database...
-              <br></br>Press enter to continue...
+              Press enter to search for "{searchTerm}"
             </div>
           )}
         </div>
@@ -106,6 +114,5 @@ const PlayerSearch: React.FC = () => {
     </div>
   );
 };
-
 
 export default PlayerSearch;

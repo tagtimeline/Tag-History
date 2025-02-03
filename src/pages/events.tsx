@@ -51,7 +51,7 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
         ));
       },
       (error) => {
-        logger.error('Error listening to events:', error);
+        console.error('Error listening to events:', error);
         setError('Failed to load updates');
       }
     );
@@ -261,7 +261,7 @@ export async function getServerSideProps() {
       }
     };
   } catch (error) {
-    logger.error('Error fetching initial events:', error);
+    console.error('Error fetching initial events:', error);
     return {
       props: {
         initialEvents: []

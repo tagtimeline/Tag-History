@@ -26,7 +26,7 @@
     grid-column: 3 / 5;
     grid-row: 1;
     padding-left: 5px;
-    margin-top: 80px;
+    margin-top: 50px;
     height: 450px;
     position: sticky;
     height: fit-content;
@@ -71,6 +71,11 @@
     flex-direction: column;
 }
 
+.statLabel {
+    display: inline-block;
+    margin-right: 4px;
+}
+
 .playerStats,
 .playerDiscord {
     font-size: 16px;
@@ -79,6 +84,34 @@
 
 .guildMasterTag {
     color: #888;
+}
+
+.playerLinks {
+    display: flex;
+    gap: 5px;
+    margin-top: 30px;
+  }
+  
+.playerLinkButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    padding: 4px 22px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+  
+.playerLinkButton:hover {
+    background-color: #444;
+    transform: scale(1.05);
+}
+  
+.playerLinkButton:active {
+    transform: scale(0.95);
 }
 
 

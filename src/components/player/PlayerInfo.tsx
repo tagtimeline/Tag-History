@@ -125,47 +125,72 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
         </p>
       <div className={styles.playerDetails}>
         {playerData.hypixel && (
-          <div className={styles.statsContainer}>
-            <p className={styles.playerStats}>
-              Network Level: {playerData.hypixel.networkLevel}
-            </p>
-            {playerData.hypixel?.guild && (
-            <p className={styles.playerStats}>
-                Guild: {playerData.hypixel.guild.name}
-                {playerData.hypixel.guild.rank === 'Guild Master' && (
-                <span className={styles.guildMasterTag}> [GM]</span>
+            <div className={styles.statsContainer}>
+                <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>Network Level:</span>{' '}
+                    {playerData.hypixel.networkLevel}
+                </p>
+                {playerData.hypixel?.guild && (
+                    <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>Guild:</span>{' '}
+                    {playerData.hypixel.guild.name}
+                    {playerData.hypixel.guild.rank === 'Guild Master' && (
+                        <span className={styles.guildMasterTag}> [GM]</span>
+                    )}
+                    </p>
                 )}
-            </p>
-            )}
-            <br></br>
-            <p className={styles.playerStats}>
-                TNT Tag Wins: {playerData.hypixel.tntGames.wins_tntag}
-            </p>
-            <p className={styles.playerStats}>
-                TNT Tag KDR: {playerData.hypixel.tntGames.kdr}
-            </p>
-            <p className={styles.playerStats}>
-                TNT Tag Hours: {typeof playerData.hypixel.tntGames.playtime === 'number' 
+                <br></br>
+                <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>TNT Tag Wins:</span>{' '}
+                    {playerData.hypixel.tntGames.wins_tntag}
+                </p>
+                <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>TNT Tag KDR:</span>{' '}
+                    {playerData.hypixel.tntGames.kdr}
+                </p>
+                <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>TNT Games Hours:</span>{' '}
+                    {typeof playerData.hypixel.tntGames.playtime === 'number' 
                     ? playerData.hypixel.tntGames.playtime 
                     : 'N/A'}
-            </p>
-            <br></br>
-            {playerData.hypixel.discord && (
-              <p className={styles.playerDiscord}>
-                Discord: @{playerData.hypixel.discord}
-              </p>
-            )}
-          </div>
-
+                </p>
+                <br></br>
+                {playerData.hypixel.discord && (
+                    <p className={styles.playerStats}>
+                    <span className={styles.statLabel}>Discord:</span>{' '}
+                    @{playerData.hypixel.discord}
+                    </p>
+                )}
+            </div>
         )}
+
         {getAffiliateRoles(currentIgn).map((role) => (
             <span key={role} className={styles.roleContainer}>
-                <span className={styles.rolePrefix}>Timeline: </span>
+                <span className={styles.statLabel}>Timeline:</span>
                 <span style={{ color: getRoleColor(role) }}>
                     {role === 'HeadDeveloper' ? 'Head Developer' : role}
                 </span>
             </span>
         ))}
+
+        <div className={styles.playerLinks}>
+            <a 
+                href={`https://namemc.com/profile/${currentIgn}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.playerLinkButton}
+            >
+                NameMC
+            </a>
+            <a 
+                href={`https://25karma.xyz/player/${currentIgn}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.playerLinkButton}
+            >
+                25karma
+            </a>
+        </div>
       </div>
     </div>
   );

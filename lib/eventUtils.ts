@@ -40,9 +40,22 @@ export async function getEventById(id: string): Promise<TimelineEvent | null> {
 export async function createEvent(eventData: Omit<TimelineEvent, 'id'>): Promise<string> {
     console.log('createEvent called with data:', eventData);
     try {
-      const playerNames = extractPlayersFromEvent(eventData);
+      // Convert eventData to a simple record of strings
+      const eventRecord = {
+        ...Object.fromEntries(
+          Object.entries(eventData).map(([key, value]) => [
+            key, 
+            typeof value === 'string' ? value : 
+            typeof value === 'boolean' ? value.toString() : 
+            JSON.stringify(value)
+          ])
+        )
+      };
+
+      const playerNames = extractPlayersFromEvent(eventRecord);
       console.log('Starting player processing for names:', playerNames);
       
+      // Rest of the function remains the same...
       const batch = writeBatch(db);
       const eventsRef = collection(db, 'events');
       const newEventRef = doc(eventsRef);
@@ -120,25 +133,36 @@ export async function createEvent(eventData: Omit<TimelineEvent, 'id'>): Promise
       console.error('Error creating event:', error);
       throw error;
     }
-  }
+}
+
   
 
-  export async function updateEvent(id: string, eventData: Partial<TimelineEvent>): Promise<void> {
+export async function updateEvent(id: string, eventData: Partial<TimelineEvent>): Promise<void> {
     console.log('updateEvent called with id:', id, 'and data:', eventData);
     try {
-      console.log('Starting event update for id:', id);
-      console.log('Event data received:', eventData);
-  
+      // Convert eventData to a simple record of strings
+      const eventRecord = {
+        ...Object.fromEntries(
+          Object.entries(eventData).map(([key, value]) => [
+            key, 
+            typeof value === 'string' ? value : 
+            typeof value === 'boolean' ? value.toString() : 
+            JSON.stringify(value)
+          ])
+        )
+      };
+
+      const playerNames = extractPlayersFromEvent(eventRecord);
+      console.log('Starting player processing for names:', playerNames);
+
+      // Rest of the function remains the same...
       const batch = writeBatch(db);
       const eventRef = doc(db, 'events', id);
-  
+
       batch.update(eventRef, {
         ...eventData,
         updatedAt: new Date()
       });
-  
-      const playerNames = extractPlayersFromEvent(eventData);
-      console.log('Starting player processing for names:', playerNames);
   
       for (const name of playerNames) {
         try {
@@ -202,10 +226,10 @@ export async function createEvent(eventData: Omit<TimelineEvent, 'id'>): Promise
       await batch.commit();
       console.log('Batch write successful');
     } catch (error) {
-      console.error('Error updating event:', error);
-      throw error;
+        console.error('Error updating event:', error);
+        throw error;
     }
-  }
+}
 
 export async function deleteEvent(id: string): Promise<void> {
   try {

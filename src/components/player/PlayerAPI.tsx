@@ -2,6 +2,7 @@
 import { PlayerProfile } from '../../config/players';
 import { TimelineEvent } from '../../data/events';
 import { getAllEvents } from '../../../lib/eventUtils';
+import { getAllIgnsForPlayer } from '../../../lib/playerUtils';
 
 interface PlayerDataResponse extends Record<string, unknown> {
   historicalIgn: string;
@@ -12,7 +13,7 @@ interface PlayerDataResponse extends Record<string, unknown> {
 }
 
 export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
-  try {
+    try {
     // Get player UUID and basic info from Ashcon
     const mojangData = await fetchMojangData(ign);
     if (!mojangData) {
@@ -40,12 +41,14 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
       hypixel: hypixelData
     };
 
+    const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);
+
     return {
-      historicalIgn: ign,
-      currentIgn: mojangData.currentIgn,
-      allUsernames: mojangData.allUsernames,
-      playerData,
-      initialEvents: events
+        historicalIgn: ign,
+        currentIgn: mojangData.currentIgn,
+        allUsernames,
+        playerData,
+        initialEvents: events
     };
   } catch (error) {
     console.error('Error in getPlayerData:', error);
@@ -77,14 +80,14 @@ async function fetchMojangData(ign: string) {
       // Check for OptiFine cape by looking at the specific message
       if (capesData.optifine?.msg === "Cape found") {
         capeUrl = capesData.optifine.imageUrl;
-        // console.log(`[Cape] ${mojangData.name} is using OptiFine cape: ${capeUrl}`);
+        console.log(`[Cape] ${mojangData.name} is using OptiFine cape: ${capeUrl}`);
       }
       // If no OptiFine cape, fallback to Minecraft cape from textureData
       else if (textureData.textures.CAPE) {
         capeUrl = textureData.textures.CAPE.url;
-        // console.log(`[Cape] ${mojangData.name} is using Minecraft cape: ${capeUrl}`);
+        console.log(`[Cape] ${mojangData.name} is using Minecraft cape: ${capeUrl}`);
       } else {
-        // console.log(`[Cape] ${mojangData.name} has no cape`);
+        console.log(`[Cape] ${mojangData.name} has no cape`);
       }
     }
   } catch (error) {
@@ -92,7 +95,7 @@ async function fetchMojangData(ign: string) {
     // Fallback to Minecraft cape if capes.dev request fails
     if (textureData.textures.CAPE) {
       capeUrl = textureData.textures.CAPE.url;
-      // console.log(`[Cape] ${mojangData.name} is using Minecraft cape (fallback): ${capeUrl}`);
+      console.log(`[Cape] ${mojangData.name} is using Minecraft cape (fallback): ${capeUrl}`);
     }
   }
 

@@ -281,7 +281,7 @@ export async function getServerSideProps() {
     
     return {
       props: {
-        initialEvents: events
+        initialEvents: JSON.parse(JSON.stringify(events))
       }
     };
   } catch (error) {
@@ -293,5 +293,6 @@ export async function getServerSideProps() {
     };
   }
 }
+
 
 export default withAuth<TimelinePageProps>(TimelinePage);

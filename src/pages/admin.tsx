@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/../lib/firebaseConfig';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Header from '@/components/layout/Header';
@@ -29,7 +29,6 @@ export default function Admin() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-        await fetchEvents();
       } else {
         setIsAuthenticated(false);
       }
@@ -39,17 +38,21 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
-  const fetchEvents = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'events'));
-      const eventData = querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setEvents(eventData);
-    } catch {
-      setError('Failed to fetch events');
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'events'), async (snapshot) => {
+      try {
+        const eventData = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent))
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setEvents(eventData);
+      } catch (error) {
+        console.error('Error in events listener:', error);
+        setError('Failed to listen to event changes');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     const auth = getAuth();
@@ -64,7 +67,6 @@ export default function Admin() {
   const handleSuccess = async (message: string) => {
     setSuccess(message);
     setSelectedEvent(null);
-    await fetchEvents();
   };
 
   if (isLoading) {

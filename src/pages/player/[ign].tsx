@@ -113,7 +113,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     
     return events.filter(event => 
       allUsernames.some(username => 
-        event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)
+        event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)  
       )
     )
     .filter(event => 
@@ -122,7 +122,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     )
     .filter(event => 
       searchTerm === '' || 
-      searchEvents([event], searchTerm).length > 0
+      searchEvents([event], searchTerm).length > 0  
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [allUsernames, selectedCategories, searchTerm, events]);
@@ -292,7 +292,18 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       };
     }
 
-    return { props: playerData };
+    // Ensure initialEvents is fully serializable
+    const serializedInitialEvents = JSON.parse(JSON.stringify(playerData.initialEvents));
+
+    return { 
+      props: {
+        historicalIgn: decodedIgn,
+        currentIgn: playerData.currentIgn,
+        allUsernames: playerData.allUsernames,
+        playerData: playerData.playerData,
+        initialEvents: serializedInitialEvents
+      }
+    };
 
   } catch (error) {
     console.error('Error in getServerSideProps:', error);

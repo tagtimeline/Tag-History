@@ -64,11 +64,43 @@ export interface PlayerProfile {
     };
   
   // Function to extract player IGNs from text
-  export const extractPlayerNames = (text: string): string[] => {
-    const matches = text.match(/<([^>]+)>/g) || [];
-    return matches.map(match => match.slice(1, -1));
-  };
+  export function extractPlayerNames(text: string): string[] {
+    const regex = /<([^>]+)>/g;
+    const matches = text.match(regex) || [];
+    const names = [...new Set(matches.map(match => match.slice(1, -1).trim()))];
+    console.log('Extracted names from text:', { text, names });
+    return names;
+  }
   
+  export function extractPlayersFromEvent(event: any): string[] {
+    const playerNames = new Set<string>();
+    
+    console.log('Scanning event for player names:', event);
+    
+    Object.entries(event).forEach(([key, value]) => {
+      console.log(`Checking field "${key}":`, value);
+      
+      if (typeof value === 'string') {
+        const names = extractPlayerNames(value);
+        names.forEach(name => playerNames.add(name));
+        console.log(`Found names in ${key}:`, names);
+      } else if (typeof value === 'object' && value !== null) {
+        console.log(`Checking nested object in ${key}:`, value);
+        Object.values(value).forEach(nestedValue => {
+          if (typeof nestedValue === 'string') {
+            const names = extractPlayerNames(nestedValue);
+            names.forEach(name => playerNames.add(name));
+            console.log(`Found names in nested value:`, names);
+          }
+        });
+      }
+    });
+    
+    const finalNames = Array.from(playerNames);
+    console.log('Final unique player names found in event:', finalNames);
+    return finalNames;
+  }
+
   // Function to format text with player names and links
   export const formatPlayerNames = (text: string): string => {
     return text.replace(/<([^>]+)>/g, (match, ign) => {

@@ -1,7 +1,6 @@
 // components/admin/EventForm.tsx
 import { useState } from 'react';
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { db } from '@/../lib/firebaseConfig';
+import { createEvent, updateEvent } from '../../../lib/eventUtils';
 import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
@@ -69,6 +68,7 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData); 
 
     try {
       if (!formData.category) {
@@ -84,7 +84,8 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
       const cleanData = {
         title: formData.title.trim(),
         date: formData.date,
-        endDate: formData.endDate?.trim() || null,
+        // Only include endDate if it has a value
+        ...(formData.endDate?.trim() ? { endDate: formData.endDate.trim() } : {}),
         category: formData.category,
         description: formData.description.trim(),
         isSpecial: formData.isSpecial,
@@ -99,19 +100,24 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
         tables: formData.tables
       };
 
+      console.log('Cleaned data before save:', cleanData);
+
       if (selectedEvent) {
-        await updateDoc(doc(db, 'events', selectedEvent.id), cleanData);
+        console.log('Updating event with ID:', selectedEvent.id);
+        await updateEvent(selectedEvent.id, cleanData);
         onSuccess('Event updated successfully!');
       } else {
-        await addDoc(collection(db, 'events'), cleanData);
+        console.log('Creating new event');
+        await createEvent(cleanData);
         onSuccess('Event added successfully!');
       }
 
       setFormData(initialFormData);
-    } catch {
+    } catch (error) {
+      console.error('Error saving event:', error);
       onError('Failed to save event. Please try again.');
     }
-  };
+};
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>

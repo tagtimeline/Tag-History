@@ -1,5 +1,4 @@
 // src/data/events.ts
-import { categories } from "@/config/categories";
 
 export interface TableCell {
   content: string;

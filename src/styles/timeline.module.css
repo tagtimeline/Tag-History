@@ -161,3 +161,24 @@
     transform: translateY(-50%);
     width: 15px;
 }
+
+
+/* Preview */
+.preview {
+    pointer-events: none;
+    left: -50px;
+}
+  
+.preview .timelineBar,
+.preview .timelineContent,
+.preview .cell {
+    pointer-events: none;
+}
+  
+.preview .eventBox {
+    cursor: default;
+}
+  
+.preview .timelineEnd {
+    display: none;
+}

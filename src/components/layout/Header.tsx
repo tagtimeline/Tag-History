@@ -12,8 +12,8 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
     <header className={styles.header}>
       <div className={styles['header-content']}>
         <div className={styles['header-left']}>
-          <Link href="/timeline">
-            TNT Tag History
+          <Link href="/">
+            Tag Timeline
           </Link>
         </div>
         {children && (

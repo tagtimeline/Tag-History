@@ -4,14 +4,14 @@ import { TimelineEvent } from '../../data/events';
 import { getCategoryColor } from '../../config/categories';
 import searchStyles from '../../styles/search.module.css';
 
-interface PlayerSearchProps {
+interface PlayerEventsProps {
   searchTerm: string;
   searchResults: TimelineEvent[];
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEventSelect: (event: TimelineEvent) => void;
 }
 
-const PlayerSearch: React.FC<PlayerSearchProps> = ({
+const PlayerEvents: React.FC<PlayerEventsProps> = ({
   searchTerm,
   searchResults,
   onSearchChange,
@@ -61,4 +61,4 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({
   );
 };
 
-export default PlayerSearch;
+export default PlayerEvents;

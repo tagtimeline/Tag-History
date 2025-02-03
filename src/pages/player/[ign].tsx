@@ -14,10 +14,11 @@ import { PlayerProfile } from '../../config/players';
 import PlayerEventsList from '../../components/player/PlayerEventsList';
 import PlayerInfo from '../../components/player/PlayerInfo';
 import PlayerSkinViewer from '../../components/player/PlayerSkinViewer';
-import PlayerSearch from '../../components/player/PlayerSearch';
 import { getAllCategories } from '../../config/categories';
 import { ALL_EVENTS_OPTION } from '../../config/dropdown';
 import { searchEvents } from '../../config/search';
+import PlayerSearch from '../../components/search/PlayerSearch';
+import EventSearch from '../../components/search/EventSearch';
 import EventModal from '../../components/timeline/EventModal';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebaseConfig';
@@ -46,6 +47,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
 
@@ -102,30 +104,28 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     });
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setSearchResults(searchEvents(events, value));
-  };
-
   const playerEvents = useMemo(() => {
     if (!allUsernames || allUsernames.length === 0 || !events) return [];
     
-    return events.filter(event => 
-      allUsernames.some(username => 
-        event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)  
+    return events
+      .filter(event => 
+        allUsernames.some(username => 
+          event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)  
+        )
       )
-    )
-    .filter(event => 
-      selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
-      selectedCategories.includes(event.category)
-    )
-    .filter(event => 
-      searchTerm === '' || 
-      searchEvents([event], searchTerm).length > 0  
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [allUsernames, selectedCategories, searchTerm, events]);
+      .filter(event => 
+        selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
+        selectedCategories.includes(event.category)
+      )
+      .filter(event => 
+        searchTerm === '' || 
+        searchEvents([event], searchTerm).length > 0  
+      )
+      .sort((a, b) => {
+        const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+  }, [allUsernames, selectedCategories, searchTerm, events, sortDirection]);
 
   if (!currentIgn || !playerData) {
     return (
@@ -165,41 +165,9 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
       
       <Header>
         <div className={controlStyles.headerControls}>
-          <div className={controlStyles.dropdown} ref={dropdownRef}>
-            <div 
-              className={controlStyles.dropdownHeader}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <span className={controlStyles.label}>Categories...</span>
-            </div>
-            {isDropdownOpen && (
-              <ul className={controlStyles.dropdownMenu}>
-                {allCategories.map((category) => (
-                  <li 
-                    key={category.id}
-                    className={`${controlStyles.dropdownItem} ${
-                      selectedCategories.includes(category.id) ? controlStyles.selected : ''
-                    }`}
-                    onClick={() => handleCategorySelect(category.id)}
-                  >
-                    <span 
-                      className={controlStyles.categoryColor} 
-                      style={{ backgroundColor: category.color }}
-                    />
-                    {category.name}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className={styles.searchWrapper}>
+            <PlayerSearch />
           </div>
-
-          <PlayerSearch
-            searchTerm={searchTerm}
-            searchResults={searchResults}
-            onSearchChange={handleSearchChange}
-            onEventSelect={setSelectedEvent}
-          />
-
           <Link href="/timeline">
             <button className={controlStyles.timelineButton}>Timeline</button>
           </Link>
@@ -235,6 +203,53 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
 
             <div className={styles.eventsSection}>
               <div className={styles.eventsTitle}>Player History</div>
+              
+              <div className={styles.eventsControls}>
+                <div className={controlStyles.dropdown} ref={dropdownRef}>
+                  <div 
+                    className={controlStyles.dropdownHeader}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    <span className={controlStyles.label}>Categories...</span>
+                  </div>
+                  {isDropdownOpen && (
+                    <ul className={controlStyles.dropdownMenu}>
+                      {allCategories.map((category) => (
+                        <li 
+                          key={category.id}
+                          className={`${controlStyles.dropdownItem} ${
+                            selectedCategories.includes(category.id) ? controlStyles.selected : ''
+                          }`}
+                          onClick={() => handleCategorySelect(category.id)}
+                        >
+                          <span 
+                            className={controlStyles.categoryColor} 
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <EventSearch 
+                  onEventSelect={setSelectedEvent}
+                  filterEvents={event => 
+                    allUsernames.some(username => 
+                      event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)
+                    )
+                  }
+                />
+
+                <button
+                  className={styles.sortButton}
+                  onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+                >
+                  {sortDirection === 'asc' ? '↑' : '↓'} Date
+                </button>
+              </div>
+
               {playerEvents.length > 0 ? (
                 <PlayerEventsList 
                   events={playerEvents}

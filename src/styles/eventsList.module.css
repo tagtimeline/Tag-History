@@ -1,10 +1,48 @@
-/* src/styles/eventsList.module.css */
-
 /* Main Content */
 .mainContent {
     margin: 0 auto;
-    max-width: 800px;
-    padding: 20px;
+    max-width: 1200px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Title and Controls */
+.eventsTitle {
+    width: 500px;
+    font-size: 18px;
+    color: #fff;
+    margin: 0 auto 15px auto;
+    text-align: left;
+}
+
+.eventsControls {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    width: 600px;
+}
+
+.sortButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    height: 32px;
+    padding: 0 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sortButton:hover {
+    background-color: #444;
+    transform: scale(1.02);
 }
 
 /* Events List */
@@ -12,6 +50,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
+    max-width: 500px;
     padding: 20px 0;
 }
 
@@ -21,7 +61,7 @@
     padding: 12px 16px !important;
     transform-origin: center;
     transition: transform 0.2s ease, background-color 0.2s ease;
-    width: 500px !important;
+    width: 470px !important;
 }
 
 .eventBox:hover {

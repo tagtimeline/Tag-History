@@ -2,18 +2,27 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import styles from '../../styles/password.module.css';
+import { AUTH_CONFIG } from '../../config/auth';
 
 const PasswordForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showError, setShowError] = useState(false);
   const router = useRouter();
 
+  // If password protection is disabled, redirect immediately
+  React.useEffect(() => {
+    if (!AUTH_CONFIG.enablePasswordProtection) {
+      localStorage.setItem('isAuthenticated', 'true');
+      router.push('/');
+    }
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password === process.env.NEXT_PUBLIC_SITE_PASSWORD) {
       setShowError(false);
       localStorage.setItem('isAuthenticated', 'true');
-      await router.push('/timeline');
+      router.push('/');
     } else {
       setShowError(true);
     }

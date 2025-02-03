@@ -12,6 +12,7 @@ interface TimelineGridProps {
   yearSpacing: number;
   onReset: number;
   showEventDates: boolean;
+  isPreview?: boolean;
 }
 
 interface EventPosition {
@@ -37,7 +38,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   isDraggingEnabled,
   yearSpacing,
   onReset,
-  showEventDates
+  showEventDates,
+  isPreview = false
 }) => {
   const [customPositions, setCustomPositions] = useState<Record<string, number>>({});
   const [eventColumns, setEventColumns] = useState<Record<string, number>>({});
@@ -211,11 +213,20 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   const rowCount = calculateRowCount(totalHeight);
   const rows = Array.from({ length: rowCount }, (_, i) => i);
 
+  const containerStyle = {
+    minHeight: `${totalHeight}px`,
+    ...(isPreview && {
+      pointerEvents: 'none' as const,
+      transform: 'scale(0.8)',
+      transformOrigin: 'top center',
+    })
+  };
+
   return (
     <div className={styles.gridWrapper}>
       <div 
-        className={styles.grid}
-        style={{ minHeight: `${totalHeight}px` }}
+        className={`${styles.grid} ${isPreview ? styles.preview : ''}`}
+        style={containerStyle}
       >
         <div className={styles.timeline}>
           <div className={styles.timelineBar} />
@@ -260,19 +271,21 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                 event={event}
                 position={position}
                 column={column}
-                isDraggingEnabled={isDraggingEnabled}
+                isDraggingEnabled={!isPreview && isDraggingEnabled}
                 onUpdateColumn={handleUpdateColumn}
                 getEventPosition={getEventPosition}
                 showEventDates={showEventDates}
               />
             ))}
             
-            <div className={styles.timelineEnd}>
-              <div className={styles.timelineArrow} />
-              <div className={styles.timelineEndText}>
-                <em>Time continues...</em>
+            {!isPreview && (
+              <div className={styles.timelineEnd}>
+                <div className={styles.timelineArrow} />
+                <div className={styles.timelineEndText}>
+                  <em>Time continues...</em>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
         

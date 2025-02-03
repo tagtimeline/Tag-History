@@ -166,7 +166,7 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
 
         {getAffiliateRoles(currentIgn).map((role) => (
             <span key={role} className={styles.roleContainer}>
-                <span className={styles.statLabel}>Timeline:</span>
+                <span className={styles.statLabel}>Timeline:</span>{' '}
                 <span style={{ color: getRoleColor(role) }}>
                     {role === 'HeadDeveloper' ? 'Head Developer' : role}
                 </span>

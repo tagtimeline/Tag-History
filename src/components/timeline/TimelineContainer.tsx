@@ -11,6 +11,7 @@ interface TimelineContainerProps {
   yearSpacing: number;
   onReset: number;
   showEventDates: boolean;
+  isPreview?: boolean;
 }
 
 const TimelineContainer: React.FC<TimelineContainerProps> = ({ 
@@ -19,10 +20,11 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
   isDraggingEnabled,
   yearSpacing,
   onReset,
-  showEventDates
+  showEventDates,
+  isPreview = false
 }) => {
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${isPreview ? styles.preview : ''}`}>
       <TimelineGrid 
         events={events}
         visibleCategories={selectedCategories} 
@@ -30,6 +32,7 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
         yearSpacing={yearSpacing}
         onReset={onReset}
         showEventDates={showEventDates}
+        isPreview={isPreview}
       />
     </div>
   );

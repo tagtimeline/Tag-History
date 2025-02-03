@@ -26,14 +26,16 @@ export interface SideEvent {
 export interface TimelineEvent {
   id: string;
   title: string;
+  description: string;
   date: string;
   endDate?: string;
-  category: keyof typeof categories;
-  isSpecial?: boolean;
-  description: string;
-  tables?: Table[];
-  sideEvents?: SideEvent[]; 
+  category: string;
   tags: string[];
+  isSpecial?: boolean;
+  tables?: any[]; // Define proper type if available
+  sideEvents?: any[]; // Define proper type if available
+  createdAt?: Date; // Make optional
+  updatedAt?: Date; // Make optional
 }
 
 

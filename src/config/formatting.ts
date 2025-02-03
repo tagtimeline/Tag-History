@@ -2,16 +2,18 @@
 
 // Regular expression patterns for text formatting
 const patterns = {
-  boldItalics: /\*\*\*(.*?)\*\*\*/g,
-  bold: /\*\*(.*?)\*\*/g,
-  italics: /\*(.*?)\*/g,
-  italicsUnderscore: /_(.*?)_/g,
-  underline: /__(.*?)__/g,
-  strikethrough: /~~(.*?)~~/g,
-  headertext: /^# (.+)$/,
-  subtext: /^-# (.+)$/,
-  link: /\[([^\]]+)\]\(([^)]+)\)/g,
-  playerMention: /<([^>]+)>/g,
+  boldItalics: /\*\*\*(.*?)\*\*\*/g,    // Format: ***text***
+  bold: /\*\*(.*?)\*\*/g,               // Format: **text**
+  italics: /\*(.*?)\*/g,                // Format: *text*
+  italicsUnderscore: /_(.*?)_/g,        // Format: _text_
+  underline: /__(.*?)__/g,              // Format: __text__
+  strikethrough: /~~(.*?)~~/g,          // Format: ~~text~~
+  headertext: /^# (.+)$/,               // Format: # text
+  subtext: /^-# (.+)$/,                 // Format: -# text
+  link: /\[([^\]]+)\]\(([^)]+)\)/g,     // Format: [text](url)
+  playerMention: /<([^>]+)>/g,          // Format: <ign>
+  youtube: /\[youtube:([^\]]+)\]/g,     // Format: [youtube:videoId]
+  image: /\[img:([^\]]+)\]/g,           // Format: [img:url]
 } as const;
 
 // CSS classes for formatting

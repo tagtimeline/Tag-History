@@ -113,6 +113,21 @@ export const EventForm: React.FC<EventFormProps> = ({
     }
   };
 
+  const handleDuplicateEvent = async () => {
+    try {
+      const duplicateData = {
+        ...formData,
+        title: `${formData.title} Copy`,
+      };
+  
+      await createEvent(duplicateData);
+      setSuccessMessage('Event duplicated successfully!');
+    } catch (error) {
+      console.error('Error duplicating event:', error);
+      setErrorMessage('Failed to duplicate event. Please try again.');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted with data:', formData);
@@ -328,28 +343,40 @@ export const EventForm: React.FC<EventFormProps> = ({
         onChange={(tables) => setFormData({ ...formData, tables })}
       />
 
-      <div className={`${styles.buttonGroup} ${styles.alignRight}`}>
-        <button type="submit" className={styles.submitButton}>
-            {selectedEvent ? 'Update Event' : 'Add Event'}
+    {/* Event Controls */}
+    <div className={`${styles.buttonGroup} ${styles.alignRight}`}>
+    <button type="submit" className={styles.submitButton}>
+        {selectedEvent ? 'Update Event' : 'Add Event'}
+    </button>
+    {selectedEvent ? (
+        <>
+        <button 
+            type="button" 
+            onClick={handleDuplicateEvent}
+            className={styles.duplicateButton}
+        >
+            Duplicate Event
         </button>
-        {selectedEvent ? (
-            <button 
+        <button 
             type="button" 
             onClick={handleDeleteEvent} 
             className={styles.deleteButton}
-            >
+        >
             Delete Event
-            </button>
-        ) : (
-            <button 
+        </button>
+        </>
+    ) : (
+        <>
+        <button 
             type="button" 
             onClick={() => setFormData(initialFormData)} 
             className={styles.clearButton}
-            >
+        >
             Clear Event
-            </button>
-        )}
-     </div>
+        </button>
+        </>
+    )}
+    </div>
     </form>
   );
 }

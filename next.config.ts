@@ -8,7 +8,9 @@ const nextConfig: NextConfig = {
       'visage.surgeplay.com',
       'textures.minecraft.net',
       'api.capes.dev',
-      'api.hypixel.net'
+      'api.hypixel.net',
+      'imgur.com',
+      'i.imgur.com'
     ],
   },
   webpack: (config) => {

@@ -166,6 +166,8 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
   );
 };
 
+// In [id].tsx, update the getServerSideProps function:
+
 export async function getServerSideProps({ params }: { params: { id: string } }) {
   try {
     const event = await getEventById(params.id);
@@ -179,10 +181,38 @@ export async function getServerSideProps({ params }: { params: { id: string } })
     // Get all events for navigation
     const allEvents = await getAllEvents();
     
+    // Create a new object without createdAt and updatedAt fields
+    const serializedEvent = {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      endDate: event.endDate,
+      category: event.category,
+      tags: event.tags,
+      isSpecial: event.isSpecial,
+      tables: event.tables,
+      sideEvents: event.sideEvents
+    };
+
+    // Similarly serialize all events
+    const serializedAllEvents = allEvents.map(event => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      endDate: event.endDate,
+      category: event.category,
+      tags: event.tags,
+      isSpecial: event.isSpecial,
+      tables: event.tables,
+      sideEvents: event.sideEvents
+    }));
+    
     return {
       props: {
-        initialEvent: event,
-        allEvents
+        initialEvent: serializedEvent,
+        allEvents: serializedAllEvents
       }
     };
   } catch (error) {

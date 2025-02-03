@@ -5,7 +5,7 @@ import { TimelineEvent } from '../../data/events';
 import EventTable from './EventTable';
 import styles from '../../styles/events.module.css';
 import formatStyles from '../../styles/formatting.module.css';
-import { formatText, extractLinks, isSubtext, getSubtextContent, isHeadertext, getHeadertextContent, getClass } from '../../config/formatting';
+import { patterns, formatText, extractLinks, isSubtext, getSubtextContent, isHeadertext, getHeadertextContent, getClass } from '../../config/formatting';
 
 interface EventContentProps {
   event: TimelineEvent;
@@ -13,82 +13,141 @@ interface EventContentProps {
 
 const renderTextWithLinks = (text: string) => {
   const links = extractLinks(text);
+  const youtubeMatches = text.match(patterns.youtube) || [];
+  const imageMatches = text.match(patterns.image) || [];
+  
+  const allElements = [
+    ...links.map(link => ({ type: 'link' as const, ...link })),
+    ...youtubeMatches.map(match => ({
+      type: 'youtube' as const,
+      index: text.indexOf(match),
+      length: match.length,
+      videoId: match.slice(match.indexOf(':') + 1, match.length - 1)
+    })),
+    ...imageMatches.map(match => ({
+      type: 'image' as const,
+      index: text.indexOf(match),
+      length: match.length,
+      url: match.slice(match.indexOf(':') + 1, match.length - 1)
+    }))
+  ].sort((a, b) => a.index - b.index);
+
   const parts = [];
   let lastIndex = 0;
 
-  // First handle all links
-  links.forEach((link, index) => {
-    if (link.index > lastIndex) {
-      const beforeText = text.slice(lastIndex, link.index);
+  // Handle all special elements first
+  allElements.forEach((element, index) => {
+    if (element.index > lastIndex) {
+      const beforeText = text.slice(lastIndex, element.index);
+      // Handle player mentions in the text before the element
+      const parts2 = processPlayerMentions(beforeText, `pre-${index}`);
+      parts.push(...parts2);
+    }
+
+    switch (element.type) {
+      case 'link':
+        parts.push(
+          <Link 
+            key={`link-${index}`}
+            href={element.url}
+            target="_blank"
+            className={formatStyles.inlineLink}
+          >
+            <ExternalLink size={12} />
+            <span>{element.text}</span>
+          </Link>
+        );
+        break;
+
+      case 'youtube':
+        parts.push(
+          <div key={`youtube-${index}`} className={styles.videoWrapper}>
+            <iframe
+              width="100%"
+              height="315"
+              src={`https://www.youtube.com/embed/${element.videoId}`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+        break;
+
+      case 'image':
+        parts.push(
+          <div key={`image-${index}`} className={styles.imageWrapper}>
+            <img 
+              src={element.url}
+              alt="Event content"
+              className={styles.contentImage}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                img.style.display = 'none';
+                const errorText = document.createElement('span');
+                errorText.textContent = 'Image failed to load';
+                errorText.className = styles.imageError;
+                img.parentNode?.appendChild(errorText);
+              }}
+            />
+          </div>
+        );
+        break;
+    }
+
+    lastIndex = element.index + element.length;
+  });
+
+  // Handle remaining text
+  if (lastIndex < text.length) {
+    const remainingText = text.slice(lastIndex);
+    const parts2 = processPlayerMentions(remainingText, 'end');
+    parts.push(...parts2);
+  }
+
+  return parts;
+};
+
+// Helper function to process player mentions
+const processPlayerMentions = (text: string, keyPrefix: string) => {
+  const parts = [];
+  const playerPattern = /<([^>]+)>/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = playerPattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const beforeText = text.slice(lastIndex, match.index);
       parts.push(
         <span 
-          key={`text-${index}`} 
+          key={`text-${keyPrefix}-${lastIndex}`} 
           dangerouslySetInnerHTML={{ __html: formatText(beforeText) }} 
         />
       );
     }
 
     parts.push(
-      <Link 
-        key={`link-${index}`} 
-        href={link.url} 
-        target="_blank" 
-        className={formatStyles.inlineLink}
+      <Link
+        key={`player-${keyPrefix}-${match.index}`}
+        href={`/player/${match[1]}`}
+        className={formatStyles.playerLink}
       >
-        <ExternalLink size={12} />
-        <span>{link.text}</span>
+        {match[1]}
       </Link>
     );
 
-    lastIndex = link.index + link.length;
-  });
+    lastIndex = match.index + match[0].length;
+  }
 
-  // Handle remaining text and look for player tags
   if (lastIndex < text.length) {
-    const remainingText = text.slice(lastIndex);
-    const playerPattern = /<([^>]+)>/g;
-    const parts2 = [];
-    let lastPlayerIndex = 0;
-    let playerMatch;
-
-    while ((playerMatch = playerPattern.exec(remainingText)) !== null) {
-      // Add text before the player tag
-      if (playerMatch.index > lastPlayerIndex) {
-        const beforeText = remainingText.slice(lastPlayerIndex, playerMatch.index);
-        parts2.push(
-          <span 
-            key={`text-p-${lastPlayerIndex}`} 
-            dangerouslySetInnerHTML={{ __html: formatText(beforeText) }} 
-          />
-        );
-      }
-
-      // Add player link
-      parts2.push(
-        <Link
-          key={`player-${lastPlayerIndex}`}
-          href={`/player/${playerMatch[1]}`}
-          className={formatStyles.playerLink}
-        >
-          {playerMatch[1]}
-        </Link>
-      );
-
-      lastPlayerIndex = playerMatch.index + playerMatch[0].length;
-    }
-
-    // Add any remaining text after the last player tag
-    if (lastPlayerIndex < remainingText.length) {
-      const afterText = remainingText.slice(lastPlayerIndex);
-      parts2.push(
-        <span 
-          key={`text-end`} 
-          dangerouslySetInnerHTML={{ __html: formatText(afterText) }} 
-        />
-      );
-    }
-
-    parts.push(...parts2);
+    const afterText = text.slice(lastIndex);
+    parts.push(
+      <span 
+        key={`text-${keyPrefix}-${lastIndex}`} 
+        dangerouslySetInnerHTML={{ __html: formatText(afterText) }} 
+      />
+    );
   }
 
   return parts;
@@ -99,9 +158,9 @@ const parseLine = (line: string, index: number) => {
   if (isHeadertext(line)) {
     const content = getHeadertextContent(line);
     return (
-      <p key={index} className={formatStyles[getClass('headertext')]}>
+      <div key={index} className={formatStyles[getClass('headertext')]}>
         {renderTextWithLinks(content)}
-      </p>
+      </div>
     );
   }
 
@@ -109,19 +168,20 @@ const parseLine = (line: string, index: number) => {
   if (isSubtext(line)) {
     const content = getSubtextContent(line);
     return (
-      <p key={index} className={formatStyles[getClass('subtext')]}>
+      <div key={index} className={formatStyles[getClass('subtext')]}>
         {renderTextWithLinks(content)}
-      </p>
+      </div>
     );
   }
 
   // Regular line with formatting
   return (
-    <p key={index} className={formatStyles.text}>
+    <div key={index} className={formatStyles.text}>
       {renderTextWithLinks(line)}
-    </p>
+    </div>
   );
 };
+
 
 const parseContent = (text: string) => {
   const lines = text.split('\n');

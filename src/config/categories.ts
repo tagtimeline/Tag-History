@@ -31,6 +31,12 @@ export const categories: Record<string, Category> = {
         color: '#66f2ff',
         borderStyle: '3px solid'
     },
+    tagtimeline: {
+        id: 'timeline',
+        name: 'Timeline',
+        color: '#ff8a00',
+        borderStyle: '3px solid'
+    },
     other: {
         id: 'other',
         name: 'Other',

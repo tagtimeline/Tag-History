@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       'crafthead.net', 
       'visage.surgeplay.com',
       'textures.minecraft.net',
+      'api.capes.dev',
       'api.hypixel.net'
     ],
   },

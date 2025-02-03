@@ -19,9 +19,9 @@ import { getAllCategories } from '../../config/categories';
 import { ALL_EVENTS_OPTION } from '../../config/dropdown';
 import { searchEvents } from '../../config/search';
 import EventModal from '../../components/timeline/EventModal';
-import { getAllEvents } from '../../../lib/eventUtils';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebaseConfig';
+import { getPlayerData } from '../../components/player/PlayerAPI';
 
 interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
@@ -29,11 +29,6 @@ interface PlayerPageProps extends Record<string, unknown> {
   allUsernames: string[];
   playerData: PlayerProfile | null;
   initialEvents: TimelineEvent[];
-}
-
-interface GuildMember {
-  uuid: string;
-  rank?: string;
 }
 
 const PlayerPage: NextPage<PlayerPageProps> = ({ 
@@ -77,6 +72,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     return () => unsubscribe();
   }, []);
 
+  // Handle clicking outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -129,7 +125,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
       searchEvents([event], searchTerm).length > 0
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-}, [allUsernames, selectedCategories, searchTerm, events]);
+  }, [allUsernames, selectedCategories, searchTerm, events]);
 
   if (!currentIgn || !playerData) {
     return (
@@ -150,9 +146,9 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
         <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
         <main className="centered">
           <div className={styles.playerPageContent}>
-          <div className={styles.errorMessage}>
-            Player &quot;{historicalIgn}&quot; not found
-          </div>
+            <div className={styles.errorMessage}>
+              Player &quot;{historicalIgn}&quot; not found
+            </div>
           </div>
         </main>
         <Footer />
@@ -271,9 +267,9 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     const ign = params?.ign;
     
     if (typeof ign !== 'string') {
-      return {
+      return { 
         props: {
-          historicalIgn: '',
+          historicalIgn: params?.ign as string || '', // Use the original IGN or empty string
           currentIgn: null,
           allUsernames: [],
           playerData: null,
@@ -282,170 +278,27 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       };
     }
 
-    // First get UUID and basic info from Ashcon
-    const ashconResponse = await fetch(`https://api.ashcon.app/mojang/v2/user/${ign}`);
-    
-    if (!ashconResponse.ok) {
-      return {
-        props: {
-          historicalIgn: ign,
-          currentIgn: null,
-          allUsernames: [],
-          playerData: null,
-          initialEvents: []
-        }
-      };
-    }
+    // Decode the IGN from the URL
+    const decodedIgn = decodeURIComponent(ign);
+    const playerData = await getPlayerData(decodedIgn);
 
-    // Fetch initial events for SSR
-    const events = await getAllEvents();
-
-    const ashconData = await ashconResponse.json();
-    const currentIgn = ashconData.username;
-    const allUsernames = ashconData.username_history?.map((history: { username: string }) => history.username) || [ashconData.username];
-    
-    // If they're using an old IGN, redirect to the current one
-    if (currentIgn.toLowerCase() !== ign.toLowerCase()) {
+    // Handle redirect for old IGNs (compare with decoded IGN)
+    if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedIgn.toLowerCase()) {
       return {
         redirect: {
-          destination: `/player/${currentIgn}`,
+          destination: `/player/${encodeURIComponent(playerData.currentIgn)}`, // Ensure proper encoding
           permanent: false,
         }
       };
     }
 
-    // Now get the official textures from Minecraft API
-    const profileResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${ashconData.uuid}`);
-    const profileData = await profileResponse.json();
+    return { props: playerData };
 
-    // Decode the base64 texture data
-    const textureProperty = profileData.properties.find((p: { name: string, value: string }) => p.name === 'textures');
-    const textureData = JSON.parse(Buffer.from(textureProperty.value, 'base64').toString());
-
-    // Prepare the player data with official texture URLs
-    const playerData: PlayerProfile = {
-      username: currentIgn,
-      uuid: ashconData.uuid,
-      created_at: ashconData.created_at,
-      username_history: ashconData.username_history,
-      textures: {
-        skin: {
-          url: textureData.textures.SKIN.url
-        },
-        cape: (textureData.textures.CAPE && {
-          url: textureData.textures.CAPE.url
-        }) || null
-      },
-      hypixel: null
-    };
-
-    // Validate Hypixel API key exists
-    const HYPIXEL_API_KEY = process.env.HYPIXEL_API_KEY;
-    if (!HYPIXEL_API_KEY) {
-      console.error('Hypixel API key not found in environment variables');
-      throw new Error('Hypixel API key not configured');
-    }
-
-    // Fetch Hypixel data
-    try {
-      const hypixelResponse = await fetch(`https://api.hypixel.net/player?uuid=${ashconData.uuid}`, {
-        headers: {
-          'API-Key': HYPIXEL_API_KEY
-        }
-      });
-
-      if (!hypixelResponse.ok) {
-        console.error('Hypixel API error:', await hypixelResponse.text());
-        throw new Error(`Hypixel API error: ${hypixelResponse.status}`);
-      }
-
-      const hypixelData = await hypixelResponse.json();
-      
-      if (!hypixelData.success || !hypixelData.player) {
-        console.warn('No Hypixel data found for player');
-        playerData.hypixel = null;
-      } else {
-        const player = hypixelData.player;
-        
-        // Calculate network level from networkExp (with fallback)
-        const networkExp = player.networkExp || 0;
-        const networkLevel = Math.floor((Math.sqrt(networkExp + 15312.5) - 125/Math.sqrt(2))/(25*Math.sqrt(2)));
-
-        // Extract TNT Games stats with fallbacks
-        const tntGames = player.stats?.TNTGames || {};
-        const tntWins = tntGames.wins_tntag || 0;
-        const tntKills = tntGames.kills_tntag || 0;
-        const tntDeaths = tntGames.deaths_tntag || 0;
-        const tntKdr = tntDeaths === 0 ? tntKills : Number((tntKills / tntDeaths).toFixed(2));
-        const tntPlaytimeMinutes = player.achievements?.tntgames_tnt_triathlon || null;
-        const tntPlaytime = tntPlaytimeMinutes ? Math.round(tntPlaytimeMinutes / 60) : 'N/A';
-
-        // Handle guild data separately with explicit null handling
-        let guildInfo = null;
-        try {
-          const guildLookupResponse = await fetch(`https://api.hypixel.net/guild?player=${ashconData.uuid}`, {
-            headers: {
-              'API-Key': HYPIXEL_API_KEY
-            }
-          });
-
-          if (guildLookupResponse.ok) {
-            const guildLookupData = await guildLookupResponse.json();
-            
-            if (guildLookupData.success && guildLookupData.guild) {
-              const hypixelUuid = ashconData.uuid.replace(/-/g, '');
-              const member = guildLookupData.guild.members.find(
-                (m: GuildMember) => m.uuid === hypixelUuid
-              );
-
-              guildInfo = {
-                name: guildLookupData.guild.name,
-                rank: member?.rank || null
-              };
-            }
-          }
-        } catch (guildError) {
-          console.error('Error fetching guild data:', guildError);
-        }
-
-        // Set hypixel data with all fields explicitly defined
-        playerData.hypixel = {
-          rank: player.rank || 
-                (player.monthlyPackageRank !== 'NONE' ? 'SUPERSTAR' : null) || 
-                player.newPackageRank || 
-                'DEFAULT',
-          rankPlusColor: player.rankPlusColor || null,
-          monthlyPackageRank: player.monthlyPackageRank || '',
-          newPackageRank: player.newPackageRank || '',
-          networkLevel: networkLevel,
-          guild: guildInfo,
-          tntGames: {
-            wins_tntag: tntWins,
-            playtime: tntPlaytime,
-            kdr: tntKdr
-          },
-          discord: player.socialMedia?.links?.DISCORD || null
-        };
-      }
-    } catch (hypixelError) {
-      console.error('Error fetching Hypixel data:', hypixelError);
-      playerData.hypixel = null;
-    }
-
-    return {
-      props: {
-        historicalIgn: ign,
-        currentIgn,
-        allUsernames,
-        playerData,
-        initialEvents: events
-      }
-    };
   } catch (error) {
     console.error('Error in getServerSideProps:', error);
-    return {
+    return { 
       props: {
-        historicalIgn: params?.ign as string,
+        historicalIgn: params?.ign as string || '', // Use the original IGN or empty string
         currentIgn: null,
         allUsernames: [],
         playerData: null,

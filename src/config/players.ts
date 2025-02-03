@@ -72,7 +72,7 @@ export interface PlayerProfile {
     return names;
   }
   
-  export function extractPlayersFromEvent(event: Record<string, any>): string[] {
+  export function extractPlayersFromEvent(event: Record<string, string | Record<string, string>>): string[] {
     const playerNames = new Set<string>();
     
     console.log('Scanning event for player names:', event);

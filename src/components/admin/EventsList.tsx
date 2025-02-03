@@ -50,11 +50,6 @@ export default function EventsList({ events, onEventSelect }: EventsListProps) {
    });
  };
 
- const handleEventSearchSelect = (event: TimelineEvent) => {
-   onEventSelect(event);
-   window.scrollTo({ top: 0, behavior: 'smooth' });
- };
-
  const filteredEvents = events
    .filter(event => 
      selectedCategories.includes(ALL_EVENTS_OPTION.id) || 

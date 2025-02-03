@@ -13,7 +13,7 @@ import eventStyles from '../styles/events.module.css';
 import controlStyles from '../styles/controls.module.css';
 import headerStyles from '../styles/header.module.css';
 import withAuth from '../components/auth/withAuth';
-import { getAllCategories, getCategoryColor, getEventStyles } from '../config/categories';
+import { getAllCategories, getEventStyles } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebaseConfig';

@@ -100,15 +100,6 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
    });
  };
 
- const handleEventSelect = (event: TimelineEvent) => {
-   const eventElement = document.querySelector(`[data-event-id="${event.id}"]`);
-   
-   if (eventElement) {
-     eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-     (eventElement as HTMLElement).click();
-   }
- };
-
  const handleZoomIn = () => {
    setYearSpacing(current => zoomIn(current));
  };

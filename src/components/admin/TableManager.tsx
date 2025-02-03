@@ -21,6 +21,12 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
     ]);
   };
 
+  const confirmRemove = (action: () => void, message: string) => {
+    if (window.confirm(message)) {
+      action();
+    }
+  };
+
   const addColumn = (tableIndex: number) => {
     const newTables = [...tables];
     const table = newTables[tableIndex];
@@ -157,13 +163,17 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
                       placeholder="Width"
                     /> %
                     {table.headers.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeColumn(tableIndex, columnIndex)}
-                        className={styles.removeColumnButton}
-                      >
-                        ×
-                      </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
+                                removeColumn(tableIndex, columnIndex);
+                                }
+                            }}
+                            className={styles.removeColumnButton}
+                            >
+                            ×
+                        </button>
                     )}
                   </div>
                 </div>
@@ -190,13 +200,18 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
                         }}
                         placeholder="Cell content"
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeRow(tableIndex, rowIndex)}
-                        className={styles.removeRowButton}
-                      >
-                        ×
-                      </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
+                                removeRow(tableIndex, rowIndex);
+                                }
+                            }}
+                            className={styles.removeRowButton}
+                            >
+                            ×
+                        </button>
+
                     </div>
                   ))}
                 </div>
@@ -206,15 +221,15 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
 
           <button
             type="button"
-            onClick={() => {
-              const newTables = [...tables];
-              newTables.splice(tableIndex, 1);
-              onChange(newTables);
-            }}
+            onClick={() => confirmRemove(() => {
+                const newTables = [...tables];
+                newTables.splice(tableIndex, 1);
+                onChange(newTables);
+            }, 'Are you sure you want to remove this table?')}
             className={styles.removeTableButton}
-          >
+            >
             Remove Table
-          </button>
+            </button>
         </div>
       ))}
     </div>

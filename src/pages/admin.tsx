@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AdminAuth from '@/components/auth/AdminAuth';
-import EventForm from '@/components/admin/EventForm';
+import { EventForm} from '@/components/admin/EventForm';
 import EventsList from '@/components/admin/EventsList';
 import { TimelineEvent } from '@/data/events';
 import styles from '@/styles/admin.module.css';
@@ -54,6 +54,8 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
+  
+
   const handleLogout = async () => {
     const auth = getAuth();
     try {
@@ -66,6 +68,10 @@ export default function Admin() {
 
   const handleSuccess = async (message: string) => {
     setSuccess(message);
+    setSelectedEvent(null);
+  };
+
+  const handleDelete = () => {
     setSelectedEvent(null);
   };
 
@@ -120,6 +126,7 @@ export default function Admin() {
           selectedEvent={selectedEvent}
           onSuccess={handleSuccess}
           onError={setError}
+          onDelete={handleDelete}
         />
 
         <EventsList 

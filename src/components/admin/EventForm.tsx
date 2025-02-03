@@ -1,6 +1,6 @@
 // components/admin/EventForm.tsx
-import { useState } from 'react';
-import { createEvent, updateEvent } from '../../../lib/eventUtils';
+import React, { useState, useEffect } from 'react';
+import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
 import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
@@ -28,6 +28,7 @@ interface EventFormProps {
   selectedEvent: TimelineEvent | null;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const initialFormData: EventFormData = {
@@ -42,20 +43,51 @@ const initialFormData: EventFormData = {
   tables: []
 };
 
-export default function EventForm({ selectedEvent, onSuccess, onError }: EventFormProps) {
+export const EventForm: React.FC<EventFormProps> = ({
+  selectedEvent,
+  onDelete
+}) => {
   const [formData, setFormData] = useState<EventFormData>(
-    selectedEvent ? {
-      title: selectedEvent.title,
-      date: selectedEvent.date,
-      endDate: selectedEvent.endDate || '',
-      category: selectedEvent.category,
-      description: selectedEvent.description,
-      isSpecial: selectedEvent.isSpecial || false,
-      tags: selectedEvent.tags || [],
-      sideEvents: selectedEvent.sideEvents || [],
-      tables: selectedEvent.tables || []
-    } : initialFormData
+    selectedEvent
+      ? {
+          title: selectedEvent.title,
+          date: selectedEvent.date,
+          endDate: selectedEvent.endDate || '',
+          category: selectedEvent.category,
+          description: selectedEvent.description,
+          isSpecial: selectedEvent.isSpecial || false,
+          tags: selectedEvent.tags || [],
+          sideEvents: selectedEvent.sideEvents || [],
+          tables: selectedEvent.tables || []
+        }
+      : initialFormData
   );
+
+  const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    let successTimeout: ReturnType<typeof setTimeout> | null = null;
+    let errorTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    if (successMessage) {
+      successTimeout = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+    }
+
+    if (errorMessage) {
+      errorTimeout = setTimeout(() => {
+        setErrorMessage('');
+      }, 5000);
+    }
+
+    return () => {
+      if (successTimeout) clearTimeout(successTimeout);
+      if (errorTimeout) clearTimeout(errorTimeout);
+    };
+  }, [successMessage, errorMessage]);
+
 
   const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
     const newSideEvents = [...formData.sideEvents];
@@ -66,25 +98,39 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
     setFormData({ ...formData, sideEvents: newSideEvents });
   };
 
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
+
+    if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      try {
+        await deleteEvent(selectedEvent.id);
+        setSuccessMessage('Event deleted successfully!');
+        onDelete(selectedEvent!.id);
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        setErrorMessage('Failed to delete event. Please try again.');
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData); 
+    console.log('Form submitted with data:', formData);
 
     try {
       if (!formData.category) {
-        onError('Please select a category');
+        setErrorMessage('Please select a category');
         return;
       }
 
       if (!formData.tags.length) {
-        onError('Please add at least one tag');
+        setErrorMessage('Please add at least one tag');
         return;
       }
 
       const cleanData = {
         title: formData.title.trim(),
         date: formData.date,
-        // Only include endDate if it has a value
         ...(formData.endDate?.trim() ? { endDate: formData.endDate.trim() } : {}),
         category: formData.category,
         description: formData.description.trim(),
@@ -105,22 +151,33 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
       if (selectedEvent) {
         console.log('Updating event with ID:', selectedEvent.id);
         await updateEvent(selectedEvent.id, cleanData);
-        onSuccess('Event updated successfully!');
+        setSuccessMessage('Event updated successfully!');
       } else {
         console.log('Creating new event');
         await createEvent(cleanData);
-        onSuccess('Event added successfully!');
+        setSuccessMessage('Event added successfully!');
       }
 
       setFormData(initialFormData);
     } catch (error) {
       console.error('Error saving event:', error);
-      onError('Failed to save event. Please try again.');
+      setErrorMessage('Failed to save event. Please try again.');
     }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
+        {successMessage && (
+            <div className={styles.successMessage}>
+                <span className={styles.successText}>{successMessage}</span>
+            </div>
+            )}
+
+            {errorMessage && (
+            <div className={styles.errorMessage}>
+                <span className={styles.errorText}>{errorMessage}</span>
+            </div>
+            )}
       {/* Title and Special Status */}
       <div className={`${styles.formSection} ${styles['full-width']} ${styles['title-row']}`}>
         <div className={styles['input-container']}>
@@ -249,15 +306,17 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
               onChange={(e) => handleSideEventChange(index, 'description', e.target.value)}
             />
             <button 
-              type="button"
-              onClick={() => {
+            type="button"
+            onClick={() => {
+                if (window.confirm('Are you sure you want to remove this side event?')) {
                 const newSideEvents = [...formData.sideEvents];
                 newSideEvents.splice(index, 1);
                 setFormData({ ...formData, sideEvents: newSideEvents });
-              }}
-              className={styles.removeButton}
+                }
+            }}
+            className={styles.removeButton}
             >
-              Remove Side Event
+            Remove Side Event
             </button>
           </div>
         ))}
@@ -269,9 +328,29 @@ export default function EventForm({ selectedEvent, onSuccess, onError }: EventFo
         onChange={(tables) => setFormData({ ...formData, tables })}
       />
 
-      <button type="submit" className={styles.submitButton}>
-        {selectedEvent ? 'Update Event' : 'Add Event'}
-      </button>
+      <div className={`${styles.buttonGroup} ${styles.alignRight}`}>
+        <button type="submit" className={styles.submitButton}>
+            {selectedEvent ? 'Update Event' : 'Add Event'}
+        </button>
+        {selectedEvent ? (
+            <button 
+            type="button" 
+            onClick={handleDeleteEvent} 
+            className={styles.deleteButton}
+            >
+            Delete Event
+            </button>
+        ) : (
+            <button 
+            type="button" 
+            onClick={() => setFormData(initialFormData)} 
+            className={styles.clearButton}
+            >
+            Clear Event
+            </button>
+        )}
+     </div>
     </form>
   );
 }
+

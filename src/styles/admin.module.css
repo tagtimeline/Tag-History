@@ -164,8 +164,7 @@
   
 .addEventButton,
 .submitButton, 
-.addButton, 
-.removeButton {
+.addButton {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -179,16 +178,46 @@
     width: fit-content;
 }
   
-.submitButton {
+.addEventButton:hover,
+.submitButton:hover,
+.addButton:hover {
+    background-color: #444;
+    transform: scale(1.02);
+}
+
+.buttonGroup {
     grid-column: 1 / -1;
-    justify-self: start;
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+    align-items: center;
     margin-top: 10px;
 }
   
-.addEventButton:hover,
-.submitButton:hover,
-.addButton:hover,
-.removeButton:hover {
+.alignRight {
+    margin-left: auto;
+}
+
+
+.removeButton,
+.deleteButton,
+.clearButton {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: #FF5555;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    height: 30px;
+    padding: 0 12px;
+    transition: all 0.2s ease;
+    width: fit-content;
+}
+
+.removeButton:hover,
+.deleteButton:hover,
+.clearButton:hover {
     background-color: #444;
     transform: scale(1.02);
 }
@@ -222,24 +251,27 @@
     gap: 5px;
 }
   
-.success {
-    background-color: rgba(0, 255, 0, 0.1);
-    border: 1px solid #00ff00;
-    color: #00ff00;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    grid-column: 1 / -1;
+.successMessage,
+.errorMessage {
+  position: fixed;
+  overflow: visible;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 40px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 24px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 }
-  
-.error {
-    background-color: rgba(255, 0, 0, 0.1);
-    border: 1px solid #ff0000;
-    color: #ff0000;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    grid-column: 1 / -1;
+
+.successText {
+  color: #55FF55;
+}
+
+.errorText {
+  color: #FF5555;
 }
   
 .subtitle {
@@ -309,8 +341,7 @@
 
 .tableButton,
 .alignDropdown {
-    composes: addButton;
-    width: 32.75%;
+    composes: input;
 }
 
 

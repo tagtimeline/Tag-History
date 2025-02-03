@@ -1,5 +1,5 @@
 // lib/eventUtils.ts
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { TimelineEvent } from '@/data/events';
 import { extractPlayersFromEvent } from '../src/config/players';

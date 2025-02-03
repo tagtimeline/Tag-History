@@ -32,10 +32,10 @@ export interface TimelineEvent {
   category: string;
   tags: string[];
   isSpecial?: boolean;
-  tables?: any[]; // Define proper type if available
-  sideEvents?: any[]; // Define proper type if available
-  createdAt?: Date; // Make optional
-  updatedAt?: Date; // Make optional
+  tables?: Table[]; // Changed from any[] to Table[]
+  sideEvents?: SideEvent[]; // Changed from any[] to SideEvent[]
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 

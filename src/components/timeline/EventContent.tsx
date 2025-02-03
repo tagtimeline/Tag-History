@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import { TimelineEvent } from '../../data/events';
 import EventTable from './EventTable';
@@ -78,9 +79,11 @@ const renderTextWithLinks = (text: string) => {
       case 'image':
         parts.push(
           <div key={`image-${index}`} className={styles.imageWrapper}>
-            <img 
+            <Image 
               src={element.url}
               alt="Event content"
+              width={800}
+              height={600}
               className={styles.contentImage}
               onError={(e) => {
                 const img = e.target as HTMLImageElement;

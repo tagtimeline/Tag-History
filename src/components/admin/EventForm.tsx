@@ -4,7 +4,9 @@ import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
 import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
+import MarkdownGuidePopup from './MarkdownGuidePopup';
 import styles from '@/styles/admin.module.css';
+
 
 interface SideEvent {
   id: string;
@@ -47,6 +49,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   selectedEvent,
   onDelete
 }) => {
+  const [showMarkdownGuide, setShowMarkdownGuide] = useState(false);
   const [formData, setFormData] = useState<EventFormData>(
     selectedEvent
       ? {
@@ -64,7 +67,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   );
 
   const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let successTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -262,15 +265,27 @@ export const EventForm: React.FC<EventFormProps> = ({
 
       {/* Description */}
       <div className={`${styles.formSection} ${styles['full-width']}`}>
-        <label htmlFor="description">Description (Markdown supported)</label>
+        <label htmlFor="description">
+            Description 
+            <button 
+            type="button"
+            onClick={() => setShowMarkdownGuide(true)}
+            className={styles.markdownInfoButton}
+            >
+            (Markdown Info)
+            </button>
+        </label>
         <textarea
-          id="description"
-          className={styles.textarea}
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          required
+            id="description"
+            className={styles.textarea}
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            required
         />
-      </div>
+        {showMarkdownGuide && (
+            <MarkdownGuidePopup onClose={() => setShowMarkdownGuide(false)} />
+        )}
+        </div>
 
       {/* Tags */}
       <div className={`${styles.formSection} ${styles['full-width']}`}>

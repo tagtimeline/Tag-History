@@ -530,3 +530,20 @@
     outline: none;
     border-color: #777;
 }
+
+.markdownInfoButton {
+    font-family: 'Minecraft', sans-serif;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    text-decoration: underline;
+    padding: 0;
+}
+  
+.markdownInfoButton:hover {
+    color: #fff;
+}
+

@@ -252,6 +252,30 @@
     background: #444;
 }
 
+/* Markdown Content - Admin Panel */
+.markdownGrid {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+.markdownSection {
+    background: #1a1a1a;
+    border-radius: 4px;
+    padding: 5px;
+}
+  
+.markdownSection code {
+    display: block;
+    background-color: #333;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #fff;
+    margin: 4px 0;
+}
+
 /* Checkbox Styles */
 .checkboxLabel {
     align-items: center;

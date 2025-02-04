@@ -46,15 +46,19 @@ export default function AdminWelcome() {
         return () => unsubscribe();
       }, [router]);
   
-    const fetchAdminInfo = async (user: any) => {
-      try {
-        const info = await getAdminInfo(user.email!);
-        setAdminInfo(info);
-      } catch (err) {
-        console.error('Error fetching admin info:', err);
-        setError('Failed to load admin information');
-      }
-    };
+      const fetchAdminInfo = async (user: { email: string | null }) => {
+        try {
+          if (!user.email) {
+            setError('No email found');
+            return;
+          }
+          const info = await getAdminInfo(user.email);
+          setAdminInfo(info);
+        } catch (err) {
+          console.error('Error fetching admin info:', err);
+          setError('Failed to load admin information');
+        }
+      };
   
     const handleLogout = () => handleAdminLogout(router);
   

@@ -22,7 +22,7 @@ const AdminAuth = () => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       console.log('Login successful:', result.user);
       localStorage.setItem('adminLoginTime', Date.now().toString());
-      router.push('/admin'); // Redirect to the admin page after successful login
+      router.push('/admin');
     } catch (error) {
       console.error('Login failed:', error);
       setShowError(true);

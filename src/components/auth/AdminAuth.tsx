@@ -1,8 +1,10 @@
 // components/auth/AdminAuth.tsx
 import { useState } from 'react';
+import '../../../lib/firebaseConfig';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/router';
-import styles from '../../styles/adminAuth.module.css';
+
+import styles from '../../styles/admin/auth.module.css';
 
 const AdminAuth = () => {
   const [email, setEmail] = useState('');

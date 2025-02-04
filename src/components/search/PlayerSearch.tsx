@@ -106,7 +106,7 @@ const PlayerSearch: React.FC = () => {
             ))
           ) : (
             <div className={searchStyles.noResults}>
-              Press enter to search for "{searchTerm}"
+              Press enter to search for &quot;{searchTerm}&quot;
             </div>
           )}
         </div>

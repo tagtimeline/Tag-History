@@ -79,8 +79,8 @@
    
 .loading {
     display: flex;
+    margin-top: 50%;
     justify-content: center;
-    align-items: center;
     color: #fff;
     font-family: 'Minecraft', sans-serif;
 }

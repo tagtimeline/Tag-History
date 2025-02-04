@@ -26,7 +26,6 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
 const [isLoading, setIsLoading] = useState(true);
 const [events, setEvents] = useState<TimelineEvent[]>([]);
 const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
-const [error, setError] = useState<string>('');
 const [success, setSuccess] = useState<string>('');
 
 useEffect(() => {
@@ -50,9 +49,8 @@ useEffect(() => {
         .map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent))
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setEvents(eventData);
-    } catch (error) {
-      console.error('Error in events listener:', error);
-      setError('Failed to listen to event changes');
+    } catch (snapshotError) {
+      console.error('Error in events listener:', snapshotError);
     }
   });
 
@@ -64,8 +62,8 @@ const handleLogout = async () => {
   try {
     await signOut(auth);
     router.push('/');
-  } catch (error) {
-    setError('Failed to logout. Please try again.');
+  } catch (logoutError) {
+    console.error('Logout error:', logoutError);
   }
 };
 
@@ -116,14 +114,13 @@ return (
         </button>
       </div>
 
-      {error && <div className={baseStyles.errorMessage}><span className={baseStyles.errorText}>{error}</span></div>}
       {success && <div className={baseStyles.successMessage}><span className={baseStyles.successText}>{success}</span></div>}
 
       <EventForm 
         key={selectedEvent?.id || 'new'} 
         selectedEvent={selectedEvent}
         onSuccess={handleSuccess}
-        onError={setError}
+        onError={(errorMsg: string) => console.error(errorMsg)}
         onDelete={handleDelete}
       />
 

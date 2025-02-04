@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { getAdminInfo } from '@/../lib/adminUtils';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import Header from '@/components/layout/Header';
@@ -54,9 +55,9 @@ export default function AdminWelcome() {
     try {
       await signOut(getAuth());
       router.push('/');
-    } catch (error) {
+    } catch (logoutError) {
       setError('Failed to logout. Please try again.');
-      console.error('Logout error:', error);
+      console.error('Logout error:', logoutError);
     }
   };
 
@@ -95,8 +96,8 @@ export default function AdminWelcome() {
                 </div>
                 {adminInfo.minecraft_uuid && (
                   <div className={welcomeStyles.playerHead}>
-                    <img 
-                      src={`https://crafatar.com/avatars/${adminInfo.minecraft_uuid}?size=64&overlay=true`}
+                    <Image 
+                      src={`https://crafthead.net/avatar/${adminInfo.minecraft_uuid}?size=64`}
                       alt="Player head"
                       width={64}
                       height={64}

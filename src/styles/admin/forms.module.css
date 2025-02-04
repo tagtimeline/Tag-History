@@ -1,0 +1,146 @@
+/* src/styles/admin/forms.module.css */
+.form {
+    width: 650px;
+    background-color: #151515;
+    border: 2px solid #505050;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 15px;
+}
+   
+.formSection {
+    display: flex;
+    flex-direction: column;
+}
+   
+.formSection label {
+    margin-bottom: 0px;
+    font-size: 14px;
+    color: #888;
+}
+   
+.formSection.fullWidth {
+    grid-column: 1 / -1;
+}
+   
+.formSection.fullWidth.titleRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 5px;
+    position: relative;
+}
+   
+.formSection.fullWidth.titleRow .inputContainer {
+    width: 100%;
+}
+   
+.checkboxLabel {
+    position: absolute;
+    right: 0;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    gap: 4px;
+    outline: none;
+}
+   
+.checkboxLabel input[type="checkbox"] {
+    appearance: none;
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 15px;
+    outline: none;
+    position: relative;
+    width: 15px;
+}
+   
+.checkboxLabel input[type="checkbox"]:checked {
+    background-color: #444;
+}
+   
+.checkboxLabel input[type="checkbox"]:checked::after {
+    color: white;
+    content: "×";
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    left: 50%;
+    position: absolute;
+    top: 35%;
+    transform: translate(-50%, -50%);
+}
+   
+.dateGroup {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+   
+.input {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-family: "Minecraft", sans-serif;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+   
+.textarea {
+    composes: input;
+    height: auto;
+    min-height: 120px;
+    resize: vertical;
+    max-height: 500px;
+    margin-top: 5px;
+}
+   
+.input:focus,
+.textarea:focus {
+    outline: none;
+    border-color: #777;
+}
+   
+.input::placeholder,
+.textarea::placeholder {
+    color: #777;
+}
+
+.sideEvents {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+  
+.sideEventsHeader {
+    display: flex;
+    margin: 0;
+    color: white;
+    margin-top: 5px;
+    font-size: 18px;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+.sideEventGroup {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}

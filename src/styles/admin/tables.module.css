@@ -1,0 +1,111 @@
+/* src/styles/admin/tables.module.css */
+.tableWrapper {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.tables {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tablesHeader {
+    display: flex;
+    margin: 0;
+    color: white;
+    margin-top: 5px;
+    font-size: 18px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tableButton {
+    composes: input from './forms.module.css';
+}
+
+.alignDropdown {
+    composes: input from './forms.module.css';
+}
+
+.tableControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.tableEditor {
+    background: #242424;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+    margin-bottom: 5px;
+}
+
+.tableGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.headerCell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+}
+
+.widthInput {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.widthInput input {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-family: "Minecraft", sans-serif;
+    padding: 4px;
+    width: 50px;
+}
+
+.removeColumnButton,
+.removeRowButton {
+    position: absolute;
+    top: 0px;
+    right: -5px;
+    background: #444;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    height: 15px;
+    width: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.tableRow {
+    display: contents;
+}
+
+.tableCell {
+    position: relative;
+}
+
+.tableCell textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+}

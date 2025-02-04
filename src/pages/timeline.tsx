@@ -159,10 +159,10 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
          <EventSearch/>
 
          <Link href="/events">
-           <button className={controlStyles.eventsButton}>Events</button>
+           <button className={controlStyles.headerButton}>Events</button>
          </Link>
          <Link href="/info">
-           <button className={controlStyles.infoButton}>Info</button>
+           <button className={controlStyles.headerButton}>Info</button>
          </Link>
        </div>
      </Header>

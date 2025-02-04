@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     domains: [
+      'discord.com',
       'crafthead.net', 
       'visage.surgeplay.com',
       'textures.minecraft.net',

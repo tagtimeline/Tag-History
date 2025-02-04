@@ -22,10 +22,10 @@ const InfoPage: NextPage = () => {
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/timeline">
-            <button className={controlStyles.timelineButton}>Timeline</button>
+            <button className={controlStyles.headerButton}>Timeline</button>
           </Link>
           <Link href="/events">
-            <button className={controlStyles.eventsButton}>Events</button>
+            <button className={controlStyles.headerButton}>Events</button>
           </Link>
         </div>
       </Header>

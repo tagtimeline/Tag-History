@@ -57,13 +57,13 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/timeline">
-            <button className={controlStyles.timelineButton}>Timeline</button>
+            <button className={controlStyles.headerButton}>Timeline</button>
           </Link>
           <Link href="/events">
-            <button className={controlStyles.eventsButton}>Events</button>
+            <button className={controlStyles.headerButton}>Events</button>
           </Link>
           <Link href="/info">
-            <button className={controlStyles.infoButton}>Info</button>
+            <button className={controlStyles.headerButton}>Info</button>
           </Link>
         </div>
       </Header>

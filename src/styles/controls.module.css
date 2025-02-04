@@ -120,22 +120,7 @@
 }
 
 /* Header Button Variants */
-.infoButton {
-    composes: button;
-    width: 64px;
-}
-
-.timelineButton {
-    composes: button;
-    width: 64px;
-}
-
-.eventsButton {
-    composes: button;
-    width: 64px;
-}
-
-.logoutButton {
+.headerButton {
     composes: button;
     width: 64px;
 }

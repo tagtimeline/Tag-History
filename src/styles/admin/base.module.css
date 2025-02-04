@@ -1,0 +1,86 @@
+/* src/styles/admin/base.module.css */
+
+.pageWrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+   
+.mainContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    height: auto;
+    padding-bottom: 100px;
+}
+   
+.header {
+    width: 684px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+   
+.title {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #fff;
+}
+   
+.successMessage,
+.errorMessage {
+    position: fixed;
+    overflow: visible;
+    top: 30px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 24px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+   
+.successText {
+    color: #55FF55;
+}
+   
+.errorText {
+    color: #FF5555;
+}
+   
+.subtitle {
+    font-size: 20px;
+    margin: 30px 0 20px 0;
+    color: #fff;
+}
+   
+.flexRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+   
+.flexColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+   
+.fullWidth {
+    width: 100%;
+}
+   
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-family: 'Minecraft', sans-serif;
+}

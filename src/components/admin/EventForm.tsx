@@ -5,8 +5,10 @@ import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
 import MarkdownGuidePopup from './MarkdownGuidePopup';
-import styles from '@/styles/admin.module.css';
 
+import baseStyles from '@/styles/admin/base.module.css';
+import buttonStyles from '@/styles/admin/buttons.module.css';
+import formStyles from '@/styles/admin/forms.module.css';
 
 interface SideEvent {
   id: string;
@@ -134,18 +136,18 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted with data:', formData);
-
+  
     try {
       if (!formData.category) {
         setErrorMessage('Please select a category');
         return;
       }
-
+  
       if (!formData.tags.length) {
         setErrorMessage('Please add at least one tag');
         return;
       }
-
+  
       const cleanData = {
         title: formData.title.trim(),
         date: formData.date,
@@ -163,9 +165,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           })),
         tables: formData.tables
       };
-
-      console.log('Cleaned data before save:', cleanData);
-
+  
       if (selectedEvent) {
         console.log('Updating event with ID:', selectedEvent.id);
         await updateEvent(selectedEvent.id, cleanData);
@@ -175,41 +175,42 @@ export const EventForm: React.FC<EventFormProps> = ({
         await createEvent(cleanData);
         setSuccessMessage('Event added successfully!');
       }
-
+  
       setFormData(initialFormData);
     } catch (error) {
       console.error('Error saving event:', error);
       setErrorMessage('Failed to save event. Please try again.');
     }
   };
+  
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-        {successMessage && (
-            <div className={styles.successMessage}>
-                <span className={styles.successText}>{successMessage}</span>
-            </div>
-            )}
-
-            {errorMessage && (
-            <div className={styles.errorMessage}>
-                <span className={styles.errorText}>{errorMessage}</span>
-            </div>
-            )}
-      {/* Title and Special Status */}
-      <div className={`${styles.formSection} ${styles['full-width']} ${styles['title-row']}`}>
-        <div className={styles['input-container']}>
+    <form onSubmit={handleSubmit} className={formStyles.form}>
+      {successMessage && (
+        <div className={baseStyles.successMessage}>
+          <span className={baseStyles.successText}>{successMessage}</span>
+        </div>
+      )}
+   
+      {errorMessage && (
+        <div className={baseStyles.errorMessage}>
+          <span className={baseStyles.errorText}>{errorMessage}</span>
+        </div>
+      )}
+   
+      <div className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}>
+        <div className={formStyles.inputContainer}>
           <label htmlFor="title">Event Title</label>
           <input
             id="title"
             type="text"
-            className={styles.input}
+            className={formStyles.input}
             value={formData.title}
             onChange={(e) => setFormData({...formData, title: e.target.value})}
             required
           />
         </div>
-        <div className={styles.checkboxLabel}>
+        <div className={formStyles.checkboxLabel}>
           <input
             type="checkbox"
             checked={formData.isSpecial}
@@ -218,38 +219,36 @@ export const EventForm: React.FC<EventFormProps> = ({
           Special Event
         </div>
       </div>
-
-      {/* Dates */}
-      <div className={`${styles.dateGroup} ${styles['full-width']}`}>
-        <div className={styles.formSection}>
+   
+      <div className={`${formStyles.dateGroup} ${formStyles.fullWidth}`}>
+        <div className={formStyles.formSection}>
           <label htmlFor="startDate">Start Date</label>
           <input
             id="startDate"
             type="date"
-            className={styles.input}
+            className={formStyles.input}
             value={formData.date}
             onChange={(e) => setFormData({...formData, date: e.target.value})}
             required
           />
         </div>
-        <div className={styles.formSection}>
+        <div className={formStyles.formSection}>
           <label htmlFor="endDate">End Date (Optional)</label>
           <input
             id="endDate"
             type="date"
-            className={styles.input}
+            className={formStyles.input}
             value={formData.endDate}
             onChange={(e) => setFormData({...formData, endDate: e.target.value})}
           />
         </div>
       </div>
-
-      {/* Category */}
-      <div className={styles.formSection}>
+   
+      <div className={formStyles.formSection}>
         <label htmlFor="category">Category</label>
         <select
           id="category"
-          className={styles.input}
+          className={formStyles.input}
           value={formData.category}
           onChange={(e) => setFormData({...formData, category: e.target.value as keyof typeof categories})}
           required
@@ -262,48 +261,45 @@ export const EventForm: React.FC<EventFormProps> = ({
           ))}
         </select>
       </div>
-
-      {/* Description */}
-      <div className={`${styles.formSection} ${styles['full-width']}`}>
+   
+      <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="description">
-            Description 
-            <button 
+          Description
+          <button 
             type="button"
             onClick={() => setShowMarkdownGuide(true)}
-            className={styles.markdownInfoButton}
-            >
+            className={buttonStyles.markdownInfoButton}
+          >
             (Markdown Info)
-            </button>
+          </button>
         </label>
         <textarea
-            id="description"
-            className={styles.textarea}
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            required
+          id="description"
+          className={formStyles.textarea}
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          required
         />
         {showMarkdownGuide && (
-            <MarkdownGuidePopup onClose={() => setShowMarkdownGuide(false)} />
+          <MarkdownGuidePopup onClose={() => setShowMarkdownGuide(false)} />
         )}
-        </div>
-
-      {/* Tags */}
-      <div className={`${styles.formSection} ${styles['full-width']}`}>
+      </div>
+   
+      <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="tags">Tags (comma-separated)</label>
         <input
           id="tags"
           type="text"
-          className={styles.input}
+          className={formStyles.input}
           value={formData.tags.join(', ')}
           onChange={(e) => setFormData({...formData, tags: e.target.value.split(',').map(tag => tag.trim())})}
           placeholder="tag1, tag2, tag3"
           required
         />
       </div>
-
-      {/* Side Events */}
-      <div className={styles.sideEvents}>
-        <div className={styles.sideEventsHeader}>
+   
+      <div className={formStyles.sideEvents}>
+        <div className={formStyles.sideEventsHeader}>
           Side Events
           <button 
             type="button"
@@ -314,85 +310,83 @@ export const EventForm: React.FC<EventFormProps> = ({
                 { id: `side${Date.now()}`, title: '', description: '' }
               ]
             })}
-            className={styles.addButton}
+            className={buttonStyles.addButton}
           >
             Add Side Event
           </button>
         </div>
-
+   
         {formData.sideEvents.map((sideEvent, index) => (
-          <div key={sideEvent.id} className={styles.sideEventGroup}>
+          <div key={sideEvent.id} className={formStyles.sideEventGroup}>
             <input
               type="text"
-              className={styles.input}
+              className={formStyles.input}
               placeholder="Side Event Title"
               value={sideEvent.title}
               onChange={(e) => handleSideEventChange(index, 'title', e.target.value)}
             />
             <textarea
-              className={styles.textarea}
+              className={formStyles.textarea}
               placeholder="Side Event Description"
               value={sideEvent.description}
               onChange={(e) => handleSideEventChange(index, 'description', e.target.value)}
             />
             <button 
-            type="button"
-            onClick={() => {
+              type="button"
+              onClick={() => {
                 if (window.confirm('Are you sure you want to remove this side event?')) {
-                const newSideEvents = [...formData.sideEvents];
-                newSideEvents.splice(index, 1);
-                setFormData({ ...formData, sideEvents: newSideEvents });
+                  const newSideEvents = [...formData.sideEvents];
+                  newSideEvents.splice(index, 1);
+                  setFormData({ ...formData, sideEvents: newSideEvents });
                 }
-            }}
-            className={styles.removeButton}
+              }}
+              className={buttonStyles.removeButton}
             >
-            Remove Side Event
+              Remove Side Event
             </button>
           </div>
         ))}
       </div>
-
-      {/* Tables */}
+   
       <TableManager 
         tables={formData.tables}
         onChange={(tables) => setFormData({ ...formData, tables })}
       />
-
-    {/* Event Controls */}
-    <div className={`${styles.buttonGroup} ${styles.alignRight}`}>
-    <button type="submit" className={styles.submitButton}>
-        {selectedEvent ? 'Update Event' : 'Add Event'}
-    </button>
-    {selectedEvent ? (
-        <>
-        <button 
-            type="button" 
-            onClick={handleDuplicateEvent}
-            className={styles.duplicateButton}
-        >
-            Duplicate Event
+   
+      <div className={`${buttonStyles.buttonGroup} ${buttonStyles.alignRight}`}>
+        <button type="submit" className={buttonStyles.submitButton}>
+          {selectedEvent ? 'Update Event' : 'Add Event'}
         </button>
-        <button 
-            type="button" 
-            onClick={handleDeleteEvent} 
-            className={styles.deleteButton}
-        >
-            Delete Event
-        </button>
-        </>
-    ) : (
-        <>
-        <button 
-            type="button" 
-            onClick={() => setFormData(initialFormData)} 
-            className={styles.clearButton}
-        >
-            Clear Event
-        </button>
-        </>
-    )}
-    </div>
+        {selectedEvent ? (
+          <>
+            <button 
+              type="button" 
+              onClick={handleDuplicateEvent}
+              className={buttonStyles.duplicateButton}
+            >
+              Duplicate Event
+            </button>
+            <button 
+              type="button" 
+              onClick={handleDeleteEvent} 
+              className={buttonStyles.deleteButton}
+            >
+              Delete Event
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              type="button" 
+              onClick={() => setFormData(initialFormData)} 
+              className={buttonStyles.clearButton}
+            >
+              Clear Event
+            </button>
+          </>
+        )}
+      </div>
     </form>
-  );
+   );
 }
 

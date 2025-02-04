@@ -1,7 +1,10 @@
 // components/admin/TableManager.tsx
 import React from 'react';
 import { Table } from '@/data/events';
-import styles from '@/styles/admin.module.css';
+
+import tableStyles from '@/styles/admin/tables.module.css';
+import formStyles from '@/styles/admin/forms.module.css';
+import buttonStyles from '@/styles/admin/buttons.module.css';
 
 interface TableManagerProps {
   tables: Table[];
@@ -33,7 +36,6 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
     
     table.headers.push(`Column ${table.headers.length + 1}`);
     
-    // Distribute widths evenly
     const newWidth = Math.floor(100 / table.headers.length);
     const remainder = 100 - (newWidth * table.headers.length);
     table.columnWidths = table.headers.map((_, index) => 
@@ -51,7 +53,6 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
     const newTables = [...tables];
     const table = newTables[tableIndex];
     
-    // Only remove if there's more than one column
     if (table.headers.length > 1) {
       table.headers.splice(columnIndex, 1);
       if (!table.columnWidths) {
@@ -95,37 +96,37 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
   };
 
   return (
-    <div className={styles.tables}>
-      <div className={styles.tablesHeader}>
+    <div className={tableStyles.tables}>
+      <div className={tableStyles.tablesHeader}>
         Tables
         <button 
           type="button" 
           onClick={addTable} 
-          className={styles.addButton}
+          className={buttonStyles.addButton}
         >
           Add Table
         </button>
       </div>
 
       {tables.map((table, tableIndex) => (
-        <div key={tableIndex} className={styles.tableWrapper}>
-          <div className={styles.tableControls}>
+        <div key={tableIndex} className={tableStyles.tableWrapper}>
+          <div className={tableStyles.tableControls}>
             <button 
               type="button"
               onClick={() => addColumn(tableIndex)}
-              className={styles.tableButton}
+              className={tableStyles.tableButton}
             >
               Add Column
             </button>
             <button 
               type="button"
               onClick={() => addRow(tableIndex)}
-              className={styles.tableButton}
+              className={tableStyles.tableButton}
             >
               Add Row
             </button>
             <select
-              className={styles.alignDropdown}
+              className={tableStyles.alignDropdown}
               value={table.align}
               onChange={(e) => {
                 const newTables = [...tables];
@@ -139,13 +140,13 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
             </select>
           </div>
 
-          <div className={styles.tableEditor}>
-            <div className={styles.tableGrid}>
+          <div className={tableStyles.tableEditor}>
+            <div className={tableStyles.tableGrid}>
               {table.headers.map((header, columnIndex) => (
-                <div key={columnIndex} className={styles.headerCell}>
+                <div key={columnIndex} className={tableStyles.headerCell}>
                   <input
                     type="text"
-                    className={styles.input}
+                    className={formStyles.input}
                     value={header}
                     onChange={(e) => {
                       const newTables = [...tables];
@@ -154,44 +155,44 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
                     }}
                     placeholder="Header"
                   />
-                  <div className={styles.widthInput}>
+                  <div className={tableStyles.widthInput}>
                     Width <input
                       type="text"
-                      className={styles.input}
+                      className={formStyles.input}
                       value={table.columnWidths?.[columnIndex]?.replace(/%$/, '') || ''}
                       onChange={(e) => updateColumnWidth(tableIndex, columnIndex, e.target.value)}
                       placeholder="Width"
                     /> %
                     {table.headers.length > 1 && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
-                                removeColumn(tableIndex, columnIndex);
-                                }
-                            }}
-                            className={styles.removeColumnButton}
-                            >
-                            ×
-                        </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
+                            removeColumn(tableIndex, columnIndex);
+                          }
+                        }}
+                        className={tableStyles.removeColumnButton}
+                      >
+                        ×
+                      </button>
                     )}
                   </div>
                 </div>
               ))}
 
               {table.rows.map((row, rowIndex) => (
-                <div key={rowIndex} className={styles.tableRow}>
+                <div key={rowIndex} className={tableStyles.tableRow}>
                   {row.cells.map((cell, columnIndex) => (
                     <div
                       key={columnIndex}
-                      className={styles.tableCell}
+                      className={tableStyles.tableCell}
                       style={{
                         gridColumn: `${columnIndex + 1} / span 1`,
                         gridRow: `${rowIndex + 2} / span 1`,
                       }}
                     >
                       <textarea
-                        className={styles.input}
+                        className={formStyles.input}
                         value={cell.content}
                         onChange={(e) => {
                           const newTables = [...tables];
@@ -200,18 +201,17 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
                         }}
                         placeholder="Cell content"
                       />
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
-                                removeRow(tableIndex, rowIndex);
-                                }
-                            }}
-                            className={styles.removeRowButton}
-                            >
-                            ×
-                        </button>
-
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
+                            removeRow(tableIndex, rowIndex);
+                          }
+                        }}
+                        className={tableStyles.removeRowButton}
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -222,14 +222,14 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
           <button
             type="button"
             onClick={() => confirmRemove(() => {
-                const newTables = [...tables];
-                newTables.splice(tableIndex, 1);
-                onChange(newTables);
+              const newTables = [...tables];
+              newTables.splice(tableIndex, 1);
+              onChange(newTables);
             }, 'Are you sure you want to remove this table?')}
-            className={styles.removeTableButton}
-            >
+            className={buttonStyles.removeButton}
+          >
             Remove Table
-            </button>
+          </button>
         </div>
       ))}
     </div>

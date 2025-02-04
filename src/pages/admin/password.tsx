@@ -1,12 +1,13 @@
-// pages/admin/password.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Head from 'next/head';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-
 import AdminAuth from '@/components/auth/AdminAuth';
+import { checkAdminAuth } from '@/components/admin/AuthHandler';
+
 import baseStyles from '@/styles/admin/base.module.css';
 import headerStyles from '@/styles/header.module.css';
 
@@ -15,16 +16,17 @@ export default function AdminPassword() {
  const [isLoading, setIsLoading] = useState(true);
 
  useEffect(() => {
-   const checkAuth = () => {
-     const auth = localStorage.getItem('adminLoginTime');
-     if (auth) {
-       router.replace('/admin');
-     }
-     setIsLoading(false);
-   };
-   
-   checkAuth();
- }, [router]);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && checkAdminAuth()) {
+        router.replace('/admin');
+      } else {
+        setIsLoading(false);
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [router]);
 
  if (isLoading) return <div className={baseStyles.loading}>Loading...</div>;
 

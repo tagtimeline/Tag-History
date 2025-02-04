@@ -34,7 +34,7 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
         router.replace('/password');
       }
     } else {
-      setIsAuthenticated(true);
+      setIsAuthenticated(false);
     }
   }, [router]);
 

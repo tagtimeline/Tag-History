@@ -1,15 +1,15 @@
-// pages/admin/players.tsx
 import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-
 import PlayerSearch from '@/components/search/PlayerSearch';
-import playerStyles from '@/styles/admin/players.module.css';
+import { handleAdminLogout } from '@/components/admin/AuthHandler';
 
+import playerStyles from '@/styles/admin/players.module.css';
 import baseStyles from '@/styles/admin/base.module.css';
 import controlStyles from '@/styles/controls.module.css';
 import headerStyles from '@/styles/header.module.css';
@@ -33,15 +33,7 @@ export default function AdminPlayers() {
     return () => unsubscribe();
   }, [router]);
 
- const handleLogout = async () => {
-   const auth = getAuth();
-   try {
-     await signOut(auth);
-     router.push('/');
-   } catch (logoutError) {
-     console.error('Logout error:', logoutError);
-   }
- };
+ const handleLogout = () => handleAdminLogout(router);
 
  if (isLoading) return <div className={baseStyles.loading}>Loading...</div>;
  if (!isAuthenticated) return null;

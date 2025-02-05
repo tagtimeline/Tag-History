@@ -76,7 +76,7 @@ export function extractPlayerNames(text: string): string[] {
   return names;
 }
 
-export function extractPlayersFromEvent(event: Partial<TimelineEvent> | Record<string, any>): string[] {
+export function extractPlayersFromEvent(event: Partial<TimelineEvent> | Record<string, string | object | null>): string[] {
   const playerNames = new Set<string>();
   
   console.log('Scanning event for player names:', event);

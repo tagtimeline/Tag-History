@@ -19,6 +19,18 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setSearchTerm('');
+      setSearchResults([]);
+      setIsFocused(false);
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => router.events.off('routeChangeStart', handleRouteChange);
+  }, [router]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -28,6 +40,9 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
           id: doc.id,
           ...doc.data()
         })) as TimelineEvent[];
+        
+        // Sort events by date (most recent first)
+        eventData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
         // Apply filter if provided
         if (filterEvents) {
@@ -52,19 +67,19 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
     
     if (value.trim()) {
       let filtered = searchEvents(events, value);
-      // Apply additional filter if provided
       if (filterEvents) {
         filtered = filtered.filter(filterEvents);
       }
       setSearchResults(filtered);
     } else {
-      setSearchResults([]);
+      setSearchResults(events);
     }
   };
 
   const handleResultClick = async (event: TimelineEvent) => {
     setSearchTerm('');
     setSearchResults([]);
+    setIsFocused(false);
 
     if (onEventSelect) {
       onEventSelect(event);
@@ -76,7 +91,6 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
     switch (currentPage) {
       case '/':
       case '/timeline':
-        // For home and timeline pages: navigate to timeline and handle scrolling + modal
         await router.push(`/timeline#${event.id}`);
         const eventElement = document.querySelector(`[data-event-id="${event.id}"]`);
         if (eventElement) {
@@ -86,7 +100,6 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
         break;
 
       case '/events':
-        // For events page: just trigger the modal
         const eventCard = document.querySelector(`[data-event-id="${event.id}"]`);
         if (eventCard) {
           (eventCard as HTMLElement).click();
@@ -94,15 +107,10 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
         break;
 
       case '/admin':
-        // For admin page: scroll to event and trigger hover effect
         const adminEventCard = document.querySelector(`[data-event-id="${event.id}"]`);
         if (adminEventCard) {
           adminEventCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Add hover effect class
           adminEventCard.classList.add(searchStyles.hoverEffect);
-          
-          // Remove hover effect after 2 seconds
           setTimeout(() => {
             adminEventCard.classList.remove(searchStyles.hoverEffect);
           }, 2000);
@@ -122,12 +130,19 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
         placeholder="Search events..." 
         value={searchTerm}
         onChange={handleSearchChange}
+        onFocus={() => {
+          setIsFocused(true);
+          setSearchResults(events);
+        }}
+        onBlur={() => {
+          setTimeout(() => setIsFocused(false), 200);
+        }}
       />
       {isLoading ? (
         <div className={searchStyles.eventSearchResults}>
           <div className={searchStyles.loadingText}>Loading...</div>
         </div>
-      ) : searchTerm && (
+      ) : (isFocused || searchTerm) && (
         <div className={searchStyles.eventSearchResults}>
           {searchResults.length > 0 ? (
             searchResults.map(event => (

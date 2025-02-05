@@ -48,7 +48,22 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
+  // Get available categories based on player's events
+  const availableCategories = useMemo(() => {
+    if (!playerData || !events) return [ALL_EVENTS_OPTION];
+    
+    const playerEventIds = new Set(playerData.events || []);
+    const usedCategories = new Set(
+      events
+        .filter(event => playerEventIds.has(event.id))
+        .map(event => event.category)
+    );
+    
+    return [
+      ALL_EVENTS_OPTION,
+      ...getAllCategories().filter(category => usedCategories.has(category.id))
+    ];
+  }, [playerData, events]);
 
   // Set up real-time listener for events
   useEffect(() => {
@@ -123,7 +138,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
             const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
             return sortDirection === 'asc' ? comparison : -comparison;
         });
-}, [playerData, selectedCategories, searchTerm, events, sortDirection]);
+  }, [playerData, selectedCategories, searchTerm, events, sortDirection]);
 
   if (!currentIgn || !playerData) {
     return (
@@ -212,7 +227,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
                   </div>
                   {isDropdownOpen && (
                     <ul className={controlStyles.dropdownMenu}>
-                      {allCategories.map((category) => (
+                      {availableCategories.map((category) => (
                         <li 
                           key={category.id}
                           className={`${controlStyles.dropdownItem} ${
@@ -233,11 +248,10 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
 
                 <EventSearch 
                   onEventSelect={setSelectedEvent}
-                  filterEvents={event => 
-                    allUsernames.some(username => 
-                      event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)
-                    )
-                  }
+                  filterEvents={(event) => {
+                    const playerEventIds = new Set(playerData.events || []);
+                    return playerEventIds.has(event.id);
+                  }}
                 />
 
                 <button
@@ -282,7 +296,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     if (typeof ign !== 'string') {
       return { 
         props: {
-          historicalIgn: params?.ign as string || '', // Use the original IGN or empty string
+          historicalIgn: params?.ign as string || '',
           currentIgn: null,
           allUsernames: [],
           playerData: null,
@@ -295,11 +309,11 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     const decodedIgn = decodeURIComponent(ign);
     const playerData = await getPlayerData(decodedIgn);
 
-    // Handle redirect for old IGNs (compare with decoded IGN)
+    // Handle redirect for old IGNs
     if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedIgn.toLowerCase()) {
       return {
         redirect: {
-          destination: `/player/${encodeURIComponent(playerData.currentIgn)}`, // Ensure proper encoding
+          destination: `/player/${encodeURIComponent(playerData.currentIgn)}`,
           permanent: false,
         }
       };
@@ -322,7 +336,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     console.error('Error in getServerSideProps:', error);
     return { 
       props: {
-        historicalIgn: params?.ign as string || '', // Use the original IGN or empty string
+        historicalIgn: params?.ign as string || '',
         currentIgn: null,
         allUsernames: [],
         playerData: null,

@@ -18,16 +18,39 @@ const PlayerSearch: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [searchResults, setSearchResults] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setSearchTerm('');
+      setSearchResults([]);
+      setIsFocused(false);
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => router.events.off('routeChangeStart', handleRouteChange);
+  }, [router]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, 'players'),
       (snapshot) => {
-        const playerData = snapshot.docs.map(doc => ({
+        let playerData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Player[];
+
+        // Sort players alphabetically and ensure flodlol is first
+        //playerData.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn));
+        
+        // Sort players alphabetically and ensure flodlol is first
+        playerData.sort((a, b) => {
+          if (a.currentIgn.toLowerCase() === 'flodlol') return -1;
+          if (b.currentIgn.toLowerCase() === 'flodlol') return 1;
+          return a.currentIgn.localeCompare(b.currentIgn);
+        });
+        
         setPlayers(playerData);
         setIsLoading(false);
       },
@@ -51,7 +74,7 @@ const PlayerSearch: React.FC = () => {
       );
       setSearchResults(filtered);
     } else {
-      setSearchResults([]);
+      setSearchResults(players);
     }
   };
 
@@ -60,6 +83,7 @@ const PlayerSearch: React.FC = () => {
       router.push(`/player/${searchTerm.trim()}`);
       setSearchTerm('');
       setSearchResults([]);
+      setIsFocused(false);
     }
   };
 
@@ -67,6 +91,7 @@ const PlayerSearch: React.FC = () => {
     router.push(`/player/${playerIgn}`);
     setSearchTerm('');
     setSearchResults([]);
+    setIsFocused(false);
   };
 
   return (
@@ -78,12 +103,19 @@ const PlayerSearch: React.FC = () => {
         value={searchTerm}
         onChange={handleSearchChange}
         onKeyPress={handleKeyPress}
+        onFocus={() => {
+          setIsFocused(true);
+          setSearchResults(players);
+        }}
+        onBlur={() => {
+          setTimeout(() => setIsFocused(false), 200);
+        }}
       />
       {isLoading ? (
         <div className={searchStyles.playerSearchResults}> 
           <div className={searchStyles.loadingText}>Loading...</div>
         </div>
-      ) : searchTerm && (
+      ) : (isFocused || searchTerm) && (
         <div className={searchStyles.playerSearchResults}>
           {searchResults.length > 0 ? (
             searchResults.map(player => (

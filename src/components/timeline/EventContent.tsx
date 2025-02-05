@@ -220,21 +220,26 @@ const parseContent = (text: string) => {
 
     const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
     
-    if (isImage(line) && isSubtext(nextLine)) {
-      // Handle image with subtext
-      const imageElement = parseLine(line, index);
+    // Check if the current line is either an image or youtube embed
+    const isYoutubeEmbed = line.match(patterns.youtube);
+    
+    if ((isImage(line) || isYoutubeEmbed) && isSubtext(nextLine)) {
+      // Handle image/youtube with subtext
+      const mediaElement = parseLine(line, index);
       const subtextElement = parseLine(nextLine, index + 1);
       
-      const imageDetails = extractImageDetails(line);
-      const width = imageDetails?.size || '75%';
+      // Get width - for images use imageDetails, for youtube use default 75%
+      const width = isImage(line) 
+        ? extractImageDetails(line)?.size || '75%'
+        : '75%';
       
       groups.push(
         <div 
-          key={`image-group-${groups.length}`} 
+          key={`media-group-${groups.length}`} 
           className={styles.imageSubtextGroup}
           style={{ width }}
         >
-          {imageElement}
+          {mediaElement}
           {subtextElement}
         </div>
       );

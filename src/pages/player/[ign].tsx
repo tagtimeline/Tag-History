@@ -104,27 +104,26 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   };
 
   const playerEvents = useMemo(() => {
-    if (!allUsernames || allUsernames.length === 0 || !events) return [];
+    if (!playerData || !events) return [];
+    
+    // Filter events that are in the player's events array
+    const playerEventIds = new Set(playerData.events || []);
     
     return events
-      .filter(event => 
-        allUsernames.some(username => 
-          event.description.toLowerCase().includes(`<${username.toLowerCase()}>`)  
+        .filter(event => playerEventIds.has(event.id))
+        .filter(event => 
+            selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
+            selectedCategories.includes(event.category)
         )
-      )
-      .filter(event => 
-        selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
-        selectedCategories.includes(event.category)
-      )
-      .filter(event => 
-        searchTerm === '' || 
-        searchEvents([event], searchTerm).length > 0  
-      )
-      .sort((a, b) => {
-        const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-        return sortDirection === 'asc' ? comparison : -comparison;
-      });
-  }, [allUsernames, selectedCategories, searchTerm, events, sortDirection]);
+        .filter(event => 
+            searchTerm === '' || 
+            searchEvents([event], searchTerm).length > 0  
+        )
+        .sort((a, b) => {
+            const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+            return sortDirection === 'asc' ? comparison : -comparison;
+        });
+}, [playerData, selectedCategories, searchTerm, events, sortDirection]);
 
   if (!currentIgn || !playerData) {
     return (

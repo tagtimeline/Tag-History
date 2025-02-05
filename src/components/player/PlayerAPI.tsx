@@ -1,4 +1,6 @@
 // src/components/player/PlayerAPI.tsx
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../../lib/firebaseConfig';
 import { PlayerProfile } from '../../config/players';
 import { TimelineEvent } from '../../data/events';
 import { getAllEvents } from '../../../lib/eventUtils';
@@ -13,7 +15,17 @@ interface PlayerDataResponse extends Record<string, unknown> {
 }
 
 export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
-    try {
+  try {
+    // First check our database
+    const playersRef = collection(db, 'players');
+    const q = query(playersRef, where('currentIgn', '==', ign));
+    const querySnapshot = await getDocs(q);
+    
+    let dbPlayerData = null;
+    if (!querySnapshot.empty) {
+      dbPlayerData = querySnapshot.docs[0].data();
+    }
+
     // Get player UUID and basic info from Ashcon
     const mojangData = await fetchMojangData(ign);
     if (!mojangData) {
@@ -38,17 +50,18 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
         },
         cape: mojangData.textures.cape
       },
-      hypixel: hypixelData
+      hypixel: hypixelData,
+      events: dbPlayerData?.events || []
     };
 
     const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);
 
     return {
-        historicalIgn: ign,
-        currentIgn: mojangData.currentIgn,
-        allUsernames,
-        playerData,
-        initialEvents: events
+      historicalIgn: ign,
+      currentIgn: mojangData.currentIgn,
+      allUsernames,
+      playerData,
+      initialEvents: events
     };
   } catch (error) {
     console.error('Error in getPlayerData:', error);
@@ -57,59 +70,64 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
 }
 
 async function fetchMojangData(ign: string) {
-  // Get UUID from Ashcon
-  const ashconResponse = await fetch(`https://api.ashcon.app/mojang/v2/user/${ign}`);
-  if (!ashconResponse.ok) return null;
-  const ashconData = await ashconResponse.json();
-
-  // Get profile data from Mojang
-  const mojangResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${ashconData.uuid}`);
-  if (!mojangResponse.ok) return null;
-  const mojangData = await mojangResponse.json();
-
-  // Parse texture data
-  const textureProperty = mojangData.properties.find((p: { name: string }) => p.name === 'textures');
-  const textureData = JSON.parse(Buffer.from(textureProperty.value, 'base64').toString());
-
-  let capeUrl = null;
   try {
-    const capesResponse = await fetch(`https://api.capes.dev/load/${ashconData.uuid}`);
-    if (capesResponse.ok) {
-      const capesData = await capesResponse.json();
-      
-      // Check for OptiFine cape by looking at the specific message
-      if (capesData.optifine?.msg === "Cape found") {
-        capeUrl = capesData.optifine.imageUrl;
-        console.log(`[Cape] ${mojangData.name} is using OptiFine cape: ${capeUrl}`);
-      }
-      // If no OptiFine cape, fallback to Minecraft cape from textureData
-      else if (textureData.textures.CAPE) {
-        capeUrl = textureData.textures.CAPE.url;
-        console.log(`[Cape] ${mojangData.name} is using Minecraft cape: ${capeUrl}`);
-      } else {
-        console.log(`[Cape] ${mojangData.name} has no cape`);
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching capes data:', error);
-    // Fallback to Minecraft cape if capes.dev request fails
-    if (textureData.textures.CAPE) {
-      capeUrl = textureData.textures.CAPE.url;
-      console.log(`[Cape] ${mojangData.name} is using Minecraft cape (fallback): ${capeUrl}`);
-    }
-  }
+    // Get UUID from Ashcon
+    const ashconResponse = await fetch(`https://api.ashcon.app/mojang/v2/user/${ign}`);
+    if (!ashconResponse.ok) return null;
+    const ashconData = await ashconResponse.json();
 
-  return {
-    uuid: ashconData.uuid,
-    currentIgn: mojangData.name,
-    created_at: ashconData.created_at,
-    username_history: ashconData.username_history,
-    allUsernames: ashconData.username_history?.map((history: { username: string }) => history.username) || [mojangData.name],
-    textures: {
-      skin: textureData.textures.SKIN.url,
-      cape: capeUrl ? { url: capeUrl } : null
+    // Get profile data from Mojang
+    const mojangResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${ashconData.uuid}`);
+    if (!mojangResponse.ok) return null;
+    const mojangData = await mojangResponse.json();
+
+    // Parse texture data
+    const textureProperty = mojangData.properties.find((p: { name: string }) => p.name === 'textures');
+    const textureData = JSON.parse(Buffer.from(textureProperty.value, 'base64').toString());
+
+    let capeUrl = null;
+    try {
+      const capesResponse = await fetch(`https://api.capes.dev/load/${ashconData.uuid}`);
+      if (capesResponse.ok) {
+        const capesData = await capesResponse.json();
+        
+        // Check for OptiFine cape by looking at the specific message
+        if (capesData.optifine?.msg === "Cape found") {
+          capeUrl = capesData.optifine.imageUrl;
+          console.log(`[Cape] ${mojangData.name} is using OptiFine cape: ${capeUrl}`);
+        }
+        // If no OptiFine cape, fallback to Minecraft cape from textureData
+        else if (textureData.textures.CAPE) {
+          capeUrl = textureData.textures.CAPE.url;
+          console.log(`[Cape] ${mojangData.name} is using Minecraft cape: ${capeUrl}`);
+        } else {
+          console.log(`[Cape] ${mojangData.name} has no cape`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching capes data:', error);
+      // Fallback to Minecraft cape if capes.dev request fails
+      if (textureData.textures.CAPE) {
+        capeUrl = textureData.textures.CAPE.url;
+        console.log(`[Cape] ${mojangData.name} is using Minecraft cape (fallback): ${capeUrl}`);
+      }
     }
-  };
+
+    return {
+      uuid: ashconData.uuid,
+      currentIgn: mojangData.name,
+      created_at: ashconData.created_at,
+      username_history: ashconData.username_history,
+      allUsernames: ashconData.username_history?.map((history: { username: string }) => history.username) || [mojangData.name],
+      textures: {
+        skin: textureData.textures.SKIN.url,
+        cape: capeUrl ? { url: capeUrl } : null
+      }
+    };
+  } catch (error) {
+    console.error('Error in fetchMojangData:', error);
+    return null;
+  }
 }
 
 async function fetchHypixelData(uuid: string) {

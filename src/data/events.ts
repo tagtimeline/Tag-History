@@ -22,6 +22,14 @@ export interface SideEvent {
   description: string;
 }
 
+export interface Player {
+  uuid: string;
+  currentIgn: string;
+  pastIgns: string[];
+  events: string[];  // Array of event IDs
+  lastUpdated: Date;
+}
+
 export interface TimelineEvent {
   id: string;
   title: string;
@@ -31,8 +39,9 @@ export interface TimelineEvent {
   category: string;
   tags: string[];
   isSpecial?: boolean;
-  tables?: Table[]; // Changed from any[] to Table[]
-  sideEvents?: SideEvent[]; // Changed from any[] to SideEvent[]
+  tables?: Table[];
+  sideEvents?: SideEvent[];
   createdAt?: Date;
   updatedAt?: Date;
+  playerIds?: string[];  // Optional array of player document IDs involved in the event
 }

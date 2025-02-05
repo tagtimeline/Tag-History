@@ -14,7 +14,6 @@ import { TimelineEvent } from '@/data/events';
 import { handleAdminLogout } from '@/components/admin/AuthHandler';
 
 import baseStyles from '@/styles/admin/base.module.css';
-import buttonStyles from '@/styles/admin/buttons.module.css';
 import controlStyles from '@/styles/controls.module.css';
 import headerStyles from '@/styles/header.module.css';
 

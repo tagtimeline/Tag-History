@@ -98,10 +98,10 @@ export const EventForm: React.FC<EventFormProps> = ({
         saveDraftWithMessage(formData);
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [formData]);
+  }, [formData, saveDraftWithMessage]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

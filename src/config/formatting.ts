@@ -23,7 +23,7 @@ interface Link {
 }
 
 export const formatText = (text: string): string => {
-  let formattedText = text
+  const formattedText = text
     .replace(patterns.bold, '<strong>$1</strong>')
     .replace(patterns.italic, '<em>$1</em>')
     .replace(patterns.underline, '<u>$1</u>')

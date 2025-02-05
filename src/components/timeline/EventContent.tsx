@@ -17,7 +17,6 @@ import {
   getClass,
   extractImageDetails,
   isImage,
-  shouldGroupLines
 } from '../../config/formatting';
 
 

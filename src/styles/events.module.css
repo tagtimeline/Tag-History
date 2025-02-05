@@ -503,3 +503,28 @@
     background: #262626;
     border-radius: 4px;
 }
+
+.imageSubtextGroup {
+    margin: 1em auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.imageSubtextGroup .imageWrapper {
+    margin: 0 0 0.2em;
+    width: 100% !important;
+}
+
+.imageSubtextGroup > div:last-child {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+.imageWrapper {
+    margin: 1em auto;
+    width: 75%;
+    text-align: center;
+}

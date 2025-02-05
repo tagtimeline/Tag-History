@@ -55,6 +55,91 @@
 .errorText {
     color: #FF5555;
 }
+
+/* Event Draft */
+.draftMessage {
+    background-color: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #888;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+}
+  
+.loadDraftButton {
+    align-items: center;
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 12px;
+    height: 32px;
+    justify-content: center;
+    padding: 0 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+  
+.loadDraftButton:hover {
+    background-color: #444;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+  
+.loadDraftButton:active {
+    transform: scale(0.95);
+}
+  
+.discardDraftButton {
+    align-items: center;
+    background-color: transparent;
+    border: 2px solid #555;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 12px;
+    height: 32px;
+    justify-content: center;
+    padding: 0 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+  
+.discardDraftButton:hover {
+    background-color: #333;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+  
+.discardDraftButton:active {
+    transform: scale(0.95);
+}
+  
+.saveMessage {
+    background-color: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+  
+.saveText {
+    color: #888;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 12px;
+}
    
 .subtitle {
     font-size: 20px;

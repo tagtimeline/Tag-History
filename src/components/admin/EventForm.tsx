@@ -5,6 +5,14 @@ import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
 import MarkdownGuidePopup from './MarkdownGuidePopup';
+import {
+  saveDraft,
+  loadDraft,
+  deleteDraft,
+  hasDraft,
+  isMacPlatform,
+  getSaveShortcutText
+} from '@/../lib/draftUtils';
 
 import baseStyles from '@/styles/admin/base.module.css';
 import buttonStyles from '@/styles/admin/buttons.module.css';
@@ -16,7 +24,7 @@ interface SideEvent {
   description: string;
 }
 
-interface EventFormData {
+export interface EventFormData {
   title: string;
   date: string;
   endDate?: string;
@@ -61,15 +69,39 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [isDirty, setIsDirty] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showDraftMessage, setShowDraftMessage] = useState(false);
+  const [hasDraftState, setHasDraftState] = useState(false);
 
-  const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
-    const newSideEvents = [...formData.sideEvents];
-    if (!newSideEvents[index]) {
-      newSideEvents[index] = { id: `side${Date.now()}`, title: '', description: '' };
-    }
-    newSideEvents[index] = { ...newSideEvents[index], [field]: value };
-    onChange({ ...formData, sideEvents: newSideEvents });
+  // Auto-save without showing message
+  const saveDraftQuietly = (data: EventFormData) => {
+    saveDraft(data, selectedEvent?.id);
   };
+
+  // Save with message (for keyboard shortcut)
+  const saveDraftWithMessage = (data: EventFormData) => {
+    saveDraft(data, selectedEvent?.id);
+    setShowDraftMessage(true);
+    setTimeout(() => setShowDraftMessage(false), 2000);
+  };
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    setHasDraftState(hasDraft(selectedEvent?.id));
+  }, [selectedEvent?.id]);
+
+  // Keyboard shortcut handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((isMacPlatform() && e.metaKey && e.key === 's') || 
+          (!isMacPlatform() && e.ctrlKey && e.key === 's')) {
+        e.preventDefault();
+        saveDraftWithMessage(formData);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [formData]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -86,10 +118,20 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleFormChange = (newData: EventFormData) => {
     setIsDirty(true);
     onChange(newData);
+    saveDraftQuietly(newData);
+  };
+
+  const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
+    const newSideEvents = [...formData.sideEvents];
+    if (!newSideEvents[index]) {
+      newSideEvents[index] = { id: `side${Date.now()}`, title: '', description: '' };
+    }
+    newSideEvents[index] = { ...newSideEvents[index], [field]: value };
+    handleFormChange({ ...formData, sideEvents: newSideEvents });
   };
 
   const handleTablesChange = (tables: Table[], updatedDescription?: string) => {
-    onChange({ 
+    handleFormChange({ 
       ...formData, 
       tables,
       ...(updatedDescription ? { description: updatedDescription } : {})
@@ -105,6 +147,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         await deleteEvent(selectedEvent.id);
         onSuccess('Event deleted successfully!');
         onDelete(selectedEvent.id);
+        deleteDraft(selectedEvent.id);
       } catch (error) {
         console.error('Error deleting event:', error);
         setErrorMessage('Failed to delete event. Please try again.');
@@ -163,10 +206,12 @@ export const EventForm: React.FC<EventFormProps> = ({
         await updateEvent(selectedEvent.id, cleanData);
         setShowSuccessMessage(true);
         setIsDirty(false);
-        setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
+        deleteDraft(selectedEvent.id);
+        setTimeout(() => setShowSuccessMessage(false), 3000);
       } else {
         await createEvent(cleanData);
         onSuccess('Event added successfully!');
+        deleteDraft();
         onChange(initialFormData);
       }
     } catch (error) {
@@ -179,6 +224,42 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className={formStyles.form}>
+      {hasDraftState && (
+        <div className={baseStyles.draftMessage}>
+          <span>You have an unsaved draft.</span>
+          <button
+            type="button"
+            onClick={() => {
+              const draft = loadDraft(selectedEvent?.id);
+              if (draft) {
+                onChange(draft);
+                setHasDraftState(false);
+              }
+            }}
+            className={baseStyles.loadDraftButton}
+          >
+            Load Draft
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              deleteDraft(selectedEvent?.id);
+              setHasDraftState(false);
+            }}
+            className={baseStyles.discardDraftButton}
+          >
+            Discard Draft
+          </button>
+        </div>
+      )}
+
+      {showDraftMessage && (
+        <div className={baseStyles.saveMessage}>
+          <span className={baseStyles.saveText}>
+            Draft saved ({getSaveShortcutText()} to save)
+          </span>
+        </div>
+      )}
       {showSuccessMessage && (
         <div className={baseStyles.successMessage}>
           <span className={baseStyles.successText}>Event updated successfully!</span>

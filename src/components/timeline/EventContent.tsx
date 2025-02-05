@@ -6,7 +6,20 @@ import { TimelineEvent } from '../../data/events';
 import EventTable from './EventTable';
 import styles from '../../styles/events.module.css';
 import formatStyles from '../../styles/formatting.module.css';
-import { patterns, formatText, extractLinks, isSubtext, getSubtextContent, isHeadertext, getHeadertextContent, getClass } from '../../config/formatting';
+import { 
+  patterns, 
+  formatText, 
+  extractLinks, 
+  isSubtext, 
+  getSubtextContent, 
+  isHeadertext, 
+  getHeadertextContent, 
+  getClass,
+  extractImageDetails,
+  isImage,
+  shouldGroupLines
+} from '../../config/formatting';
+
 
 interface EventContentProps {
   event: TimelineEvent;
@@ -25,22 +38,25 @@ const renderTextWithLinks = (text: string) => {
       length: match.length,
       videoId: match.slice(match.indexOf(':') + 1, match.length - 1)
     })),
-    ...imageMatches.map(match => ({
-      type: 'image' as const,
-      index: text.indexOf(match),
-      length: match.length,
-      url: match.slice(match.indexOf(':') + 1, match.length - 1)
-    }))
+    ...imageMatches.map(match => {
+      const imageDetails = extractImageDetails(match);
+      return {
+        type: 'image' as const,
+        index: text.indexOf(match),
+        length: match.length,
+        url: imageDetails?.url || '',
+        size: imageDetails?.size
+      };
+    })
   ].sort((a, b) => a.index - b.index);
 
   const parts = [];
   let lastIndex = 0;
-
+  
   // Handle all special elements first
   allElements.forEach((element, index) => {
     if (element.index > lastIndex) {
       const beforeText = text.slice(lastIndex, element.index);
-      // Handle player mentions in the text before the element
       const parts2 = processPlayerMentions(beforeText, `pre-${index}`);
       parts.push(...parts2);
     }
@@ -78,7 +94,11 @@ const renderTextWithLinks = (text: string) => {
 
       case 'image':
         parts.push(
-          <div key={`image-${index}`} className={styles.imageWrapper}>
+          <div 
+            key={`image-${index}`} 
+            className={styles.imageWrapper}
+            style={{ width: element.size || '75%' }}
+          >
             <Image 
               src={element.url}
               alt="Event content"
@@ -101,6 +121,7 @@ const renderTextWithLinks = (text: string) => {
 
     lastIndex = element.index + element.length;
   });
+
 
   // Handle remaining text
   if (lastIndex < text.length) {
@@ -190,9 +211,37 @@ const parseContent = (text: string) => {
   const lines = text.split('\n');
   let currentGroup: React.ReactNode[] = [];
   const groups: React.ReactNode[] = [];
+  let skipNext = false;
 
   lines.forEach((line, index) => {
-    if (line.trim() === '') {
+    if (skipNext) {
+      skipNext = false;
+      return;
+    }
+
+    const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
+    
+    if (isImage(line) && isSubtext(nextLine)) {
+      // Handle image with subtext
+      const imageElement = parseLine(line, index);
+      const subtextElement = parseLine(nextLine, index + 1);
+      
+      const imageDetails = extractImageDetails(line);
+      const width = imageDetails?.size || '75%';
+      
+      groups.push(
+        <div 
+          key={`image-group-${groups.length}`} 
+          className={styles.imageSubtextGroup}
+          style={{ width }}
+        >
+          {imageElement}
+          {subtextElement}
+        </div>
+      );
+      
+      skipNext = true;
+    } else if (line.trim() === '') {
       if (currentGroup.length > 0) {
         groups.push(
           <div key={`group-${groups.length}`} className={formatStyles.paragraph}>

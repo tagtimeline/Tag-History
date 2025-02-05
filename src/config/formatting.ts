@@ -101,6 +101,21 @@ export const extractImageDetails = (text: string): ImageDetails | null => {
   };
 };
 
+export interface YouTubeDetails {
+  videoId: string;
+}
+
+export const extractYouTubeDetails = (text: string): YouTubeDetails | null => {
+  const match = text.match(patterns.youtube);
+  if (!match) return null;
+
+  const videoId = match[1];
+
+  return {
+    videoId,
+  };
+};
+
 
 // Helper function to check if a line is an image
 export const isImage = (text: string): boolean => {
@@ -127,7 +142,7 @@ export const cleanText = (text: string): string => {
 };
 
 // Helper function to check if two lines should be grouped together
-// (e.g., an image and its subtext)
+// (e.g., an image and its subtext, or a YouTube video and its subtext)
 export const shouldGroupLines = (line1: string, line2: string): boolean => {
-  return isImage(line1) && isSubtext(line2);
+  return (isImage(line1) || isYouTube(line1)) && isSubtext(line2);
 };

@@ -354,6 +354,58 @@
     font-size: 14px;
     line-height: 1.2;
     padding: 8px 8px;
+  }
+  
+/* Media handling in side events */
+.sideEventContent .videoWrapper {
+    width: 100%;
+    margin: 1em 0;
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+}
+  
+.sideEventContent .videoWrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+  
+.sideEventContent .imageWrapper {
+    width: 100% !important; /* Override any inline width */
+    margin: 1em 0;
+    text-align: center;
+}
+  
+.sideEventContent .contentImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+  
+/* Handle groups with subtexts */
+.sideEventContent .imageSubtextGroup {
+    width: 100% !important;
+    margin: 1em 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+.sideEventContent .imageSubtextGroup .imageWrapper,
+.sideEventContent .imageSubtextGroup .videoWrapper {
+    margin: 0 0 0.2em;
+    width: 100% !important;
+}
+  
+.sideEventContent .imageSubtextGroup > div:last-child {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    text-align: center;
 }
 
 /* Table Styles */

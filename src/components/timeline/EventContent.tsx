@@ -80,7 +80,7 @@ const renderTextWithLinks = (text: string) => {
           <div key={`youtube-${index}`} className={styles.videoWrapper}>
             <iframe
               width="100%"
-              height="315"
+              height="100%"
               src={`https://www.youtube.com/embed/${element.videoId}`}
               title="YouTube video player"
               frameBorder="0"
@@ -120,7 +120,6 @@ const renderTextWithLinks = (text: string) => {
 
     lastIndex = element.index + element.length;
   });
-
 
   // Handle remaining text
   if (lastIndex < text.length) {
@@ -313,7 +312,7 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
       </div>
     );
   }, [expandedSideEvents]);
-
+  
   const renderContent = () => {
     if (!event.description) return null;
   

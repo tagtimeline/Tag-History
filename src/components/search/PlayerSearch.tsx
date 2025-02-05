@@ -36,14 +36,14 @@ const PlayerSearch: React.FC = () => {
     const unsubscribe = onSnapshot(
       collection(db, 'players'),
       (snapshot) => {
-        let playerData = snapshot.docs.map(doc => ({
+        const playerData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Player[];
 
         // Sort players alphabetically and ensure flodlol is first
         //playerData.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn));
-        
+
         // Sort players alphabetically and ensure flodlol is first
         playerData.sort((a, b) => {
           if (a.currentIgn.toLowerCase() === 'flodlol') return -1;

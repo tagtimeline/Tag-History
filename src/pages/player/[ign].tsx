@@ -35,7 +35,7 @@ interface PlayerPageProps extends Record<string, unknown> {
 const PlayerPage: NextPage<PlayerPageProps> = ({ 
   historicalIgn, 
   currentIgn, 
-  allUsernames, 
+  // allUsernames, 
   playerData,
   initialEvents
 }) => {

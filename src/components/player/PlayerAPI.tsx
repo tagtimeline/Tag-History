@@ -235,8 +235,8 @@ async function fetchHypixelData(uuid: string) {
       discord: player.socialMedia?.links?.DISCORD || null
     };
 
-  } catch (error) {
-    console.error('Error fetching Hypixel data:', error);
+  } catch {
+    console.error('Error fetching Hypixel data:');
     return null;
   }
 }

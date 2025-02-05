@@ -8,25 +8,53 @@ import buttonStyles from '@/styles/admin/buttons.module.css';
 
 interface TableManagerProps {
   tables: Table[];
-  onChange: (tables: Table[]) => void;
+  onChange: (tables: Table[], description?: string) => void;
+  currentDescription: string;
 }
 
-export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) => {
+const insertTableMarker = (description: string, tableIndex: number) => {
+  const marker = `[TABLE-${tableIndex}]`;
+  return description + (description.endsWith('\n') ? '' : '\n') + marker + '\n';
+};
+
+export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, currentDescription }) => {
   const addTable = () => {
-    onChange([
+    const newTables = [
       ...tables,
       {
         headers: ['Column 1'],
         rows: [{ cells: [{ content: '' }] }],
-        align: 'left',
+        align: 'left' as const,
         columnWidths: ['100%'] as string[]
       }
-    ]);
+    ];
+
+    // Add table marker to description
+    const updatedDescription = insertTableMarker(currentDescription, tables.length);
+    
+    onChange(newTables, updatedDescription);
   };
 
-  const confirmRemove = (action: () => void, message: string) => {
-    if (window.confirm(message)) {
-      action();
+  const confirmRemove = (tableIndex: number) => {
+    if (typeof window !== 'undefined') {
+      if (window.confirm('Are you sure you want to remove this table? This cannot be undone.')) {
+        const newTables = [...tables];
+        newTables.splice(tableIndex, 1);
+        
+        // Update description by removing the table marker and updating remaining ones
+        let updatedDescription = currentDescription;
+        const oldMarker = `[TABLE-${tableIndex}]`;
+        updatedDescription = updatedDescription.replace(oldMarker + '\n', '');
+        
+        // Update remaining table markers
+        for (let i = tableIndex + 1; i < tables.length; i++) {
+          const oldTableMarker = `[TABLE-${i}]`;
+          const newTableMarker = `[TABLE-${i - 1}]`;
+          updatedDescription = updatedDescription.replace(oldTableMarker, newTableMarker);
+        }
+        
+        onChange(newTables, updatedDescription);
+      }
     }
   };
 
@@ -110,34 +138,37 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
 
       {tables.map((table, tableIndex) => (
         <div key={tableIndex} className={tableStyles.tableWrapper}>
-          <div className={tableStyles.tableControls}>
-            <button 
-              type="button"
-              onClick={() => addColumn(tableIndex)}
-              className={tableStyles.tableButton}
-            >
-              Add Column
-            </button>
-            <button 
-              type="button"
-              onClick={() => addRow(tableIndex)}
-              className={tableStyles.tableButton}
-            >
-              Add Row
-            </button>
-            <select
-              className={tableStyles.alignDropdown}
-              value={table.align}
-              onChange={(e) => {
-                const newTables = [...tables];
-                newTables[tableIndex].align = e.target.value as 'left' | 'center' | 'right';
-                onChange(newTables);
-              }}
-            >
-              <option value="left">Left Align</option>
-              <option value="center">Center Align</option>
-              <option value="right">Right Align</option>
-            </select>
+          <div className={tableStyles.tableHeader}>
+            <div>Table {tableIndex}</div>
+            <div className={tableStyles.tableControls}>
+              <button 
+                type="button"
+                onClick={() => addColumn(tableIndex)}
+                className={tableStyles.tableButton}
+              >
+                Add Column
+              </button>
+              <button 
+                type="button"
+                onClick={() => addRow(tableIndex)}
+                className={tableStyles.tableButton}
+              >
+                Add Row
+              </button>
+              <select
+                className={tableStyles.alignDropdown}
+                value={table.align}
+                onChange={(e) => {
+                  const newTables = [...tables];
+                  newTables[tableIndex].align = e.target.value as 'left' | 'center' | 'right';
+                  onChange(newTables);
+                }}
+              >
+                <option value="left">Left Align</option>
+                <option value="center">Center Align</option>
+                <option value="right">Right Align</option>
+              </select>
+            </div>
           </div>
 
           <div className={tableStyles.tableEditor}>
@@ -221,11 +252,7 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange }) 
 
           <button
             type="button"
-            onClick={() => confirmRemove(() => {
-              const newTables = [...tables];
-              newTables.splice(tableIndex, 1);
-              onChange(newTables);
-            }, 'Are you sure you want to remove this table?')}
+            onClick={() => confirmRemove(tableIndex)}
             className={buttonStyles.removeButton}
           >
             Remove Table

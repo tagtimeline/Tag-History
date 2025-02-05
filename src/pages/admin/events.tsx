@@ -1,15 +1,14 @@
+// pages/admin/events.tsx
 import { useState, useEffect } from 'react';
-import { db } from '@/../lib/firebaseConfig';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, onSnapshot } from 'firebase/firestore';
-
+import { db } from '@/../lib/firebaseConfig';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { EventForm } from '@/components/admin/EventForm';
 import EventsList from '@/components/admin/EventsList';
 import { TimelineEvent } from '@/data/events';
 import { handleAdminLogout } from '@/components/admin/AuthHandler';
@@ -24,8 +23,6 @@ export default function AdminEvents() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
-  const [success, setSuccess] = useState<string>('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -58,13 +55,8 @@ export default function AdminEvents() {
 
   const handleLogout = () => handleAdminLogout(router);
 
-  const handleSuccess = (message: string) => {
-    setSuccess(message);
-    setSelectedEvent(null);
-  };
-
-  const handleDelete = () => {
-    setSelectedEvent(null);
+  const handleEventSelect = (event: TimelineEvent) => {
+    router.push(`/admin/event/${event.id}`);
   };
 
   if (isLoading) {
@@ -95,29 +87,9 @@ export default function AdminEvents() {
       <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
       
       <main className={baseStyles.mainContent}>
-        <div className={baseStyles.header}>
-          <div className={baseStyles.title}>Event Management</div>
-          <button 
-            onClick={() => setSelectedEvent(null)} 
-            className={buttonStyles.addButton}
-          >
-            Create New Event
-          </button>
-        </div>
-
-        {success && <div className={baseStyles.successMessage}><span className={baseStyles.successText}>{success}</span></div>}
-
-        <EventForm 
-          key={selectedEvent?.id || 'new'} 
-          selectedEvent={selectedEvent}
-          onSuccess={handleSuccess}
-          onError={(errorMsg: string) => console.error(errorMsg)}
-          onDelete={handleDelete}
-        />
-
         <EventsList 
           events={events}
-          onEventSelect={setSelectedEvent}
+          onEventSelect={handleEventSelect}
         />
       </main>
 

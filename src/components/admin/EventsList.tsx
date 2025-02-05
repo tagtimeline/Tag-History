@@ -1,4 +1,6 @@
 // components/admin/EventsList.tsx
+import Link from 'next/link';
+
 import { useState, useRef, useEffect } from 'react';
 import { TimelineEvent } from '@/data/events';
 import { categories, getEventStyles } from '@/config/categories';
@@ -8,6 +10,7 @@ import EventSearch from '@/components/search/EventSearch';
 import eventStyles from '@/styles/events.module.css';
 import controlStyles from '@/styles/controls.module.css';
 import listStyles from '@/styles/admin/events.module.css';
+import buttonStyles from '@/styles/admin/buttons.module.css';
 import baseStyles from '@/styles/admin/base.module.css';
 
 interface EventsListProps {
@@ -64,6 +67,14 @@ const filteredEvents = events
 
 return (
   <div className={listStyles.eventsList}>
+    <div className={baseStyles.header}>
+      <div className={baseStyles.title}>Event Management</div>
+      <Link href="/admin/event/new">
+        <button className={buttonStyles.addButton}>
+          Create New Event
+        </button>
+      </Link>
+    </div>
     <div className={baseStyles.title}>Existing Events</div>
     
     <div className={listStyles.eventsControls}>

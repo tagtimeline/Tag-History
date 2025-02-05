@@ -1,6 +1,5 @@
 // src/data/affiliates.ts
 
-// Define the possible roles and their colors
 export const roleColors = {
     HeadDeveloper: '#6b00ff',
     Developer: '#6b00ff',
@@ -9,17 +8,14 @@ export const roleColors = {
     Contributor: '#3fd0ff',
   } as const;
   
-  // Create a type from the roleColors keys
   export type AffiliateRole = keyof typeof roleColors;
   
-  // Interface for affiliate data
   export interface Affiliate {
     uuid: string;
     discord?: string;
     roles: AffiliateRole[];
   }
   
-  // Map of IGNs to affiliate data
   export const affiliates: Record<string, Affiliate> = {
     'flodlol': {
       uuid: 'c6fd06c5-c716-4e1a-923e-17b48b3f5226',

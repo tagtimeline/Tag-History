@@ -232,7 +232,7 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
 
   // Track which side events have been used inline
   const usedSideEvents = useMemo(() => {
-    const sideEventMatches = event.description.match(/\[SIDE:\w+\]/g) || [];
+    const sideEventMatches = event.description.match(/\[SIDE-\d+\]/g) || [];
     return new Set(sideEventMatches.map(match => match.slice(6, -1)));
   }, [event.description]);
 
@@ -260,12 +260,10 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
 
   const renderContent = () => {
     if (!event.description) return null;
-
-    // Split content by table and side event markers
-    const parts = event.description.split(/\[(?:TABLE|SIDE:\w+)\]/);
-    const markers = event.description.match(/\[(?:TABLE|SIDE:\w+)\]/g) || [];
-    
-    let tableIndex = 0;
+  
+    // Update the split pattern to match new format
+    const parts = event.description.split(/\[(?:TABLE-\d+|SIDE-\d+)\]/);
+    const markers = event.description.match(/\[(?:TABLE-\d+|SIDE-\d+)\]/g) || [];
     
     return parts.map((part, index) => {
       const content = parseContent(part);
@@ -274,28 +272,32 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
       if (index < markers.length) {
         const marker = markers[index];
         
-        if (marker === '[TABLE]' && event.tables) {
-          return (
-            <React.Fragment key={`section-${index}`}>
-              {content}
-              <div className={styles.tableWrapper}>
-                <EventTable table={event.tables[tableIndex++]} />
-              </div>
-            </React.Fragment>
-          );
-        } else if (marker.startsWith('[SIDE:') && event.sideEvents) {
-          const sideEventId = marker.slice(6, -1);
-          const sideEvent = event.sideEvents.find(event => event.id === sideEventId);
-          
-          if (sideEvent) {
+        if (marker.startsWith('[TABLE-')) {
+          const tableIndex = parseInt(marker.slice(7, -1));
+          if (event.tables && tableIndex < event.tables.length) {
             return (
               <React.Fragment key={`section-${index}`}>
                 {content}
-                <div className={styles.inlineSideEventContainer}>
-                  {renderSideEvent(sideEvent)}
+                <div className={styles.tableWrapper}>
+                  <EventTable table={event.tables[tableIndex]} />
                 </div>
               </React.Fragment>
             );
+          }
+        } else if (marker.startsWith('[SIDE-')) {
+          const sideEventIndex = parseInt(marker.slice(6, -1));
+          if (event.sideEvents && sideEventIndex < event.sideEvents.length) {
+            const sideEvent = event.sideEvents[sideEventIndex];
+            if (sideEvent) {
+              return (
+                <React.Fragment key={`section-${index}`}>
+                  {content}
+                  <div className={styles.inlineSideEventContainer}>
+                    {renderSideEvent(sideEvent)}
+                  </div>
+                </React.Fragment>
+              );
+            }
           }
         }
       }

@@ -25,6 +25,62 @@ interface EventPageProps extends Record<string, unknown> {
   allEvents: TimelineEvent[];
 }
 
+export async function getServerSideProps({ params }: { params: { id: string } }) {
+  try {
+    const event = await getEventById(params.id);
+    
+    if (!event) {
+      return {
+        notFound: true
+      };
+    }
+
+    // Get all events for navigation
+    const allEvents = await getAllEvents();
+    
+    // Create a new object without createdAt and updatedAt fields
+    const serializedEvent = {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      endDate: event.endDate,
+      category: event.category,
+      tags: event.tags,
+      isSpecial: event.isSpecial,
+      tables: event.tables,
+      sideEvents: event.sideEvents
+    };
+
+    // Similarly serialize all events
+    const serializedAllEvents = allEvents.map(event => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      endDate: event.endDate,
+      category: event.category,
+      tags: event.tags,
+      isSpecial: event.isSpecial,
+      tables: event.tables,
+      sideEvents: event.sideEvents
+    }));
+    
+    return {
+      props: {
+        initialEvent: serializedEvent,
+        allEvents: serializedAllEvents
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    return {
+      notFound: true
+    };
+  }
+}
+
+
 const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -166,61 +222,5 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
   );
 };
 
-// In [id].tsx, update the getServerSideProps function:
-
-export async function getServerSideProps({ params }: { params: { id: string } }) {
-  try {
-    const event = await getEventById(params.id);
-    
-    if (!event) {
-      return {
-        notFound: true
-      };
-    }
-
-    // Get all events for navigation
-    const allEvents = await getAllEvents();
-    
-    // Create a new object without createdAt and updatedAt fields
-    const serializedEvent = {
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      endDate: event.endDate,
-      category: event.category,
-      tags: event.tags,
-      isSpecial: event.isSpecial,
-      tables: event.tables,
-      sideEvents: event.sideEvents
-    };
-
-    // Similarly serialize all events
-    const serializedAllEvents = allEvents.map(event => ({
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      endDate: event.endDate,
-      category: event.category,
-      tags: event.tags,
-      isSpecial: event.isSpecial,
-      tables: event.tables,
-      sideEvents: event.sideEvents
-    }));
-    
-    return {
-      props: {
-        initialEvent: serializedEvent,
-        allEvents: serializedAllEvents
-      }
-    };
-  } catch (error) {
-    console.error('Error fetching event:', error);
-    return {
-      notFound: true
-    };
-  }
-}
 
 export default withAuth<EventPageProps>(EventPage);

@@ -14,16 +14,17 @@
     align-items: center;
     padding: 30px;
     height: auto;
-    padding-bottom: 100px;
+    padding: 40px 0;
 }
    
 .header {
-    width: 684px;
+    width: 100%;
     margin-bottom: 10px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    max-width: 1500px;
 }
    
 .title {
@@ -83,4 +84,68 @@
     justify-content: center;
     color: #fff;
     font-family: 'Minecraft', sans-serif;
+}
+
+
+
+/* Event Preview */
+.editLayout {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 10px;
+    align-items: stretch;
+}
+  
+.formSection {
+    width: 50%;
+    min-width: 600px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.previewSection {
+    width: 50%;
+    min-width: 600px;
+    flex: 1;
+    flex-direction: column;
+}
+
+
+.formSection > form,
+.previewSection > div:nth-child(2) {
+    border-radius: 4px;
+    padding: 15px;
+    height: auto;
+    overflow: visible;
+    min-height: 600px;
+}
+
+.formSection > form {
+    margin-top: -10px;
+}
+  
+@media (max-width: 1280px) {
+    .editLayout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .formSection {
+        width: 100%;
+        max-width: 660px;
+        min-width: auto;
+    }
+
+    .previewSection {
+        width: 100%;
+        padding-left: 25px;
+        max-width: 680px;
+        min-width: auto;
+        margin-bottom: 50px;
+    }
 }

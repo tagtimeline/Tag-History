@@ -1,5 +1,5 @@
 // components/admin/EventForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
 import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
@@ -33,6 +33,8 @@ interface EventFormProps {
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
   onDelete: (id: string) => void;
+  onChange: (data: EventFormData) => void;
+  formData: EventFormData;
 }
 
 const initialFormData: EventFormData = {
@@ -49,50 +51,16 @@ const initialFormData: EventFormData = {
 
 export const EventForm: React.FC<EventFormProps> = ({
   selectedEvent,
-  onDelete
+  onSuccess,
+  onError,
+  onDelete,
+  onChange,
+  formData
 }) => {
   const [showMarkdownGuide, setShowMarkdownGuide] = useState(false);
-  const [formData, setFormData] = useState<EventFormData>(
-    selectedEvent
-      ? {
-          title: selectedEvent.title,
-          date: selectedEvent.date,
-          endDate: selectedEvent.endDate || '',
-          category: selectedEvent.category,
-          description: selectedEvent.description,
-          isSpecial: selectedEvent.isSpecial || false,
-          tags: selectedEvent.tags || [],
-          sideEvents: selectedEvent.sideEvents || [],
-          tables: selectedEvent.tables || []
-        }
-      : initialFormData
-  );
-
-  const [successMessage, setSuccessMessage] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    let successTimeout: ReturnType<typeof setTimeout> | null = null;
-    let errorTimeout: ReturnType<typeof setTimeout> | null = null;
-
-    if (successMessage) {
-      successTimeout = setTimeout(() => {
-        setSuccessMessage('');
-      }, 5000);
-    }
-
-    if (errorMessage) {
-      errorTimeout = setTimeout(() => {
-        setErrorMessage('');
-      }, 5000);
-    }
-
-    return () => {
-      if (successTimeout) clearTimeout(successTimeout);
-      if (errorTimeout) clearTimeout(errorTimeout);
-    };
-  }, [successMessage, errorMessage]);
-
 
   const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
     const newSideEvents = [...formData.sideEvents];
@@ -100,7 +68,33 @@ export const EventForm: React.FC<EventFormProps> = ({
       newSideEvents[index] = { id: `side${Date.now()}`, title: '', description: '' };
     }
     newSideEvents[index] = { ...newSideEvents[index], [field]: value };
-    setFormData({ ...formData, sideEvents: newSideEvents });
+    onChange({ ...formData, sideEvents: newSideEvents });
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = ''; // This shows the browser's default message
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  const handleFormChange = (newData: EventFormData) => {
+    setIsDirty(true);
+    onChange(newData);
+  };
+
+  const handleTablesChange = (tables: Table[], updatedDescription?: string) => {
+    onChange({ 
+      ...formData, 
+      tables,
+      ...(updatedDescription ? { description: updatedDescription } : {})
+    });
+    setIsDirty(true);
   };
 
   const handleDeleteEvent = async () => {
@@ -109,8 +103,8 @@ export const EventForm: React.FC<EventFormProps> = ({
     if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
       try {
         await deleteEvent(selectedEvent.id);
-        setSuccessMessage('Event deleted successfully!');
-        onDelete(selectedEvent!.id);
+        onSuccess('Event deleted successfully!');
+        onDelete(selectedEvent.id);
       } catch (error) {
         console.error('Error deleting event:', error);
         setErrorMessage('Failed to delete event. Please try again.');
@@ -126,7 +120,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       };
   
       await createEvent(duplicateData);
-      setSuccessMessage('Event duplicated successfully!');
+      onSuccess('Event duplicated successfully!');
     } catch (error) {
       console.error('Error duplicating event:', error);
       setErrorMessage('Failed to duplicate event. Please try again.');
@@ -135,8 +129,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
-  
+    
     try {
       if (!formData.category) {
         setErrorMessage('Please select a category');
@@ -167,46 +160,45 @@ export const EventForm: React.FC<EventFormProps> = ({
       };
   
       if (selectedEvent) {
-        console.log('Updating event with ID:', selectedEvent.id);
         await updateEvent(selectedEvent.id, cleanData);
-        setSuccessMessage('Event updated successfully!');
+        setShowSuccessMessage(true);
+        setIsDirty(false);
+        setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
       } else {
-        console.log('Creating new event');
         await createEvent(cleanData);
-        setSuccessMessage('Event added successfully!');
+        onSuccess('Event added successfully!');
+        onChange(initialFormData);
       }
-  
-      setFormData(initialFormData);
     } catch (error) {
       console.error('Error saving event:', error);
       setErrorMessage('Failed to save event. Please try again.');
+      onError('Failed to save event. Please try again.');
     }
   };
   
 
   return (
     <form onSubmit={handleSubmit} className={formStyles.form}>
-      {successMessage && (
+      {showSuccessMessage && (
         <div className={baseStyles.successMessage}>
-          <span className={baseStyles.successText}>{successMessage}</span>
+          <span className={baseStyles.successText}>Event updated successfully!</span>
         </div>
       )}
-   
       {errorMessage && (
         <div className={baseStyles.errorMessage}>
           <span className={baseStyles.errorText}>{errorMessage}</span>
         </div>
       )}
-   
+  
       <div className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}>
-        <div className={formStyles.inputContainer}>
+      <div className={formStyles.inputContainer}>
           <label htmlFor="title">Event Title</label>
           <input
             id="title"
             type="text"
             className={formStyles.input}
             value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            onChange={(e) => handleFormChange({ ...formData, title: e.target.value })}
             required
           />
         </div>
@@ -214,12 +206,12 @@ export const EventForm: React.FC<EventFormProps> = ({
           <input
             type="checkbox"
             checked={formData.isSpecial}
-            onChange={(e) => setFormData({...formData, isSpecial: e.target.checked})}
+            onChange={(e) => onChange({ ...formData, isSpecial: e.target.checked })}
           />
           Special Event
         </div>
       </div>
-   
+  
       <div className={`${formStyles.dateGroup} ${formStyles.fullWidth}`}>
         <div className={formStyles.formSection}>
           <label htmlFor="startDate">Start Date</label>
@@ -228,7 +220,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             type="date"
             className={formStyles.input}
             value={formData.date}
-            onChange={(e) => setFormData({...formData, date: e.target.value})}
+            onChange={(e) => onChange({ ...formData, date: e.target.value })}
             required
           />
         </div>
@@ -239,18 +231,18 @@ export const EventForm: React.FC<EventFormProps> = ({
             type="date"
             className={formStyles.input}
             value={formData.endDate}
-            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+            onChange={(e) => onChange({ ...formData, endDate: e.target.value })}
           />
         </div>
       </div>
-   
+  
       <div className={formStyles.formSection}>
         <label htmlFor="category">Category</label>
         <select
           id="category"
           className={formStyles.input}
           value={formData.category}
-          onChange={(e) => setFormData({...formData, category: e.target.value as keyof typeof categories})}
+          onChange={(e) => onChange({ ...formData, category: e.target.value as keyof typeof categories })}
           required
         >
           <option value="" disabled>Select Category</option>
@@ -261,7 +253,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           ))}
         </select>
       </div>
-   
+  
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="description">
           Description
@@ -277,14 +269,14 @@ export const EventForm: React.FC<EventFormProps> = ({
           id="description"
           className={formStyles.textarea}
           value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          onChange={(e) => onChange({ ...formData, description: e.target.value })}
           required
         />
         {showMarkdownGuide && (
           <MarkdownGuidePopup onClose={() => setShowMarkdownGuide(false)} />
         )}
       </div>
-   
+  
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="tags">Tags (comma-separated)</label>
         <input
@@ -292,18 +284,18 @@ export const EventForm: React.FC<EventFormProps> = ({
           type="text"
           className={formStyles.input}
           value={formData.tags.join(', ')}
-          onChange={(e) => setFormData({...formData, tags: e.target.value.split(',').map(tag => tag.trim())})}
+          onChange={(e) => onChange({ ...formData, tags: e.target.value.split(',').map(tag => tag.trim()) })}
           placeholder="tag1, tag2, tag3"
           required
         />
       </div>
-   
+  
       <div className={formStyles.sideEvents}>
         <div className={formStyles.sideEventsHeader}>
           Side Events
           <button 
             type="button"
-            onClick={() => setFormData({
+            onClick={() => onChange({
               ...formData,
               sideEvents: [
                 ...formData.sideEvents,
@@ -315,9 +307,12 @@ export const EventForm: React.FC<EventFormProps> = ({
             Add Side Event
           </button>
         </div>
-   
+  
         {formData.sideEvents.map((sideEvent, index) => (
           <div key={sideEvent.id} className={formStyles.sideEventGroup}>
+            <div className={formStyles.sideEventHeader}>
+              <div>Side {index}</div>
+            </div>
             <input
               type="text"
               className={formStyles.input}
@@ -337,7 +332,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 if (window.confirm('Are you sure you want to remove this side event?')) {
                   const newSideEvents = [...formData.sideEvents];
                   newSideEvents.splice(index, 1);
-                  setFormData({ ...formData, sideEvents: newSideEvents });
+                  onChange({ ...formData, sideEvents: newSideEvents });
                 }
               }}
               className={buttonStyles.removeButton}
@@ -347,12 +342,14 @@ export const EventForm: React.FC<EventFormProps> = ({
           </div>
         ))}
       </div>
-   
+  
       <TableManager 
         tables={formData.tables}
-        onChange={(tables) => setFormData({ ...formData, tables })}
+        currentDescription={formData.description}
+        onChange={handleTablesChange}
       />
-   
+
+      <hr className={formStyles.divider} />
       <div className={`${buttonStyles.buttonGroup} ${buttonStyles.alignRight}`}>
         <button type="submit" className={buttonStyles.submitButton}>
           {selectedEvent ? 'Update Event' : 'Add Event'}
@@ -375,18 +372,16 @@ export const EventForm: React.FC<EventFormProps> = ({
             </button>
           </>
         ) : (
-          <>
-            <button 
-              type="button" 
-              onClick={() => setFormData(initialFormData)} 
-              className={buttonStyles.clearButton}
-            >
-              Clear Event
-            </button>
-          </>
+          <button 
+            type="button" 
+            onClick={() => onChange(initialFormData)} 
+            className={buttonStyles.clearButton}
+          >
+            Clear Event
+          </button>
         )}
       </div>
     </form>
-   );
-}
-
+    );
+  };
+  

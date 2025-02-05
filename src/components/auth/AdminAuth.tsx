@@ -16,7 +16,7 @@ const AdminAuth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowError(false);
-
+  
     try {
       console.log('Attempting login...');
       const result = await signInWithEmailAndPassword(auth, email, password);

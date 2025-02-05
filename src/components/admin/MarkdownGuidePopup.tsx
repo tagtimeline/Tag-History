@@ -16,7 +16,8 @@ const MarkdownGuidePopup: React.FC<MarkdownGuidePopupProps> = ({ onClose }) => {
          <div className={controlStyles.markdownGrid}>
            <div className={controlStyles.markdownSection}>
              <div>Elements</div>
-             <code>[TABLE]</code>
+             <code>[TABLE-#]</code>
+             <code>[SIDE-#]</code>
            </div>
 
            <div className={controlStyles.markdownSection}>

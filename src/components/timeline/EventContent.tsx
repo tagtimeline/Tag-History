@@ -281,7 +281,10 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
   // Track which side events have been used inline
   const usedSideEvents = useMemo(() => {
     const sideEventMatches = event.description.match(/\[SIDE-\d+\]/g) || [];
-    return new Set(sideEventMatches.map(match => match.slice(6, -1)));
+    // Extract just the numbers from the SIDE markers
+    return new Set(sideEventMatches.map(match => 
+      parseInt(match.slice(6, -1)) // Convert "SIDE-0" to 0
+    ));
   }, [event.description]);
 
   const renderSideEvent = useCallback((sideEvent: NonNullable<TimelineEvent['sideEvents']>[number]) => {
@@ -357,7 +360,7 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
   // Filter out side events that were already used inline
   const unusedSideEvents = useMemo(() => {
     if (!event.sideEvents) return [];
-    return event.sideEvents.filter(sideEvent => !usedSideEvents.has(sideEvent.id));
+    return event.sideEvents.filter((_, index) => !usedSideEvents.has(index));
   }, [event.sideEvents, usedSideEvents]);
 
   return (

@@ -143,8 +143,8 @@ async function fetchMojangData(ign: string) {
           // console.log(`[Cape] ${currentIgn} has no cape`);
         }
       }
-    } catch (error) {
-      // console.error('Error fetching capes data:', error);
+    } catch {
+      // console.error('Error fetching capes data:');
       if (textureData.textures.CAPE) {
         capeUrl = textureData.textures.CAPE.url;
         // onsole.log(`[Cape] ${currentIgn} is using Minecraft cape (fallback): ${capeUrl}`);

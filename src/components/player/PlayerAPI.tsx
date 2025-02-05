@@ -161,8 +161,8 @@ async function fetchMojangData(ign: string) {
         cape: capeUrl ? { url: capeUrl } : null
       }
     };
-  } catch (error) {
-    console.error('[MojangAPI] Error:', error);
+  } catch {
+    console.error('[MojangAPI] Error', );
     return null;
   }
 }
@@ -236,7 +236,7 @@ async function fetchHypixelData(uuid: string) {
     };
 
   } catch {
-    console.error('Error fetching Hypixel data:');
+    console.error('Error fetching Hypixel data');
     return null;
   }
 }

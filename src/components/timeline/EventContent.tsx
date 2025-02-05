@@ -17,8 +17,6 @@ import {
   getClass,
   extractImageDetails,
   isImage,
-  isYouTube,
-  extractYouTubeDetails,
 } from '../../config/formatting';
 
 
@@ -82,7 +80,7 @@ const renderTextWithLinks = (text: string) => {
           <div key={`youtube-${index}`} className={styles.videoWrapper}>
             <iframe
               width="100%"
-              height="315"
+              height="100%"
               src={`https://www.youtube.com/embed/${element.videoId}`}
               title="YouTube video player"
               frameBorder="0"
@@ -122,7 +120,6 @@ const renderTextWithLinks = (text: string) => {
 
     lastIndex = element.index + element.length;
   });
-
 
   // Handle remaining text
   if (lastIndex < text.length) {
@@ -199,23 +196,6 @@ const parseLine = (line: string, index: number) => {
     );
   }
 
-  if (isYouTube(line)) {
-    const videoDetails = extractYouTubeDetails(line);
-    return (
-      <div key={index} className={styles.videoWrapper}>
-        <iframe
-          width="100%"
-          height="315"
-          src={`https://www.youtube.com/embed/${videoDetails?.videoId}`}
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
-
   // Regular line with formatting
   return (
     <div key={index} className={formatStyles.text}>
@@ -239,23 +219,30 @@ const parseContent = (text: string) => {
 
     const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
     
-    if ((isImage(line) || isYouTube(line)) && isSubtext(nextLine)) {
+    // Check if the current line is either an image or youtube embed
+    const isYoutubeEmbed = line.match(patterns.youtube);
+    
+    if ((isImage(line) || isYoutubeEmbed) && isSubtext(nextLine)) {
+      // Handle image/youtube with subtext
       const mediaElement = parseLine(line, index);
       const subtextElement = parseLine(nextLine, index + 1);
-
-      const width = isImage(line) ? (extractImageDetails(line)?.size || '75%') : '75%';
-
+      
+      // Get width - for images use imageDetails, for youtube use default 75%
+      const width = isImage(line) 
+        ? extractImageDetails(line)?.size || '75%'
+        : '75%';
+      
       groups.push(
         <div 
           key={`media-group-${groups.length}`} 
-          className={styles.mediaSubtextGroup}
+          className={styles.imageSubtextGroup}
           style={{ width }}
         >
           {mediaElement}
           {subtextElement}
         </div>
       );
-
+      
       skipNext = true;
     } else if (line.trim() === '') {
       if (currentGroup.length > 0) {
@@ -325,7 +312,7 @@ const EventContent: React.FC<EventContentProps> = ({ event }) => {
       </div>
     );
   }, [expandedSideEvents]);
-
+  
   const renderContent = () => {
     if (!event.description) return null;
   

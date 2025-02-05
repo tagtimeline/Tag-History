@@ -1,5 +1,5 @@
 // components/admin/EventForm.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
 import { categories } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
@@ -78,11 +78,11 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   // Save with message (for keyboard shortcut)
-  const saveDraftWithMessage = (data: EventFormData) => {
+  const saveDraftWithMessage = useCallback((data: EventFormData) => {
     saveDraft(data, selectedEvent?.id);
     setShowDraftMessage(true);
     setTimeout(() => setShowDraftMessage(false), 2000);
-  };
+  }, [selectedEvent?.id]);
 
   // Check for existing draft on mount
   useEffect(() => {

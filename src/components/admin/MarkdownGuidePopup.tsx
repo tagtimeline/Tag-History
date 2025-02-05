@@ -41,7 +41,7 @@ const MarkdownGuidePopup: React.FC<MarkdownGuidePopupProps> = ({ onClose }) => {
              <code>[text](url)</code>
              <code>&lt;ign&gt;</code>
              <code>[youtube:videoId]</code>
-             <code>[img:imageUrl]</code>
+             <code>[img:imageUrl][size=50%]</code>
            </div>
          </div>
        </div>

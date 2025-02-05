@@ -139,7 +139,8 @@ export default function AdminEventEdit() {
     setFormData(data);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (deletedId: string) => {
+    console.log(`Deleted event with id: ${deletedId}`);
     router.push('/admin/events');
   };
 

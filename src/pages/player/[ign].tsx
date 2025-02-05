@@ -27,7 +27,7 @@ import { getPlayerData } from '../../components/player/PlayerAPI';
 interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
   currentIgn: string | null;
-  allUsernames: string[];
+  // allUsernames: string[];
   playerData: PlayerProfile | null;
   initialEvents: TimelineEvent[];
 }

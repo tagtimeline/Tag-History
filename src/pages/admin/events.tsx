@@ -15,7 +15,6 @@ import { handleAdminLogout } from '@/components/admin/AuthHandler';
 
 import baseStyles from '@/styles/admin/base.module.css';
 import controlStyles from '@/styles/controls.module.css';
-import headerStyles from '@/styles/header.module.css';
 
 export default function AdminEvents() {
   const router = useRouter();
@@ -83,7 +82,6 @@ export default function AdminEvents() {
           </button>
         </div>
       </Header>
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
       
       <main className={baseStyles.mainContent}>
         <EventsList 

@@ -100,6 +100,7 @@ const EventSearch: React.FC<EventSearchProps> = ({ onEventSelect, filterEvents }
         break;
 
       case '/events':
+      case '/events/[id]':
         const eventCard = document.querySelector(`[data-event-id="${event.id}"]`);
         if (eventCard) {
           (eventCard as HTMLElement).click();

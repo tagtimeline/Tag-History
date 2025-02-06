@@ -35,18 +35,3 @@
     gap: 10px;
     height: 100%;
 }
-
-/* Info Box */
-.info-box {
-    color: #505050;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 12px;
-    line-height: 1;
-    max-width: 200px;
-    position: absolute;
-    right: 20px;
-    text-align: right;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    top: 70px;
-    z-index: -5;
-}

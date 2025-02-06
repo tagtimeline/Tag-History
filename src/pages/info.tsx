@@ -7,7 +7,6 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import styles from '../styles/info.module.css'
 import controlStyles from '../styles/controls.module.css';
-import headerStyles from '../styles/header.module.css'
 import withAuth from '../components/auth/withAuth'
 import { getDevelopers, getRoleColor } from '../data/affiliates';
 
@@ -29,9 +28,7 @@ const InfoPage: NextPage = () => {
           </Link>
         </div>
       </Header>
-      
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
-      
+            
       <main className="centered">
         <div className={styles.mainContent}>
           <h2>The TNT Tag History Project</h2>

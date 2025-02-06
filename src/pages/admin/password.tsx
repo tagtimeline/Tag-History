@@ -9,7 +9,6 @@ import AdminAuth from '@/components/auth/AdminAuth';
 import { checkAdminAuth } from '@/components/admin/AuthHandler';
 
 import baseStyles from '@/styles/admin/base.module.css';
-import headerStyles from '@/styles/header.module.css';
 
 export default function AdminPassword() {
  const router = useRouter();
@@ -36,7 +35,6 @@ export default function AdminPassword() {
        <title>Admin Login - TNT Tag History</title>
      </Head>
      <Header />
-     <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
      <main className="centered">
        <AdminAuth />
      </main>

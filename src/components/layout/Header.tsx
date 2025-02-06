@@ -1,5 +1,6 @@
 // src/components/layout/Header.tsx
 import React, { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../../styles/header.module.css';
 import { useRouter } from 'next/router';

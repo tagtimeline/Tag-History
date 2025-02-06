@@ -397,12 +397,14 @@
 
 /* Event Page Styles */
 .eventPageContent {
-    composes: modalContent;
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 340px);
+    background: #1a1a1a;
+    border: 4px solid #333;
+    border-radius: 12px;
     max-width: 800px;
-    top: 0px;
+    padding: 24px;
+    position: relative;
+    width: 95%;
+    margin: 20px auto;
 }
 
 .eventNavigation {
@@ -414,21 +416,17 @@
 
 .modalText {
     color: #888;
-    flex: 1;
     line-height: 1.2;
     margin: 0;
-    overflow-y: hidden;
-    padding-right: 10px;
-    scrollbar-gutter: stable;
     white-space: pre-line;
 }
 
 .modalText:hover {
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
 .modalFooter {
-    margin-top: 5px;
+    margin-top: auto;
 }
 
 /* Navigation Buttons */
@@ -441,11 +439,23 @@
     cursor: pointer;
     display: flex;
     font-family: 'Minecraft', sans-serif;
-    font-size: 16px;
+    font-size: 14px;
+    gap: 4px;
     height: 32px;
     justify-content: center;
+    padding: 0 12px;
+    position: fixed;
     text-decoration: none;
-    width: 32px;
+    top: 120px;
+    z-index: 10;
+}
+
+.navButtonPrev {
+    left: 20px;
+}
+
+.navButtonNext {
+    right: 20px;
 }
 
 .navButton:hover {
@@ -462,7 +472,6 @@
 .navButtonDisabled:hover {
     background-color: #222;
 }
-
 
 
 

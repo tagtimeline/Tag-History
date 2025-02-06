@@ -169,7 +169,6 @@ export default function AdminEventEdit() {
           </button>
         </div>
       </Header>
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
       
       <main className={baseStyles.mainContent}>
         {success && <div className={baseStyles.successMessage}><span className={baseStyles.successText}>{success}</span></div>}

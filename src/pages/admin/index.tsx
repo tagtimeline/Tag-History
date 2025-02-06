@@ -13,7 +13,6 @@ import { handleAdminLogout } from '@/components/admin/AuthHandler';
 import baseStyles from '@/styles/admin/base.module.css';
 import welcomeStyles from '@/styles/admin/welcome.module.css';
 import controlStyles from '@/styles/controls.module.css';
-import headerStyles from '@/styles/header.module.css';
 
 interface AdminInfo {
   email: string;
@@ -77,8 +76,6 @@ export default function AdminWelcome() {
             Logout
           </button>
         </Header>
-
-        <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
         {error && <div className={baseStyles.errorMessage}><span className={baseStyles.errorText}>{error}</span></div>}
 

@@ -116,3 +116,8 @@
 .eventLink:visited {
     color: #ff9900;
 }
+
+.eventLink svg {
+    border-radius: 3px;
+    padding: 2px;
+}

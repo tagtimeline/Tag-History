@@ -156,7 +156,6 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
             </Link>
           </div>
         </Header>
-        <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
         <main className="centered">
           <div className={styles.playerPageContent}>
             <div className={styles.errorMessage}>

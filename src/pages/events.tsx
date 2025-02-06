@@ -11,7 +11,6 @@ import { TimelineEvent } from '../data/events';
 import styles from '../styles/eventsList.module.css';
 import eventStyles from '../styles/events.module.css';
 import controlStyles from '../styles/controls.module.css';
-import headerStyles from '../styles/header.module.css';
 import withAuth from '../components/auth/withAuth';
 import { getAllCategories, getEventStyles } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown';
@@ -114,8 +113,6 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
           </Link>
         </div>
       </Header>
-
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
       {error && (
         <div className="error-message" style={{ 

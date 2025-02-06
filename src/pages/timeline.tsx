@@ -8,7 +8,6 @@ import TimelineContainer from '../components/timeline/TimelineContainer'
 import SettingsPopup from '../components/timeline/SettingsPopup'
 import EventSearch from '../components/search/EventSearch'
 import controlStyles from '../styles/controls.module.css'
-import headerStyles from '../styles/header.module.css'
 import { useState, useMemo, useEffect, useRef } from 'react'
 import withAuth from '../components/auth/withAuth'
 import { getAllCategories } from '../config/categories'
@@ -166,8 +165,6 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
          </Link>
        </div>
      </Header>
-
-     <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
      {error && (
        <div className="error-message" style={{ 

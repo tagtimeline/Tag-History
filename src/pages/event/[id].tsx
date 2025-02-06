@@ -9,14 +9,16 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { TimelineEvent } from '../../data/events';
-import styles from '../../styles/events.module.css';
 import controlStyles from '../../styles/controls.module.css';
-import headerStyles from '../../styles/header.module.css';
 import withAuth from '../../components/auth/withAuth';
 import { getCategoryName, getCategoryColor } from '../../config/categories';
 import EventContent from '../../components/timeline/EventContent';
 import { getEventById, getAllEvents } from '../../../lib/eventUtils';
 import { db } from '../../../lib/firebaseConfig';
+
+import styles from '../../styles/eventPage.module.css';
+import eventStyles from '../../styles/events.module.css';
+
 
 interface EventPageProps extends Record<string, unknown> {
  initialEvent: TimelineEvent;
@@ -114,104 +116,106 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
  if (!event) return null;
 
  return (
-   <>
-     <Head>
-       <title>{event.title} - TNT Tag History</title>
-       <meta name="description" content={event.description.slice(0, 160)} />
-     </Head>
-     
-     <Header>
-       <div className={controlStyles.headerControls}>
-         <Link href="/timeline">
-           <button className={controlStyles.headerButton}>Timeline</button>
-         </Link>
-         <Link href="/events">
-           <button className={controlStyles.headerButton}>Events</button>
-         </Link>
-         <Link href="/info">
-           <button className={controlStyles.headerButton}>Info</button>
-         </Link>
-       </div>
-     </Header>
+  <>
+    <Head>
+      <title>{event.title} - TNT Tag History</title>
+      <meta name="description" content={event.description.slice(0, 160)} />
+    </Head>
 
-     <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
-
-     {error && (
-       <div className="error-message" style={{ 
-         color: 'red', 
-         textAlign: 'center', 
-         padding: '10px' 
-       }}>
-         {error}
-       </div>
-     )}
-     
-     <main className="centered">
-       <div className={styles.eventPageContent}>
-         <div className={styles.modalHeader}>
-           <div className={styles.headerTags}>
-             <div className={styles.eventTypeWrapper}>
-               <div 
-                 className={styles.eventType}
-                 style={{ color: getCategoryColor(event.category) }}
-               >
-                 {getCategoryName(event.category)}
-               </div>
-               {event.category === 'feuds' && (
-                 <Link 
-                   href="https://discord.gg/pvhW64Jhbu" 
-                   target="_blank" 
-                   className={styles.discordLink}
-                 >
-                   <ExternalLink size={12} />
-                   <span>Tag Feuds Discord</span>
-                 </Link>
-               )}
-             </div>
-           </div>
-         </div>
-         <h2 className={styles.modalTitle}>
-           {event.isSpecial && <span className={styles.specialStar}>⭐</span>}
-           {event.title}
-         </h2>
-         <div className={styles.modalDate}>
-           {new Date(event.date).toLocaleDateString()}
-           {event.endDate && (
-             <span> - {new Date(event.endDate).toLocaleDateString()}</span>
-           )}
-         </div>
-         <hr className={styles.divider} />
-         <EventContent event={event} getEventTitle={getEventTitle} />
-         
-         <div className={styles.modalFooter}>
-           <hr className={styles.divider} />
-           <div className={styles.tagLabel}>Tags:</div>
-           <div className={styles.modalTags}>
-             {event.tags.map(tag => (
-               <span key={tag} className={styles.tag}>{tag}</span>
-             ))}
-           </div>
-         </div>
-       </div>
-       
-       <div className={styles.eventNavigation}>
-         <Link 
-           href={prevEvent ? `/event/${prevEvent.id}` : '#'}
-           className={`${styles.navButton} ${!prevEvent ? styles.navButtonDisabled : ''}`}
-         >
-           <ChevronLeft size={22} />
-         </Link>
-         <Link 
-           href={nextEvent ? `/event/${nextEvent.id}` : '#'}
-           className={`${styles.navButton} ${!nextEvent ? styles.navButtonDisabled : ''}`}
-         >
-           <ChevronRight size={22} />
-         </Link>
-       </div>
-     </main>
-
-     <Footer />
-   </>
+    <Header>
+      <div className={controlStyles.headerControls}>
+      <Link href="/timeline">
+          <button className={controlStyles.headerButton}>Timeline</button>
+        </Link>
+        <Link href="/events">
+          <button className={controlStyles.headerButton}>Events</button>
+        </Link>
+        <Link href="/info">
+          <button className={controlStyles.headerButton}>Info</button>
+        </Link>
+      </div>
+    </Header>
+  
+    {error && (
+      <div className="error-message" style={{ 
+        color: 'red', 
+        textAlign: 'center', 
+        padding: '10px' 
+      }}>
+        {error}
+      </div>
+    )}
+    
+    <main className={styles.wrapper}>
+      <div className={styles.navigation}>
+        <Link 
+          href={prevEvent ? `/event/${prevEvent.id}` : '#'}
+          className={`${styles.navButton} ${!prevEvent ? styles.navButtonDisabled : ''}`}
+        >
+          <ChevronLeft size={14} />
+          <span>Back</span>
+        </Link>
+        <Link 
+          href={nextEvent ? `/event/${nextEvent.id}` : '#'}
+          className={`${styles.navButton} ${!nextEvent ? styles.navButtonDisabled : ''}`}
+        >
+          <span>Next</span>
+          <ChevronRight size={14} />
+        </Link>
+      </div>
+ 
+      <div className={styles.content}>
+        <div className={styles.header}>
+          <div className={styles.headerTags}>
+            <div 
+              className={eventStyles.eventType}
+              style={{ color: getCategoryColor(event.category) }}
+            >
+              {getCategoryName(event.category)}
+            </div>
+            {event.category === 'feuds' && (
+              <Link 
+                href="https://discord.gg/pvhW64Jhbu" 
+                target="_blank" 
+                className={eventStyles.discordLink}
+              >
+                <ExternalLink size={12} />
+                <span>Tag Feuds Discord</span>
+              </Link>
+            )}
+          </div>
+        </div>
+ 
+        <h2 className={styles.title}>
+          {event.isSpecial && <span className={eventStyles.specialStar}>⭐</span>}
+          {event.title}
+        </h2>
+ 
+        <div className={styles.date}>
+          {new Date(event.date).toLocaleDateString()}
+          {event.endDate && (
+            <span> - {new Date(event.endDate).toLocaleDateString()}</span>
+          )}
+        </div>
+ 
+        <hr className={eventStyles.divider} />
+        
+        <EventContent event={event} getEventTitle={getEventTitle} />
+        
+        <div className={eventStyles.modalFooter}>
+          <hr className={eventStyles.divider} />
+          <div className={eventStyles.tagLabel}>Tags:</div>
+          <div className={eventStyles.modalTags}>
+            {event.tags.map(tag => (
+              <span key={tag} className={eventStyles.tag}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+ 
+    <Footer />
+  </>
  );
 };
 

@@ -11,7 +11,6 @@ import PlayerSearch from '../components/search/PlayerSearch'
 import { AUTH_CONFIG } from '../config/auth';
 import { useEffect, useState } from 'react';
 import styles from '../styles/home.module.css';
-import headerStyles from '../styles/header.module.css';
 import controlStyles from '../styles/controls.module.css';
 import { TimelineEvent } from '../data/events';
 import { DEFAULT_YEAR_SPACING } from '../config/timelineControls';
@@ -67,8 +66,6 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
           </Link>
         </div>
       </Header>
-
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
       <main className={styles.mainContent}>
         <div className={styles.mainContainer}>

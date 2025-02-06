@@ -301,4 +301,4 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   );
 };
 
-export default TimelineGrid;
+export default React.memo(TimelineGrid);

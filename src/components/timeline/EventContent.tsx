@@ -59,7 +59,10 @@ const VideoPlayer: React.FC<{ platform: string; id: string }> = ({ platform, id 
   );
 };
 
-const renderTextWithLinks = (text: string, getEventTitle?: (id: string) => string | undefined) => {
+const renderTextWithLinks = (
+  text: string, 
+  getEventTitle?: (id: string) => string | undefined
+) => {
   const links = extractLinks(text);
   const eventLinks = extractEventLinks(text);
   const youtubeMatches = text.match(patterns.youtube) || [];

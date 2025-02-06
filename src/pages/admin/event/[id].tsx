@@ -18,7 +18,6 @@ import { getCategoryName, getCategoryColor } from '@/config/categories';
 import baseStyles from '@/styles/admin/base.module.css';
 import eventStyles from '@/styles/events.module.css';
 import controlStyles from '@/styles/controls.module.css';
-import headerStyles from '@/styles/header.module.css';
 
 interface EventFormData {
   title: string;

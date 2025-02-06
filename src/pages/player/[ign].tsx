@@ -8,7 +8,6 @@ import Footer from '../../components/layout/Footer';
 import { TimelineEvent } from '../../data/events';
 import styles from '../../styles/player.module.css';
 import controlStyles from '../../styles/controls.module.css';
-import headerStyles from '../../styles/header.module.css';
 import withAuth from '../../components/auth/withAuth';
 import { PlayerProfile } from '../../config/players';
 import PlayerEventsList from '../../components/player/PlayerEventsList';
@@ -191,8 +190,6 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
           </Link>
         </div>
       </Header>
-
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
 
       {error && (
         <div className="error-message" style={{ 

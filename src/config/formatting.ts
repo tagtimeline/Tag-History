@@ -60,7 +60,7 @@ export const extractVideoDetails = (text: string): VideoDetails | null => {
   const match = text.match(patterns.video);
   if (!match) return null;
 
-  const [_, platform, id] = text.match(/\[video:([^:]+):([^\]]+)\]/) || [];
+  const [, platform, id] = text.match(/\[video:([^:]+):([^\]]+)\]/) || [];
   return { platform, id };
 };
 

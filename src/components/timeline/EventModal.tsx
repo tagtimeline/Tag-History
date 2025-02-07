@@ -1,12 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react';
 import styles from '../../styles/events.module.css';
 import controlStyles from '../../styles/controls.module.css'
 import { TimelineEvent } from '../../data/events';
-import { getCategoryName, getCategoryColor } from '../../config/categories';
+import { getCategoryName, getCategoryColor, Category, fetchCategories } from '../../config/categories';
 import EventContent from './EventContent';
 import { getAllEvents } from '../../../lib/eventUtils';
+
 
 interface EventModalProps {
   event: TimelineEvent;
@@ -16,14 +17,23 @@ interface EventModalProps {
 const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
 // Get all events as an array
 const [allEvents, setAllEvents] = React.useState<TimelineEvent[]>([]);
+const [categories, setCategories] = useState<Record<string, Category>>({});
 
-React.useEffect(() => {
+useEffect(() => {
   getAllEvents().then(events => setAllEvents(events));
 }, []);
 
 const getEventTitle = useCallback((eventId: string) => {
   return allEvents.find((e: TimelineEvent) => e.id === eventId)?.title;
 }, [allEvents]);
+
+useEffect(() => {
+  const loadCategories = async () => {
+    const cats = await fetchCategories();
+    setCategories(cats);
+  };
+  loadCategories();
+}, []);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>

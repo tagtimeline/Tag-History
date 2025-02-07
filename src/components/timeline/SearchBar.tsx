@@ -1,8 +1,8 @@
 // src/components/timeline/SearchBar.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TimelineEvent } from '../../data/events';
 import { searchEvents } from '../../config/search';
-import { getCategoryColor } from '../../config/categories';
+import { Category, fetchCategories, getCategoryColor } from '../../config/categories';
 import searchStyles from '../../styles/search.module.css';
 
 interface SearchBarProps {
@@ -13,6 +13,7 @@ interface SearchBarProps {
 const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
+  const [categories, setCategories] = useState<Record<string, Category>>({});
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -25,6 +26,14 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
     setSearchTerm('');
     setSearchResults([]);
   };
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const cats = await fetchCategories();
+      setCategories(cats);
+    };
+    loadCategories();
+  }, []);
 
   return (
     <div className={searchStyles.searchContainer}>

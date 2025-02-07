@@ -2,11 +2,13 @@
 import { TimelineEvent } from '../../data/events';
 import styles from '../../styles/eventsList.module.css';
 import eventStyles from '../../styles/events.module.css';
-import { getEventStyles } from '../../config/categories';
+import { Category, getEventStyles } from '../../config/categories';
 
 interface PlayerEventsListProps {
   events: TimelineEvent[];
   onEventSelect?: (event: TimelineEvent) => void;
+  categories: Record<string, Category>;
+  formatDate: (date: string) => string;
 }
 
 const PlayerEventsList: React.FC<PlayerEventsListProps> = ({ events, onEventSelect }) => {

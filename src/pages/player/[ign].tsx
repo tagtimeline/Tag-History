@@ -13,7 +13,7 @@ import { PlayerProfile } from '../../config/players';
 import PlayerEventsList from '../../components/player/PlayerEventsList';
 import PlayerInfo from '../../components/player/PlayerInfo';
 import PlayerSkinViewer from '../../components/player/PlayerSkinViewer';
-import { getAllCategories } from '../../config/categories';
+import { fetchCategories, Category } from '@/config/categories';
 import { ALL_EVENTS_OPTION } from '../../config/dropdown';
 import { searchEvents } from '../../config/search';
 import PlayerSearch from '../../components/search/PlayerSearch';
@@ -26,15 +26,13 @@ import { getPlayerData } from '../../components/player/PlayerAPI';
 interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
   currentIgn: string | null;
-  // allUsernames: string[];
   playerData: PlayerProfile | null;
   initialEvents: TimelineEvent[];
 }
 
 const PlayerPage: NextPage<PlayerPageProps> = ({ 
   historicalIgn, 
-  currentIgn, 
-  // allUsernames, 
+  currentIgn,
   playerData,
   initialEvents
 }) => {
@@ -46,10 +44,28 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [categories, setCategories] = useState<Record<string, Category>>({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setError('Failed to load categories');
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // Get available categories based on player's events
   const availableCategories = useMemo(() => {
-    if (!playerData || !events) return [ALL_EVENTS_OPTION];
+    if (!playerData || !events || !categories) return [ALL_EVENTS_OPTION];
     
     const playerEventIds = new Set(playerData.events || []);
     const usedCategories = new Set(
@@ -60,9 +76,9 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     
     return [
       ALL_EVENTS_OPTION,
-      ...getAllCategories().filter(category => usedCategories.has(category.id))
+      ...Object.values(categories).filter(category => usedCategories.has(category.id))
     ];
-  }, [playerData, events]);
+  }, [playerData, events, categories]);
 
   // Set up real-time listener for events
   useEffect(() => {
@@ -120,24 +136,27 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const playerEvents = useMemo(() => {
     if (!playerData || !events) return [];
     
-    // Filter events that are in the player's events array
     const playerEventIds = new Set(playerData.events || []);
     
     return events
-        .filter(event => playerEventIds.has(event.id))
-        .filter(event => 
-            selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
-            selectedCategories.includes(event.category)
-        )
-        .filter(event => 
-            searchTerm === '' || 
-            searchEvents([event], searchTerm).length > 0  
-        )
-        .sort((a, b) => {
-            const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-            return sortDirection === 'asc' ? comparison : -comparison;
-        });
+      .filter(event => playerEventIds.has(event.id))
+      .filter(event => 
+        selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
+        selectedCategories.includes(event.category)
+      )
+      .filter(event => 
+        searchTerm === '' || 
+        searchEvents([event], searchTerm).length > 0  
+      )
+      .sort((a, b) => {
+        const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
   }, [playerData, selectedCategories, searchTerm, events, sortDirection]);
+
+  if (isLoadingCategories) {
+    return <div>Loading...</div>;
+  }
 
   if (!currentIgn || !playerData) {
     return (
@@ -166,6 +185,12 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
       </>
     );
   }
+
+  // Format dates on the client side only
+  const formatDate = (date: string) => {
+    if (typeof window === 'undefined') return '';
+    return new Date(date).toLocaleDateString();
+  };
 
   return (
     <>
@@ -219,9 +244,11 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
                     className={controlStyles.dropdownHeader}
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
-                    <span className={controlStyles.label}>Categories...</span>
+                    <span className={controlStyles.label}>
+                      {isLoadingCategories ? 'Loading categories...' : 'Categories...'}
+                    </span>
                   </div>
-                  {isDropdownOpen && (
+                  {isDropdownOpen && !isLoadingCategories && (
                     <ul className={controlStyles.dropdownMenu}>
                       {availableCategories.map((category) => (
                         <li 
@@ -262,6 +289,8 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
                 <PlayerEventsList 
                   events={playerEvents}
                   onEventSelect={setSelectedEvent}
+                  categories={categories}
+                  formatDate={formatDate}
                 />
               ) : (
                 <div className={styles.noEvents}>

@@ -1,7 +1,7 @@
 // components/admin/EventForm.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
-import { categories } from '@/config/categories';
+import { fetchCategories, type Category } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
 import MarkdownGuidePopup from './MarkdownGuidePopup';
@@ -28,7 +28,7 @@ export interface EventFormData {
   title: string;
   date: string;
   endDate?: string;
-  category: keyof typeof categories | '';
+  category: string;
   description: string;
   isSpecial: boolean;
   tags: string[];
@@ -71,6 +71,25 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [showDraftMessage, setShowDraftMessage] = useState(false);
   const [hasDraftState, setHasDraftState] = useState(false);
+  const [categories, setCategories] = useState<Record<string, Category>>({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories when component mounts
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await fetchCategories();  // Here's the fix - use fetchCategories()
+        setCategories(cats);
+        setIsLoadingCategories(false);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setErrorMessage('Failed to load categories');
+        setIsLoadingCategories(false);
+      }
+    };
+    
+    loadCategories();
+  }, []);
 
   // Auto-save without showing message
   const saveDraftQuietly = (data: EventFormData) => {
@@ -103,11 +122,16 @@ export const EventForm: React.FC<EventFormProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [formData, saveDraftWithMessage]);
 
+  const autoResizeTextArea = (element: HTMLTextAreaElement) => {
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
+  };
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = ''; // This shows the browser's default message
+        e.returnValue = '';
       }
     };
   
@@ -323,13 +347,16 @@ export const EventForm: React.FC<EventFormProps> = ({
           id="category"
           className={formStyles.input}
           value={formData.category}
-          onChange={(e) => onChange({ ...formData, category: e.target.value as keyof typeof categories })}
+          onChange={(e) => onChange({ ...formData, category: e.target.value })}
           required
+          disabled={isLoadingCategories}
         >
-          <option value="" disabled>Select Category</option>
-          {Object.keys(categories).map((category) => (
-            <option key={category} value={category}>
-              {categories[category as keyof typeof categories].name}
+          <option value="" disabled>
+            {isLoadingCategories ? 'Loading categories...' : 'Select Category'}
+          </option>
+          {Object.entries(categories).map(([id, category]) => (
+            <option key={id} value={id}>
+              {category.name}
             </option>
           ))}
         </select>
@@ -350,7 +377,14 @@ export const EventForm: React.FC<EventFormProps> = ({
           id="description"
           className={formStyles.textarea}
           value={formData.description}
-          onChange={(e) => onChange({ ...formData, description: e.target.value })}
+          onChange={(e) => {
+            onChange({ ...formData, description: e.target.value });
+            autoResizeTextArea(e.target);
+          }}
+          onInput={(e) => autoResizeTextArea(e.target as HTMLTextAreaElement)}
+          ref={(ref) => {
+            if (ref) autoResizeTextArea(ref);
+          }}
           required
         />
         {showMarkdownGuide && (
@@ -405,7 +439,14 @@ export const EventForm: React.FC<EventFormProps> = ({
               className={formStyles.textarea}
               placeholder="Side Event Description"
               value={sideEvent.description}
-              onChange={(e) => handleSideEventChange(index, 'description', e.target.value)}
+              onChange={(e) => {
+                handleSideEventChange(index, 'description', e.target.value);
+                autoResizeTextArea(e.target);
+              }}
+              onInput={(e) => autoResizeTextArea(e.target as HTMLTextAreaElement)}
+              ref={(ref) => {
+                if (ref) autoResizeTextArea(ref);
+              }}
             />
             <button 
               type="button"

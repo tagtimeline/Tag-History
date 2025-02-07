@@ -102,10 +102,11 @@
     height: auto;
     min-height: 120px;
     resize: vertical;
-    max-height: 1000px;
     margin-top: 5px;
+    transition: height 0.1s ease;
+    overflow-y: hidden;
 }
-   
+
 .input:focus,
 .textarea:focus {
     outline: none;

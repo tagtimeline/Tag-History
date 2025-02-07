@@ -1,4 +1,7 @@
 // src/config/categories.ts
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { db } from '@/../lib/firebaseConfig';
+import type { CSSProperties } from 'react';
 
 export interface Category {
     id: string;
@@ -11,42 +14,49 @@ export interface Category {
         boxShadow?: string;
     };
 }
-
-export const categories: Record<string, Category> = {
-    hypixel: {
-        id: 'hypixel',
-        name: 'Hypixel',
-        color: '#66ff66',
-        borderStyle: '3px solid'
-    },
-    feuds: {
-        id: 'feuds',
-        name: 'Feuds',
-        color: '#ff6666',
-        borderStyle: '3px solid'
-    },
-    guilds: {
-        id: 'guilds',
-        name: 'Guilds',
-        color: '#66f2ff',
-        borderStyle: '3px solid'
-    },
-    tagtimeline: {
-        id: 'timeline',
-        name: 'Timeline',
-        color: '#ff8a00',
-        borderStyle: '3px solid'
-    },
-    other: {
-        id: 'other',
-        name: 'Other',
-        color: '#ffffff',
-        borderStyle: '3px solid'
+  
+ export const categories: Record<string, Category> = {
+    default: {
+      id: 'default',
+      name: 'Default',
+      color: '#808080',
+      borderStyle: '3px solid'
     }
-};
+  };
 
-export const getEventStyles = (categoryId: string, isSpecial?: boolean): React.CSSProperties => {
-    const category = categories[categoryId];
+// This will store our cached categories
+let cachedCategories: Record<string, Category> = {};
+
+// Make sure to properly export the function
+export async function fetchCategories(): Promise<Record<string, Category>> {
+    try {
+        const categoriesRef = collection(db, 'categories');
+        const snapshot = await getDocs(categoriesRef);
+        
+        const categoriesData: Record<string, Category> = {};
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            categoriesData[doc.id] = {
+                id: doc.id,
+                name: data.name,
+                color: data.color,
+                borderStyle: data.borderStyle,
+                extraStyles: data.extraStyles
+            };
+        });
+
+        // Update cache
+        cachedCategories = categoriesData;
+        return categoriesData;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        return {};
+    }
+}
+
+// Helper functions now use the cached categories
+export function getEventStyles(categoryId: string, isSpecial?: boolean): CSSProperties {
+    const category = cachedCategories[categoryId];
     if (!category) return {};
 
     const baseStyles = {
@@ -60,13 +70,39 @@ export const getEventStyles = (categoryId: string, isSpecial?: boolean): React.C
     }
 
     return baseStyles;
-};
+}
 
-export const getCategoryColor = (categoryId: string): string => 
-    categories[categoryId]?.color || '#888';
+export function getCategoryColor(categoryId: string): string {
+    return cachedCategories[categoryId]?.color || '#888';
+}
 
-export const getCategoryName = (categoryId: string): string => 
-    categories[categoryId]?.name || categoryId;
+export function getCategoryName(categoryId: string): string {
+    return cachedCategories[categoryId]?.name || categoryId;
+}
 
-export const getAllCategories = () => 
-    Object.values(categories);
+export function getAllCategories(): Category[] {
+    return Object.values(cachedCategories);
+}
+
+// Optional: Function to get a single category
+export async function getCategory(id: string): Promise<Category | null> {
+    try {
+        const categoryRef = doc(db, 'categories', id);
+        const categoryDoc = await getDoc(categoryRef);
+        
+        if (categoryDoc.exists()) {
+            const data = categoryDoc.data();
+            return {
+                id: categoryDoc.id,
+                name: data.name,
+                color: data.color,
+                borderStyle: data.borderStyle,
+                extraStyles: data.extraStyles
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching category:', error);
+        return null;
+    }
+}

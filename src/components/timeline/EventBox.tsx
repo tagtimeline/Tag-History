@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import styles from '../../styles/events.module.css';  
 import { TimelineEvent } from '../../data/events';
 import EventModal from './EventModal';
-import { getEventStyles } from '../../config/categories';
+import { Category, fetchCategories, getEventStyles } from '../../config/categories';
 import { EVENT_CARD_WIDTH } from '../../config/timelineControls';
+
 
 interface EventBoxProps {
   event: TimelineEvent;
@@ -32,11 +33,20 @@ const EventBox: React.FC<EventBoxProps> = ({
   const [titleWidth, setTitleWidth] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const [categories, setCategories] = useState<Record<string, Category>>({});
   const eventStyles = getEventStyles(event.category, event.isSpecial);
 
   const TOTAL_PADDING = 16; // 8px padding on each side
   const STAR_WIDTH = event.isSpecial ? 22 : 0; // Account for star + gap (16px + 6px gap)
   const MIN_BOX_CONTENT_WIDTH = EVENT_CARD_WIDTH - TOTAL_PADDING - STAR_WIDTH;
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const cats = await fetchCategories();
+      setCategories(cats);
+    };
+    loadCategories();
+  }, []);
 
   // Effect to measure title width
   useEffect(() => {

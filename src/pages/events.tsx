@@ -12,7 +12,7 @@ import styles from '../styles/eventsList.module.css';
 import eventStyles from '../styles/events.module.css';
 import controlStyles from '../styles/controls.module.css';
 import withAuth from '../components/auth/withAuth';
-import { getAllCategories, getEventStyles } from '../config/categories';
+import { fetchCategories, getEventStyles, Category } from '../config/categories';
 import { ALL_EVENTS_OPTION } from '../config/dropdown';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebaseConfig';
@@ -29,9 +29,25 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [categories, setCategories] = useState<Record<string, Category>>({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  const allCategories = [ALL_EVENTS_OPTION, ...getAllCategories()];
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setError('Failed to load categories');
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // Set up real-time listener for events
   useEffect(() => {
@@ -85,7 +101,9 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
     });
   };
 
-  const filteredEvents = events ? events
+  const allCategories = [ALL_EVENTS_OPTION, ...Object.values(categories)];
+
+  const filteredEvents = events
     .filter(event => 
       selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
       selectedCategories.includes(event.category)
@@ -93,8 +111,21 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
     .sort((a, b) => {
       const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
       return sortDirection === 'asc' ? comparison : -comparison;
-    })
-    : [];
+    });
+
+  // Format dates on the client side only
+  const formatDate = (date: string) => {
+    if (typeof window === 'undefined') return '';
+    return new Date(date).toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+
+  if (isLoadingCategories) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -133,9 +164,11 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
               className={controlStyles.dropdownHeader}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span className={controlStyles.label}>Categories...</span>
+              <span className={controlStyles.label}>
+                {isLoadingCategories ? 'Loading categories...' : 'Categories...'}
+              </span>
             </div>
-            {isDropdownOpen && (
+            {isDropdownOpen && !isLoadingCategories && (
               <ul className={controlStyles.dropdownMenu}>
                 {allCategories.map((category) => (
                   <li 
@@ -192,8 +225,8 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
                     <span className={eventStyles.eventTitleText}>{event.title}</span>
                   </h3>
                   <div className={eventStyles.eventDate} style={{ fontSize: '12px' }}>
-                    {new Date(event.date).toLocaleDateString()}
-                    {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                    {formatDate(event.date)}
+                    {event.endDate && ` - ${formatDate(event.endDate)}`}
                   </div>
                 </div>
               </div>

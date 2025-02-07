@@ -117,6 +117,11 @@ export default function AdminWelcome() {
                   Player Management
                 </button>
               </Link>
+              <Link href="/admin/categories">
+                <button className={controlStyles.headerButton} style={{ width: '264px' }}>
+                  Category Management
+                </button>
+              </Link>
             </div>
           </div>  
         </main>

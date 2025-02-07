@@ -33,7 +33,7 @@ const EventBox: React.FC<EventBoxProps> = ({
   const [titleWidth, setTitleWidth] = useState(0);
   const eventBoxRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const [categories, setCategories] = useState<Record<string, Category>>({});
+  const [, setCategories] = useState<Record<string, Category>>({});
   const eventStyles = getEventStyles(event.category, event.isSpecial);
 
   const TOTAL_PADDING = 16; // 8px padding on each side

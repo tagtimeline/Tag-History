@@ -17,7 +17,7 @@ interface EventModalProps {
 const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
 // Get all events as an array
 const [allEvents, setAllEvents] = React.useState<TimelineEvent[]>([]);
-const [categories, setCategories] = useState<Record<string, Category>>({});
+const [, setCategories] = useState<Record<string, Category>>({});
 
 useEffect(() => {
   getAllEvents().then(events => setAllEvents(events));

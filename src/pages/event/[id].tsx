@@ -11,7 +11,7 @@ import Footer from '../../components/layout/Footer';
 import { TimelineEvent } from '../../data/events';
 import controlStyles from '../../styles/controls.module.css';
 import withAuth from '../../components/auth/withAuth';
-import { getCategoryName, getCategoryColor, fetchCategories, Category } from '../../config/categories';
+import { fetchCategories, Category } from '../../config/categories';
 import EventContent from '../../components/timeline/EventContent';
 import { getEventById, getAllEvents } from '../../../lib/eventUtils';
 import { db } from '../../../lib/firebaseConfig';

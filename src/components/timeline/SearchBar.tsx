@@ -13,7 +13,7 @@ interface SearchBarProps {
 const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
-  const [categories, setCategories] = useState<Record<string, Category>>({});
+  const [, setCategories] = useState<Record<string, Category>>({});
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

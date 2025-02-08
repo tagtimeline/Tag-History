@@ -86,6 +86,32 @@
     color: #888;
 }
 
+.roleList {
+    margin-top: 5px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+  
+.roleBox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 4px;
+    font-size: 14px;
+
+}
+  
+.roleIndicator {
+    display: inline-block;
+    width: 6px;
+    height: 12px;
+}
+  
+.roleTag {
+    color: #888;
+}
+
 /* Player Links */
 .playerLinks {
     display: flex;

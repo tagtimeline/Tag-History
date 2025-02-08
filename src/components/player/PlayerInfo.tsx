@@ -1,10 +1,11 @@
 // src/components/player/PlayerInfo.tsx
 import React, { useEffect, useState } from 'react';
-import { PlayerProfile } from '../../config/players';
+import { PlayerProfile, ROLE_ORDER } from '../../config/players';
 import styles from '../../styles/player.module.css';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebaseConfig';
 
+import { sortRolesByPriority } from '../../config/players';
 
 
 const colorMap: { [key: string]: string } = {
@@ -182,20 +183,38 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
                 : 'N/A'}
             </p>
             <br />
-            {playerData.role && (
-              <p className={styles.playerStats}>
-                <span className={styles.statLabel}>Role:</span>{' '}
-                <span style={{ 
-                  color: `#${roles.find(r => r.id === playerData.role)?.color}` 
-                }}>
-                  {roles.find(r => r.id === playerData.role)?.tag || playerData.role}
-                </span>
-              </p>
-            )}
             {playerData.hypixel.discord && (
               <p className={styles.playerStats}>
                 <span className={styles.statLabel}>Discord:</span>{' '}
                 @{playerData.hypixel.discord}
+              </p>
+            )}
+            {playerData.role && (
+              <p className={styles.playerStats}>
+                <span className={styles.statLabel}>Timeline:</span>
+                <div className={styles.roleList}>
+
+                {sortRolesByPriority(playerData.role.split(',').filter((id): id is typeof ROLE_ORDER[number] => 
+                          ROLE_ORDER.includes(id as typeof ROLE_ORDER[number])
+                        )).map((roleId, index) => {
+                    const role = roles.find(r => r.id === roleId.trim());
+                    if (!role) return null;
+                    
+                    return (
+                      <React.Fragment key={index}>
+                        <div className={styles.roleBox}>
+                          <span 
+                            className={styles.roleIndicator}
+                            style={{ backgroundColor: `#${role.color}` }}
+                          />
+                          <span className={styles.roleTag}>
+                            {role.tag}
+                          </span>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
               </p>
             )}
           </div>

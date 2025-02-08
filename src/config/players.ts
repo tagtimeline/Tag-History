@@ -1,6 +1,17 @@
 // src/config/players.ts
 import { TimelineEvent } from "@/data/events";
 
+export const ROLE_ORDER = ['head-dev', 'dev', 'staff', 'sponsor', 'contributor'] as const;
+
+export function sortRolesByPriority(roleIds: (typeof ROLE_ORDER[number])[]): (typeof ROLE_ORDER[number])[] {
+  return [...roleIds].sort((a, b) => {
+    const aIndex = ROLE_ORDER.indexOf(a);
+    const bIndex = ROLE_ORDER.indexOf(b);
+    return aIndex - bIndex;
+  });
+}
+
+
 interface GuildInfo {
   name: string;
   rank?: string;

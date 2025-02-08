@@ -60,7 +60,7 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
       },
       hypixel: hypixelData,
       events: dbPlayerData?.events || [],
-      role: dbPlayerData?.role || null  // Add this line to include the role
+      role: dbPlayerData?.role || null
     };
 
     const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);

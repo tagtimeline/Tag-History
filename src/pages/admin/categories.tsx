@@ -284,6 +284,9 @@ export default function AdminCategories() {
                   onChange={handleFormChange}
                 >
                   <option value="3px solid">Solid 3px</option>
+                  <option value="3px dashed">Dashed 3px</option>
+                  <option value="3px dotted">Dotted 3px</option>
+                  <option value="5px solid">Solid 5px</option>
                 </select>
               </div>
   

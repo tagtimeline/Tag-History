@@ -1,5 +1,5 @@
 // pages/admin/player.tsx
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
@@ -12,6 +12,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { handleAdminLogout } from '@/components/admin/AuthHandler';
 import { updatePlayerData } from '@/../lib/playerUtils';
+import { ROLE_ORDER, sortRolesByPriority } from '@/config/players';
 
 import baseStyles from '@/styles/admin/base.module.css';
 import playerStyles from '@/styles/admin/players.module.css';
@@ -52,6 +53,8 @@ export default function PlayerManagement() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   // Authentication check
   useEffect(() => {
@@ -97,6 +100,18 @@ export default function PlayerManagement() {
     return () => unsubscribe();
   }, []);
 
+  // Handle clicking outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handlePlayerSelect = (player: Player) => {
     setSelectedPlayer(player);
     setPlayerForm({ ...player });
@@ -118,35 +133,35 @@ export default function PlayerManagement() {
     setSuccess('');
 
     try {
-        if (!playerForm.currentIgn?.trim()) {
-            setError('Player IGN is required');
-            return;
-        }
+      if (!playerForm.currentIgn?.trim()) {
+        setError('Player IGN is required');
+        return;
+      }
 
-        // If updating existing player
-        if (selectedPlayer?.id) {
-            const playerRef = doc(db, 'players', selectedPlayer.id);
-            await updateDoc(playerRef, {
-                currentIgn: playerForm.currentIgn.trim(),
-                pastIgns: playerForm.pastIgns?.filter(ign => ign.trim() !== '') || [],
-                role: playerForm.role || null,
-                lastUpdated: new Date()
-            });
-            setSuccess('Player updated successfully');
-        } else {
-            // Adding new player
-            await updatePlayerData(playerForm.currentIgn.trim(), playerForm.role || null);
-            setSuccess('Player added successfully');
-        }
+      // If updating existing player
+      if (selectedPlayer?.id) {
+        const playerRef = doc(db, 'players', selectedPlayer.id);
+        await updateDoc(playerRef, {
+          currentIgn: playerForm.currentIgn.trim(),
+          pastIgns: playerForm.pastIgns?.filter(ign => ign.trim() !== '') || [],
+          role: playerForm.role || null,
+          lastUpdated: new Date()
+        });
+        setSuccess('Player updated successfully');
+      } else {
+        // Adding new player
+        await updatePlayerData(playerForm.currentIgn.trim(), playerForm.role || null);
+        setSuccess('Player added successfully');
+      }
 
-        // Reset form
-        setPlayerForm(initialPlayerForm);
-        setSelectedPlayer(null);
+      // Reset form
+      setPlayerForm(initialPlayerForm);
+      setSelectedPlayer(null);
     } catch (err) {
-        console.error('Error saving player:', err);
-        setError('Failed to save player. Please try again.');
+      console.error('Error saving player:', err);
+      setError('Failed to save player. Please try again.');
     }
-};
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -156,6 +171,15 @@ export default function PlayerManagement() {
     player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
     player.pastIgns?.some(ign => ign.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const sortedRoles = [...roles].sort((a, b) => {
+    const aIndex = ROLE_ORDER.indexOf(a.id as typeof ROLE_ORDER[number]);
+    const bIndex = ROLE_ORDER.indexOf(b.id as typeof ROLE_ORDER[number]);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
 
   const handleLogout = () => handleAdminLogout(router);
 
@@ -167,6 +191,7 @@ export default function PlayerManagement() {
       <Head>
         <title>Player Management - TNT Tag History</title>
       </Head>
+
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/admin">
@@ -218,34 +243,45 @@ export default function PlayerManagement() {
             <div className={playerStyles.playersList}>
               {filteredPlayers.map(player => (
                 <div 
-                key={player.id} 
-                className={`${playerStyles.playerItem} ${selectedPlayer?.id === player.id ? playerStyles.selected : ''}`}
-                onClick={() => handlePlayerSelect(player)}
-              >
-                <div className={playerStyles.playerItemLeft}>
-                  <div className={playerStyles.playerAvatar}>
-                    <Image
-                      src={`https://crafthead.net/avatar/${player.uuid}`}
-                      alt={player.currentIgn}
-                      width={32}
-                      height={32}
-                    />
+                  key={player.id} 
+                  className={`${playerStyles.playerItem} ${selectedPlayer?.id === player.id ? playerStyles.selected : ''}`}
+                  onClick={() => handlePlayerSelect(player)}
+                >
+                  <div className={playerStyles.playerItemLeft}>
+                    <div className={playerStyles.playerAvatar}>
+                      <Image
+                        src={`https://crafthead.net/avatar/${player.uuid}`}
+                        alt={player.currentIgn}
+                        width={32}
+                        height={32}
+                      />
+                    </div>
+                    <span>{player.currentIgn}</span>
                   </div>
-                  <span>{player.currentIgn}</span>
+                  {player.role && (
+                    <div className={playerStyles.playerRole}>
+                      {(() => {
+                        const roleIds = player.role.split(',');
+                        const primaryRoleId = sortRolesByPriority(roleIds.filter((id): id is typeof ROLE_ORDER[number] => 
+                          ROLE_ORDER.includes(id as typeof ROLE_ORDER[number])
+                        ))[0];
+                        const role = roles.find(r => r.id === primaryRoleId);
+                        if (!role) return null;
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {role.tag}
+                            <span 
+                              className={playerStyles.roleColor}
+                              style={{
+                                backgroundColor: `#${role.color}`
+                              }}
+                            />
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
-                {player.role && (
-                  <div className={playerStyles.playerRole}>
-                    {roles.find(r => r.id === player.role)?.tag || ''}
-                    <span 
-                      className={playerStyles.roleColor}
-                      style={{
-                        backgroundColor: `#${roles.find(r => r.id === player.role)?.color}`
-                      }}
-                    />
-                  </div>
-                )}
-
-              </div>
               ))}
             </div>
           </div>
@@ -282,7 +318,7 @@ export default function PlayerManagement() {
                 />
               </div>
   
-              {/* Past IGNs section in the form */}
+              {/* Past IGNs section */}
               <div className={playerStyles.formSection}>
                 <label htmlFor="pastIgns">Past IGNs</label>
                 <div className={playerStyles.pastIgnsList}>
@@ -332,37 +368,63 @@ export default function PlayerManagement() {
                 </div>
               </div>
 
-              {/* Role selection */}
+              {/* Roles dropdown */}
               <div className={playerStyles.formSection}>
-                <label htmlFor="role">Role</label>
-                <select
-                      id="role"
-                      name="role"
-                      className={playerStyles.roleSelect}
-                      value={playerForm.role || ''}
-                      onChange={(e) => setPlayerForm(prev => ({
-                          ...prev,
-                          role: e.target.value || null
-                      }))}
-                      style={{
-                          backgroundColor: playerForm.role ? 
-                              roles.find(r => r.id === playerForm.role)?.color || '#333' : 
-                              '#333'
-                      }}
+                <label>Roles</label>
+                <div 
+                  className={controlStyles.dropdown} 
+                  ref={roleDropdownRef}
+                  style={{ width: '100%' }}
+                >
+                  <div 
+                    className={controlStyles.dropdownHeader}
+                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                   >
-                      <option value="">None</option>
-                      {roles.map((role) => (
-                          <option 
-                              key={role.id} 
-                              value={role.id}
-                              style={{
-                                  backgroundColor: role.color
-                              }}
-                          >
-                              {role.tag}
-                          </option>
+                    <span className={controlStyles.label}>
+                      {playerForm.role ? 
+                        sortRolesByPriority(playerForm.role.split(',').filter((id): id is typeof ROLE_ORDER[number] => 
+                          ROLE_ORDER.includes(id as typeof ROLE_ORDER[number])
+                        ))
+                          .map(id => roles.find(r => r.id === id.trim())?.tag)
+                          .join(', ') 
+                        : 'Select roles...'
+                      }
+                    </span>
+                  </div>
+                  {isRoleDropdownOpen && (
+                    <ul className={controlStyles.dropdownMenu}>
+                      {sortedRoles.map((role) => (
+                        <li 
+                          key={role.id}
+                          className={`${controlStyles.dropdownItem} ${
+                            playerForm.role?.includes(role.id) ? controlStyles.selected : ''
+                          }`}
+                          onClick={() => {
+                            const currentRoles = playerForm.role ? playerForm.role.split(',') : [];
+                            let newRoles;
+                            
+                            if (currentRoles.includes(role.id)) {
+                              newRoles = currentRoles.filter(id => id !== role.id);
+                            } else {
+                              newRoles = [...currentRoles, role.id];
+                            }
+                            
+                            setPlayerForm(prev => ({
+                              ...prev,
+                              role: newRoles.length > 0 ? newRoles.join(',') : null
+                            }));
+                          }}
+                        >
+                          <span 
+                            className={controlStyles.categoryColor} 
+                            style={{ backgroundColor: `#${role.color}` }}
+                          />
+                          {role.tag}
+                        </li>
                       ))}
-                  </select>
+                    </ul>
+                  )}
+                </div>
               </div>
   
               {/* Events section */}

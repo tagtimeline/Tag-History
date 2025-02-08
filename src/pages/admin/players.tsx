@@ -157,7 +157,7 @@ export default function PlayerManagement() {
                     setError('Invalid UUID provided');
                     return;
                 }
-            } catch (err) {
+            } catch {
                 setError('Failed to fetch player data from UUID');
                 return;
             }
@@ -174,7 +174,7 @@ export default function PlayerManagement() {
                     setError('Invalid IGN provided');
                     return;
                 }
-            } catch (err) {
+            } catch {
                 setError('Failed to fetch player data from IGN');
                 return;
             }

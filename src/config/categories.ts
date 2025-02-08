@@ -8,6 +8,8 @@ export interface Category {
     name: string;
     color: string;
     borderStyle: string;
+    createdAt?: Date;
+    updatedAt?: Date;
     extraStyles?: {
         border?: string;
         zIndex?: number;
@@ -105,4 +107,15 @@ export async function getCategory(id: string): Promise<Category | null> {
         console.error('Error fetching category:', error);
         return null;
     }
+}
+
+// Validation function for categories
+export function validateCategory(category: Partial<Category>): boolean {
+    // Check if required fields are present and valid
+    return !!(
+        category.name && 
+        category.name.trim() !== '' && 
+        category.color && 
+        /^#([0-9A-F]{3}){1,2}$/i.test(category.color)
+    );
 }

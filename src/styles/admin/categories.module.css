@@ -1,0 +1,121 @@
+/* src/styles/admin/categories.module.css */
+.categoriesList {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.categoryItem {
+    background-color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 16px;
+    transition: all 0.2s ease;
+    min-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categoryItem:hover {
+    background-color: #444;
+    transform: scale(1.02);
+}
+
+.categoryItem.selected {
+    background-color: #2563eb;
+}
+
+.categoryColorInput {
+    appearance: none;
+    width: 40px;
+    margin-top: 5px;
+    height: 30px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background-color: #333;
+    cursor: pointer;
+    padding: 0;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.categoryColorInput::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.categoryColorInput::-webkit-color-swatch {
+    border: none;
+}
+
+.colorPickerContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.extraStyles {
+    background-color: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.extraStylesTitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.extraStyleInput {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-family: "Minecraft", sans-serif;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 15px 0;
+}
+
+.categoriesForm {
+    width: 100%;
+    max-width: 620px;
+    background: #1a1a1a;
+    border: 4px solid #333;
+    border-radius: 4px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.formSection {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.formSection label {
+    margin-bottom: 2px;
+    font-size: 14px;
+    color: #888;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 5px;
+}

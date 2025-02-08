@@ -1,42 +1,46 @@
 /* Base Layout */
-.playerPageContent {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 30px;
+.mainContent {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: calc(100vh - var(--footer-height) - var(--header-height) - 25px);
 }
 
-.gridContainer {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto;
-    gap: 10px;
+.playerPageContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
 }
+
+
+.gridContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 250px);
+    grid-template-rows: fitting repeat(2, 100%);
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+}    
 
 /* Player Info Section */
 .playerInfoSection {
-    grid-column: 3 / 5;
-    grid-row: 1;
+    grid-area: 1 / 2 / 2 / 4;
     padding-left: 5px;
     margin-top: 50px;
-    height: fit-content;
+    height: auto;
     position: sticky;
     overflow: visible;
 }
 
 .skinViewerSection {
-    grid-column: 1 / 3;
-    grid-row: 1;
+    grid-area: 1 / 1 / 2 / 2;
 }
 
 .playerSkinViewer {
     width: 100%;
-    height: 450px;
-    border-radius: 4px;
-    overflow: hidden;
 }
 
 /* Player Details */
@@ -143,49 +147,74 @@
 
 /* Alt/Main Accounts */
 .altAccountsSection {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    grid-area: 2 / 1 / 3 / 4;
+    align-items: center;
+    max-width: 500px;
     width: 100%;
+    height: auto;
+    margin: 0 auto;
 }
   
-.altAccountsTitle {
-    font-size: 18px;
-    color: #fff;
-    margin-bottom: 15px;
+.accountGroup {
+    margin-bottom: 10px;
 }
   
-.altAccountsList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-  
-.altAccountItem {
+.accountHeader {
     display: flex;
     align-items: center;
     gap: 8px;
+    background: #333;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 14px;
+    padding: 5px;
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+  
+.accountHeader:hover {
+    background: #444;
+}
+  
+.accountList {
+    background: #262626;
+    margin-top: 2px;
     padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+  
+.accountItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
     background: #333;
     border: 1px solid #444;
     border-radius: 4px;
     transition: all 0.2s ease;
+    text-decoration: none; 
 }
   
-.altAccountItem:hover {
+.accountItem:hover {
     background: #444;
     transform: scale(1.02);
 }
   
-.altAccountAvatar {
-    width: 24px;
-    height: 24px;
+.accountAvatar {
+    width: 16px;
+    height: 16px;
     border-radius: 2px;
     overflow: hidden;
 }
   
-.altAccountName {
+.accountName {
     color: #fff;
     font-size: 14px;
     text-decoration: none;
@@ -193,13 +222,12 @@
 
 /* Events Section */
 .eventsSection {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    grid-area: 3 / 1 / 4 / 4;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    margin-top: 20px;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .eventsTitle {
@@ -231,6 +259,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .sortButton:hover {

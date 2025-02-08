@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -50,6 +51,10 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [players, setPlayers] = useState<{currentIgn: string; uuid: string}[]>([]);
+  
+  const [isAltAccountsExpanded, setIsAltAccountsExpanded] = useState(false);
+  const [isMainAccountExpanded, setIsMainAccountExpanded] = useState(false);
 
   // Load categories
   useEffect(() => {
@@ -65,6 +70,20 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
       }
     };
     loadCategories();
+  }, []);
+
+  // Load players
+  useEffect(() => {
+    const playersRef = collection(db, 'players');
+    const unsubscribe = onSnapshot(playersRef, (snapshot) => {
+      const fetchedPlayers = snapshot.docs.map(doc => ({
+        currentIgn: doc.data().currentIgn,
+        uuid: doc.data().uuid
+      }));
+      setPlayers(fetchedPlayers);
+    });
+  
+    return () => unsubscribe();
   }, []);
 
   // Get available categories based on player's events
@@ -230,8 +249,10 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
         </div>
       )}
       
-      <main className="centered">
+      <main className={styles.mainContent}>
         <div className={styles.playerPageContent}>
+
+          {/* Player Info Section */}
           <div className={styles.gridContainer}>
             <PlayerSkinViewer playerData={playerData} />
             <PlayerInfo 
@@ -239,6 +260,97 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
               playerData={playerData}
             />
 
+            {/* Alt/Main Accounts Section */}
+            {((playerData.altAccounts && playerData.altAccounts.length > 0) || playerData.mainAccount) && (
+              <div className={styles.altAccountsSection}>
+                {(playerData?.altAccounts ?? []).length > 0 && (
+                  <div className={styles.accountGroup}>
+                    <button 
+                      className={styles.accountHeader}
+                      onClick={() => setIsAltAccountsExpanded(!isAltAccountsExpanded)}
+                    >
+                      {isAltAccountsExpanded ? 
+                        <ChevronDown size={16} /> : 
+                        <ChevronRight size={16} />
+                      }
+                      <span>Alt Accounts</span>
+                    </button>
+                    {isAltAccountsExpanded && (
+                      <div className={styles.accountList}>
+                        {(playerData?.altAccounts ?? []).map((uuid) => {
+                          const altPlayer = players.find(p => p.uuid === uuid);
+                          if (!altPlayer) return null;
+                          
+                          return (
+                            <Link 
+                              key={uuid} 
+                              href={`/player/${encodeURIComponent(altPlayer.currentIgn)}`}
+                              className={styles.accountItem}
+                            >
+                              <div className={styles.accountAvatar}>
+                                <img 
+                                  src={`https://crafthead.net/avatar/${uuid}`}
+                                  alt="Player avatar"
+                                  width={16}
+                                  height={16}
+                                />
+                              </div>
+                              <span className={styles.accountName}>
+                                {altPlayer.currentIgn}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {playerData.mainAccount && (
+                  <div className={styles.accountGroup}>
+                    <button 
+                      className={styles.accountHeader}
+                      onClick={() => setIsMainAccountExpanded(!isMainAccountExpanded)}
+                    >
+                      {isMainAccountExpanded ? 
+                        <ChevronDown size={16} /> : 
+                        <ChevronRight size={16} />
+                      }
+                      <span>Main Account</span>
+                    </button>
+                    {isMainAccountExpanded && (
+                      <div className={styles.accountList}>
+                        {(() => {
+                          const mainPlayer = players.find(p => p.uuid === playerData.mainAccount);
+                          if (!mainPlayer) return null;
+                          
+                          return (
+                            <Link 
+                              href={`/player/${encodeURIComponent(mainPlayer.currentIgn)}`}
+                              className={styles.accountItem}
+                            >
+                              <div className={styles.accountAvatar}>
+                                <img 
+                                  src={`https://crafthead.net/avatar/${playerData.mainAccount}`}
+                                  alt="Player avatar"
+                                  width={16}
+                                  height={16}
+                                />
+                              </div>
+                              <span className={styles.accountName}>
+                                {mainPlayer.currentIgn}
+                              </span>
+                            </Link>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Events Section */}
             <div className={styles.eventsSection}>
               <div className={styles.eventsTitle}>Player History</div>
               

@@ -28,6 +28,7 @@ const PlayerEventsList: React.FC<PlayerEventsListProps> = ({ events, onEventSele
                 left: 0,
                 top: 0,
                 width: '100%',
+                maxWidth: '490px',
                 cursor: 'pointer',
               }}
             >

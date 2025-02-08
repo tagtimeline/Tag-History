@@ -52,6 +52,8 @@ export interface PlayerProfile {
   events?: string[];
   role?: string | null;
   playerId?: string;
+  altAccounts?: string[];
+  mainAccount?: string | null;
 }
 
 

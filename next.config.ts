@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       'crafthead.net', 
       'visage.surgeplay.com',
       'textures.minecraft.net',
+      'sessionserver.mojang.com',
       'api.capes.dev',
       'api.hypixel.net',
       'imgur.com',

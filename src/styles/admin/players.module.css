@@ -79,6 +79,26 @@
   height: 16px;
 }
 
+.inputWithAvatar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.currentIgnAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.currentIgnAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .playerAvatar {
   width: 16px;
   height: 16px;

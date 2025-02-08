@@ -28,6 +28,8 @@ interface Player {
   events: string[];
   lastUpdated: Date;
   role?: string | null;
+  mainAccount?: string | null;
+  altAccounts?: string[];
 }
 
 interface Role {
@@ -39,7 +41,8 @@ interface Role {
 const initialPlayerForm: Partial<Player> = {
   currentIgn: '',
   pastIgns: [],
-  events: []
+  events: [],
+  altAccounts: []
 };
 
 export default function PlayerManagement() {
@@ -133,35 +136,109 @@ export default function PlayerManagement() {
     setSuccess('');
 
     try {
-      if (!playerForm.currentIgn?.trim()) {
-        setError('Player IGN is required');
-        return;
-      }
+        // Basic validation
+        if (!playerForm.currentIgn?.trim() && !playerForm.uuid?.trim()) {
+            setError('Either Current IGN or UUID is required');
+            return;
+        }
 
-      // If updating existing player
-      if (selectedPlayer?.id) {
-        const playerRef = doc(db, 'players', selectedPlayer.id);
-        await updateDoc(playerRef, {
-          currentIgn: playerForm.currentIgn.trim(),
-          pastIgns: playerForm.pastIgns?.filter(ign => ign.trim() !== '') || [],
-          role: playerForm.role || null,
-          lastUpdated: new Date()
-        });
-        setSuccess('Player updated successfully');
-      } else {
-        // Adding new player
-        await updatePlayerData(playerForm.currentIgn.trim(), playerForm.role || null);
-        setSuccess('Player added successfully');
-      }
+        // Clean up the form data
+        const cleanPastIgns = playerForm.pastIgns?.filter(ign => ign.trim() !== '') || [];
+        const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
 
-      // Reset form
-      setPlayerForm(initialPlayerForm);
-      setSelectedPlayer(null);
+        // If we have a UUID but no IGN, fetch the IGN
+        if (playerForm.uuid?.trim() && !playerForm.currentIgn?.trim()) {
+            try {
+                const response = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${playerForm.uuid}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    playerForm.currentIgn = data.name;
+                } else {
+                    setError('Invalid UUID provided');
+                    return;
+                }
+            } catch (err) {
+                setError('Failed to fetch player data from UUID');
+                return;
+            }
+        }
+
+        // If we have an IGN but no UUID, fetch the UUID
+        if (playerForm.currentIgn?.trim() && !playerForm.uuid?.trim()) {
+            try {
+                const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${playerForm.currentIgn.trim()}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    playerForm.uuid = data.uuid;
+                } else {
+                    setError('Invalid IGN provided');
+                    return;
+                }
+            } catch (err) {
+                setError('Failed to fetch player data from IGN');
+                return;
+            }
+        }
+
+        // Validate alt accounts
+        if (cleanAltAccounts.includes(playerForm.currentIgn?.trim() || '') || 
+            cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
+            setError('A player cannot be their own alt account');
+            return;
+        }
+
+        // Check for duplicate alt accounts
+        const uniqueAlts = [...new Set(cleanAltAccounts)];
+        if (uniqueAlts.length !== cleanAltAccounts.length) {
+            setError('Duplicate alt accounts are not allowed');
+            return;
+        }
+
+        // If updating existing player
+        if (selectedPlayer?.id) {
+            const playerRef = doc(db, 'players', selectedPlayer.id);
+            
+            // Update the base player document first
+            await updateDoc(playerRef, {
+                currentIgn: playerForm.currentIgn?.trim() ?? '',
+                uuid: playerForm.uuid?.trim() ?? '',
+                pastIgns: cleanPastIgns,
+                role: playerForm.role || null,
+                lastUpdated: new Date()
+            });
+        }
+
+        // Process the player and their alt accounts
+        try {
+            await updatePlayerData(
+                playerForm.currentIgn?.trim() || '',
+                playerForm.role || null,
+                cleanAltAccounts
+            );
+
+            setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+
+            // Reset form and selection
+            setPlayerForm(initialPlayerForm);
+            setSelectedPlayer(null);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(`Failed to process alt accounts: ${err.message}`);
+            } else {
+                setError('Failed to process alt accounts');
+            }
+            return;
+        }
+
     } catch (err) {
-      console.error('Error saving player:', err);
-      setError('Failed to save player. Please try again.');
+        console.error('Error saving player:', err);
+        if (err instanceof Error) {
+            setError(`Failed to save player: ${err.message}`);
+        } else {
+            setError('Failed to save player. Please try again.');
+        }
     }
-  };
+};
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -305,17 +382,65 @@ export default function PlayerManagement() {
                 </div>
               )}
   
+              {/* Current IGN section */}
               <div className={playerStyles.formSection}>
-                <label htmlFor="currentIgn">Current IGN</label>
+                <label htmlFor="uuid">UUID</label>
                 <input
-                  id="currentIgn"
-                  name="currentIgn"
+                  id="uuid"
+                  name="uuid"
                   type="text"
                   className={formStyles.input}
-                  value={playerForm.currentIgn}
-                  onChange={handleFormChange}
-                  required
+                  value={playerForm.uuid || ''}
+                  onChange={async (e) => {
+                    const uuid = e.target.value;
+                    setPlayerForm(prev => ({
+                      ...prev,
+                      uuid
+                    }));
+                    
+                    // If valid UUID format, fetch current IGN
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    if (uuidRegex.test(uuid)) {
+                      try {
+                        const response = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+                        if (response.ok) {
+                          const data = await response.json();
+                          setPlayerForm(prev => ({
+                            ...prev,
+                            currentIgn: data.name,
+                            uuid: uuid
+                          }));
+                        }
+                      } catch (error) {
+                        console.error('Error fetching player data:', error);
+                      }
+                    }
+                  }}
+                  placeholder="Enter UUID"
                 />
+                
+                <label htmlFor="currentIgn">Current IGN</label>
+                <div className={playerStyles.inputWithAvatar}>
+                  <input
+                    id="currentIgn"
+                    name="currentIgn"
+                    type="text"
+                    className={formStyles.input}
+                    value={playerForm.currentIgn}
+                    onChange={handleFormChange}
+                    required
+                  />
+                  {playerForm.uuid && (
+                    <div className={playerStyles.currentIgnAvatar}>
+                      <Image
+                        src={`https://crafthead.net/avatar/${playerForm.uuid}`}
+                        alt={playerForm.currentIgn || 'Player avatar'}
+                        width={30}
+                        height={30}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
   
               {/* Past IGNs section */}
@@ -425,6 +550,146 @@ export default function PlayerManagement() {
                     </ul>
                   )}
                 </div>
+              </div>
+
+              {/* Alt Accounts or Main Account section */}
+              <div className={playerStyles.formSection}>
+                {playerForm.mainAccount ? (
+                  // If this is an alt account, show the main account info
+                  <>
+                    <label>Main Account</label>
+                    <div className={playerStyles.pastIgnsList}>
+                      <div className={playerStyles.pastIgnRow}>
+                        {(() => {
+                          const mainPlayer = players.find(p => p.uuid === playerForm.mainAccount);
+                          const displayValue = mainPlayer 
+                            ? `${mainPlayer.currentIgn} (${playerForm.mainAccount})`
+                            : playerForm.mainAccount;
+
+                          return (
+                            <>
+                              <input
+                                type="text"
+                                className={formStyles.input}
+                                value={displayValue}
+                                disabled
+                                style={{ opacity: 0.7 }}
+                              />
+                              {mainPlayer && (
+                                <div className={playerStyles.altAccountInfo}>
+                                  <div 
+                                    className={playerStyles.playerAvatar}
+                                    style={{ 
+                                      width: '30px',
+                                      height: '30px'
+                                    }}
+                                  >
+                                    <Image
+                                      src={`https://crafthead.net/avatar/${mainPlayer.uuid}`}
+                                      alt={mainPlayer.currentIgn}
+                                      width={40}
+                                      height={40}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // If this is a main account, show the alt accounts section
+                  <>
+                    <label htmlFor="altAccounts">Alt Accounts</label>
+                    <div className={playerStyles.pastIgnsList}>
+                      {playerForm.altAccounts?.map((account, index) => {
+                        const altPlayer = players.find(p => p.uuid === account);
+                        const displayValue = altPlayer ? `${altPlayer.currentIgn} (${account})` : account;
+
+                        return (
+                          <div key={index} className={playerStyles.pastIgnRow}>
+                            <input
+                              type="text"
+                              className={formStyles.input}
+                              value={displayValue}
+                              onChange={(e) => {
+                                const newAltAccounts = [...(playerForm.altAccounts || [])];
+                                const inputValue = e.target.value;
+                                
+                                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                                if (uuidRegex.test(inputValue)) {
+                                  newAltAccounts[index] = inputValue;
+                                } else {
+                                  const player = players.find(p => 
+                                    p.currentIgn.toLowerCase() === inputValue.toLowerCase() ||
+                                    p.pastIgns?.some(ign => ign.toLowerCase() === inputValue.toLowerCase())
+                                  );
+                                  if (player) {
+                                    newAltAccounts[index] = player.uuid;
+                                  } else {
+                                    newAltAccounts[index] = inputValue;
+                                  }
+                                }
+                                
+                                setPlayerForm(prev => ({
+                                  ...prev,
+                                  altAccounts: newAltAccounts
+                                }));
+                              }}
+                              placeholder="Enter IGN or UUID"
+                            />
+                            <div className={playerStyles.altAccountInfo}>
+                              {altPlayer && (
+                                <div 
+                                  className={playerStyles.playerAvatar}
+                                  style={{ 
+                                    width: '30px',
+                                    height: '30px'
+                                  }}
+                                >
+                                  <Image
+                                    src={`https://crafthead.net/avatar/${altPlayer.uuid}`}
+                                    alt={altPlayer.currentIgn}
+                                    width={40}
+                                    height={40}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className={buttonStyles.deleteButton}
+                              onClick={() => {
+                                const newAltAccounts = [...(playerForm.altAccounts || [])];
+                                newAltAccounts.splice(index, 1);
+                                setPlayerForm(prev => ({
+                                  ...prev,
+                                  altAccounts: newAltAccounts
+                                }));
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        className={playerStyles.addIgnButton}
+                        onClick={() => {
+                          setPlayerForm(prev => ({
+                            ...prev,
+                            altAccounts: [...(prev.altAccounts || []), '']
+                          }));
+                        }}
+                      >
+                        Add Alt Account
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
   
               {/* Events section */}

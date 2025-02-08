@@ -1,8 +1,11 @@
 // src/components/player/PlayerInfo.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlayerProfile } from '../../config/players';
 import styles from '../../styles/player.module.css';
-import { getAffiliateRoles, getRoleColor } from '../../data/affiliates';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../../lib/firebaseConfig';
+
+
 
 const colorMap: { [key: string]: string } = {
   RED: '#FF5555',
@@ -26,9 +29,33 @@ const colorMap: { [key: string]: string } = {
 interface PlayerInfoProps {
   currentIgn: string;
   playerData: PlayerProfile;
+  role?: string | null;
+}
+
+interface Role {
+  id: string;
+  tag: string;
+  color: string;
 }
 
 const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  useEffect(() => {
+    const rolesRef = collection(db, 'roles');
+    const unsubscribe = onSnapshot(rolesRef, (snapshot) => {
+      const fetchedRoles: Role[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Role));
+      setRoles(fetchedRoles);
+    });
+  
+    return () => unsubscribe();
+  }, []);
+
+
+
   const getRankDisplay = () => {
     const player = playerData.hypixel;
     if (!player) return { rankDisplay: null, nameColor: '#AAAAAA' };
@@ -117,79 +144,80 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ currentIgn, playerData }) => {
 
   return (
     <div className={styles.playerInfoSection}>
-        <div className={styles.playerIGN}>
-          {rankDisplay} <span style={{ color: nameColor }}>{currentIgn}</span>
-        </div>
-        <p className={styles.playerAccountAge}>
-          Account created on {new Date(playerData.created_at).toLocaleDateString()}
-        </p>
+      <div className={styles.playerIGN}>
+        {rankDisplay} <span style={{ color: nameColor }}>{currentIgn}</span>
+      </div>
+      <p className={styles.playerAccountAge}>
+        Account created on {new Date(playerData.created_at).toLocaleDateString()}
+      </p>
       <div className={styles.playerDetails}>
         {playerData.hypixel && (
-            <div className={styles.statsContainer}>
-                <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>Network Level:</span>{' '}
-                    {playerData.hypixel.networkLevel}
-                </p>
-                {playerData.hypixel?.guild && (
-                    <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>Guild:</span>{' '}
-                    {playerData.hypixel.guild.name}
-                    {playerData.hypixel.guild.rank === 'Guild Master' && (
-                        <span className={styles.guildMasterTag}> [GM]</span>
-                    )}
-                    </p>
+          <div className={styles.statsContainer}>
+            <p className={styles.playerStats}>
+              <span className={styles.statLabel}>Network Level:</span>{' '}
+              {playerData.hypixel.networkLevel}
+            </p>
+            {playerData.hypixel?.guild && (
+              <p className={styles.playerStats}>
+                <span className={styles.statLabel}>Guild:</span>{' '}
+                {playerData.hypixel.guild.name}
+                {playerData.hypixel.guild.rank === 'Guild Master' && (
+                  <span className={styles.guildMasterTag}> [GM]</span>
                 )}
-                <br></br>
-                <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>TNT Tag Wins:</span>{' '}
-                    {playerData.hypixel.tntGames.wins_tntag}
-                </p>
-                <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>TNT Tag KDR:</span>{' '}
-                    {playerData.hypixel.tntGames.kdr}
-                </p>
-                <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>TNT Games Hours:</span>{' '}
-                    {typeof playerData.hypixel.tntGames.playtime === 'number' 
-                    ? playerData.hypixel.tntGames.playtime 
-                    : 'N/A'}
-                </p>
-                <br></br>
-                {playerData.hypixel.discord && (
-                    <p className={styles.playerStats}>
-                    <span className={styles.statLabel}>Discord:</span>{' '}
-                    @{playerData.hypixel.discord}
-                    </p>
-                )}
-            </div>
+              </p>
+            )}
+            <br />
+            <p className={styles.playerStats}>
+              <span className={styles.statLabel}>TNT Tag Wins:</span>{' '}
+              {playerData.hypixel.tntGames.wins_tntag}
+            </p>
+            <p className={styles.playerStats}>
+              <span className={styles.statLabel}>TNT Tag KDR:</span>{' '}
+              {playerData.hypixel.tntGames.kdr}
+            </p>
+            <p className={styles.playerStats}>
+              <span className={styles.statLabel}>TNT Games Hours:</span>{' '}
+              {typeof playerData.hypixel.tntGames.playtime === 'number' 
+                ? playerData.hypixel.tntGames.playtime 
+                : 'N/A'}
+            </p>
+            <br />
+            {playerData.role && (
+              <p className={styles.playerStats}>
+                <span className={styles.statLabel}>Role:</span>{' '}
+                <span style={{ 
+                  color: `#${roles.find(r => r.id === playerData.role)?.color}` 
+                }}>
+                  {roles.find(r => r.id === playerData.role)?.tag || playerData.role}
+                </span>
+              </p>
+            )}
+            {playerData.hypixel.discord && (
+              <p className={styles.playerStats}>
+                <span className={styles.statLabel}>Discord:</span>{' '}
+                @{playerData.hypixel.discord}
+              </p>
+            )}
+          </div>
         )}
 
-        {getAffiliateRoles(currentIgn).map((role) => (
-            <span key={role} className={styles.roleContainer}>
-                <span className={styles.statLabel}>Timeline:</span>{' '}
-                <span style={{ color: getRoleColor(role) }}>
-                    {role === 'HeadDeveloper' ? 'Head Developer' : role}
-                </span>
-            </span>
-        ))}
-
         <div className={styles.playerLinks}>
-            <a 
-                href={`https://namemc.com/profile/${currentIgn}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.playerLinkButton}
-            >
-                NameMC
-            </a>
-            <a 
-                href={`https://25karma.xyz/player/${currentIgn}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.playerLinkButton}
-            >
-                25karma
-            </a>
+          <a 
+            href={`https://namemc.com/profile/${currentIgn}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.playerLinkButton}
+          >
+            NameMC
+          </a>
+          <a 
+            href={`https://25karma.xyz/player/${currentIgn}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.playerLinkButton}
+          >
+            25karma
+          </a>
         </div>
       </div>
     </div>

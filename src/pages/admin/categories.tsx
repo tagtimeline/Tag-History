@@ -303,18 +303,6 @@ export default function AdminCategories() {
                     Delete Category
                   </button>
                 )}
-                {selectedCategory && (
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setCategoryForm(initialCategoryForm);
-                      setSelectedCategory(null);
-                    }} 
-                    className={buttonStyles.clearButton}
-                  >
-                    Clear
-                  </button>
-                )}
               </div>
             </form>
           </div>

@@ -91,8 +91,21 @@ export async function updateEvent(id: string, eventData: Partial<TimelineEvent>)
   try {
     // Get old event to compare players
     const oldEvent = await getEventById(id);
-    const oldPlayers = oldEvent ? extractPlayersFromEvent(oldEvent) : [];
-    const newPlayers = extractPlayersFromEvent(eventData);
+    if (!oldEvent) {
+      throw new Error('Event not found');
+    }
+    
+    // Create complete new event data by merging old and new
+    const newEventData = {
+      ...oldEvent,
+      ...eventData
+    };
+
+    // Get all players from both versions of the event
+    const oldPlayers = extractPlayersFromEvent(oldEvent);
+    const newPlayers = extractPlayersFromEvent(newEventData);
+    console.log('Old players:', oldPlayers);
+    console.log('New players:', newPlayers);
 
     // Update the event first
     const batch = writeBatch(db);
@@ -105,29 +118,51 @@ export async function updateEvent(id: string, eventData: Partial<TimelineEvent>)
 
     await batch.commit();
 
-    // Handle player references after event is updated
-    // Remove event from players no longer mentioned
-    const removedPlayers = oldPlayers.filter(p => !newPlayers.includes(p));
-    for (const player of removedPlayers) {
+    // First, remove event from all old players
+    for (const player of oldPlayers) {
       try {
         await updatePlayerEvents(player, id, 'remove');
+        console.log(`Removed event ${id} from player ${player}`);
       } catch (error) {
         console.error(`Error removing event from player ${player}:`, error);
       }
     }
 
-    // Add event to newly mentioned players
-    const addedPlayers = newPlayers.filter(p => !oldPlayers.includes(p));
-    for (const player of addedPlayers) {
+    // Then, add event to all new players (ensures clean state)
+    for (const player of newPlayers) {
       try {
+        // Always update player data first to ensure player exists
         await updatePlayerData(player);
+        // Then add the event
         await updatePlayerEvents(player, id, 'add');
+        console.log(`Added/Verified event ${id} for player ${player}`);
       } catch (error) {
         console.error(`Error adding event to player ${player}:`, error);
       }
     }
 
-    console.log('Event update successful');
+    // Double-check all new players have the event
+    for (const player of newPlayers) {
+      try {
+        const playersRef = collection(db, 'players');
+        const playerQuery = await getDocs(query(playersRef, where('currentIgn', '==', player)));
+        
+        if (!playerQuery.empty) {
+          const playerDoc = playerQuery.docs[0];
+          const playerData = playerDoc.data();
+          const events = playerData.events || [];
+          
+          if (!events.includes(id)) {
+            console.log(`Re-adding missing event ${id} to player ${player}`);
+            await updatePlayerEvents(player, id, 'add');
+          }
+        }
+      } catch (error) {
+        console.error(`Error verifying event for player ${player}:`, error);
+      }
+    }
+
+    console.log('Event update successful with player links verified');
   } catch (error) {
     console.error('Error updating event:', error);
     throw error;

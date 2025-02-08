@@ -1,5 +1,4 @@
 // src/config/players.ts
-
 import { TimelineEvent } from "@/data/events";
 
 interface GuildInfo {
@@ -40,33 +39,35 @@ export interface PlayerProfile {
     discord: string | null;
   } | null;
   events?: string[];
+  role?: string | null;
   playerId?: string;
 }
-  
+
+
 export const getCurrentUsername = async (historicalIgn: string): Promise<string | null> => {
-try {
+  try {
     const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${historicalIgn}`, {
-    headers: {
+      headers: {
         'Accept': 'application/json'
-    }
+      }
     });
     
     if (!response.ok) {
-    if (response.status === 404) {
+      if (response.status === 404) {
         console.log(`Player ${historicalIgn} not found`);
         return null;
-    }
-    throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data: PlayerProfile = await response.json();
     return data.username;
-} catch (error) {
+  } catch (error) {
     console.error(`Error fetching player data for ${historicalIgn}:`, error);
     return null;
-}
+  }
 };
-  
+
 // Function to extract player IGNs from text
 export function extractPlayerNames(text: string): string[] {
   const regex = /<([^>]+)>/g;

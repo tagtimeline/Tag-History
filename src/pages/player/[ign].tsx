@@ -3,25 +3,28 @@ import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useMemo, useRef, useState, useEffect } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
-import { TimelineEvent } from '../../data/events';
-import styles from '../../styles/player.module.css';
-import controlStyles from '../../styles/controls.module.css';
-import withAuth from '../../components/auth/withAuth';
-import { PlayerProfile } from '../../config/players';
-import PlayerEventsList from '../../components/player/PlayerEventsList';
-import PlayerInfo from '../../components/player/PlayerInfo';
-import PlayerSkinViewer from '../../components/player/PlayerSkinViewer';
-import { fetchCategories, Category } from '@/config/categories';
-import { ALL_EVENTS_OPTION } from '../../config/dropdown';
-import { searchEvents } from '../../config/search';
-import PlayerSearch from '../../components/search/PlayerSearch';
-import EventSearch from '../../components/search/EventSearch';
-import EventModal from '../../components/timeline/EventModal';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../../lib/firebaseConfig';
-import { getPlayerData } from '../../components/player/PlayerAPI';
+import { db } from '@/../lib/firebaseConfig';
+
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import withAuth from '@/components/auth/withAuth';
+import PlayerEventsList from '@/components/player/PlayerEventsList';
+import PlayerInfo from '@/components/player/PlayerInfo';
+import PlayerSkinViewer from '@/components/player/PlayerSkinViewer';
+import PlayerSearch from '@/components/search/PlayerSearch';
+import EventSearch from '@/components/search/EventSearch';
+import EventModal from '@/components/timeline/EventModal';
+
+import { TimelineEvent } from '@/data/events';
+import { PlayerProfile } from '@/config/players';
+import { fetchCategories, Category } from '@/config/categories';
+import { getPlayerData } from '@/components/player/PlayerAPI';
+import { ALL_EVENTS_OPTION } from '@/config/dropdown';
+import { searchEvents } from '@/config/search';
+
+import styles from '@/styles/player.module.css';
+import controlStyles from '@/styles/controls.module.css';
 
 interface PlayerPageProps extends Record<string, unknown> {
   historicalIgn: string;
@@ -29,6 +32,7 @@ interface PlayerPageProps extends Record<string, unknown> {
   playerData: PlayerProfile | null;
   initialEvents: TimelineEvent[];
 }
+
 
 const PlayerPage: NextPage<PlayerPageProps> = ({ 
   historicalIgn, 
@@ -323,7 +327,6 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
         props: {
           historicalIgn: params?.ign as string || '',
           currentIgn: null,
-          allUsernames: [],
           playerData: null,
           initialEvents: []
         }
@@ -333,7 +336,7 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     // Decode the IGN from the URL
     const decodedIgn = decodeURIComponent(ign);
     const playerData = await getPlayerData(decodedIgn);
-
+    
     // Handle redirect for old IGNs
     if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedIgn.toLowerCase()) {
       return {
@@ -346,12 +349,11 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
 
     // Ensure initialEvents is fully serializable
     const serializedInitialEvents = JSON.parse(JSON.stringify(playerData.initialEvents));
-
+    
     return { 
       props: {
         historicalIgn: decodedIgn,
         currentIgn: playerData.currentIgn,
-        allUsernames: playerData.allUsernames,
         playerData: playerData.playerData,
         initialEvents: serializedInitialEvents
       }
@@ -363,7 +365,6 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       props: {
         historicalIgn: params?.ign as string || '',
         currentIgn: null,
-        allUsernames: [],
         playerData: null,
         initialEvents: []
       }

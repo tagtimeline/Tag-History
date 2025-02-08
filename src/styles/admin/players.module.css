@@ -1,7 +1,198 @@
-/* src/styles/admin/players.module.css */
+ /* src/styles/admin/players.module.css */
 
-.searchContainer {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
+ .searchContainer {
+  margin-bottom: 20px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Common Input Base Styles */
+.searchInput {
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: "Minecraft", sans-serif;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: white;
+  height: 32px;
+  padding: 8px 12px;
+  font-size: 13px;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.playersList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 0 20px;
+}
+
+.playerItem {
+  background-color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 16px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.playerItem:hover {
+  background-color: #444;
+  transform: scale(1.02);
+}
+
+.playerItem.selected {
+  background-color: #2563eb;
+}
+
+.playerItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.playerRole {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 12px;
+}
+
+
+.roleColor {
+  display: inline-block;
+  width: 6px;
+  height: 16px;
+}
+
+.playerAvatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.playerAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eventsDisplay {
+  background-color: #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-height: 38px;
+  color: #888;
+  font-style: italic;
+}
+
+.playerForm {
+  width: 100%;
+  max-width: 620px;
+  background: #1a1a1a;
+  border: 4px solid #333;
+  border-radius: 4px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.formSection label {
+  font-size: 14px;
+  color: #888;
+}
+
+.pastIgnsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.pastIgnRow {
+  display: flex;
+  align-items: center; /* This centers items vertically */
+  gap: 5px;
+}
+
+.pastIgnRow input {
+  margin-top: 0 !important; /* Override the default margin from forms.input */
+}
+
+.addIgnButton {
+  composes: button from './buttons.module.css';
+  width: 100%;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.eventsDisplay {
+  background-color: #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-height: 38px;
+  color: #888;
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eventLink {
+  margin: 0;
+  padding: 0;
+}
+
+.eventLink a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.eventLink a:hover {
+  color: #2563eb;
+}
+
+
+.roleSelect {
+  composes: input from './forms.module.css';
+  cursor: pointer;
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+.roleSelect option {
+  color: white;
+  padding: 8px;
+}

@@ -1,64 +1,92 @@
 // lib/playerUtils.ts
-import { doc, setDoc, collection, getDocs, query, where, getDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
-export async function updatePlayerData(playerIgn: string, usedIgn?: string): Promise<void> {
+export async function updatePlayerData(playerIgn: string, role?: string | null): Promise<void> {
     try {
+        // First check if player already exists (case insensitive)
+        const playersRef = collection(db, 'players');
+        const existingPlayerQuery = await getDocs(playersRef);
+        const existingPlayer = existingPlayerQuery.docs.find(doc => 
+            doc.data().currentIgn.toLowerCase() === playerIgn.toLowerCase()
+        );
+
+        if (existingPlayer) {
+            // Player exists, update role if provided
+            if (role !== undefined) {
+                await updateDoc(existingPlayer.ref, {
+                    role: role,
+                    lastUpdated: new Date()
+                });
+            }
+            return;
+        }
+
+        // If player doesn't exist, fetch from Minecraft API
         const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${playerIgn}`);
-        if (!response.ok) return;
+        if (!response.ok) {
+            console.warn(`Unable to fetch Minecraft data for player ${playerIgn}`);
+            // Create minimal player record with correct capitalization from input
+            const playerRef = doc(collection(db, 'players'));
+            await setDoc(playerRef, {
+                currentIgn: playerIgn,
+                pastIgns: [],
+                events: [],
+                role: role || null,
+                lastUpdated: new Date()
+            });
+            return;
+        }
         
         const data = await response.json();
         const uuid = data.uuid;
         const currentIgn = data.username;
         
         // Query for existing player document with this UUID
-        const playersRef = collection(db, 'players');
         const playerQuery = await getDocs(query(playersRef, where('uuid', '==', uuid)));
         
         let existingPlayerId: string | null = null;
         let pastIgns: string[] = [];
-        let events: string[] = [];  // Add events array
+        let events: string[] = [];
         
         if (!playerQuery.empty) {
             const existingDoc = playerQuery.docs[0];
             existingPlayerId = existingDoc.id;
             const existingData = existingDoc.data();
             pastIgns = existingData.pastIgns || [];
-            events = existingData.events || [];  // Preserve existing events
+            events = existingData.events || [];
         }
         
-        if (usedIgn && usedIgn !== currentIgn && !pastIgns.includes(usedIgn)) {
-            pastIgns.push(usedIgn);
-        }
-        
-        if (data.username_history) {
-            data.username_history.forEach((history: { username: string }) => {
-                if (history.username !== currentIgn && !pastIgns.includes(history.username)) {
-                    pastIgns.push(history.username);
-                }
-            });
-        }
-        
-        pastIgns = [...new Set(pastIgns)].filter(ign => ign !== currentIgn);
-        
-        // Create or update document
+        // Create or update player document
         const playerRef = existingPlayerId ? 
             doc(db, 'players', existingPlayerId) : 
-            doc(collection(db, 'players')); // This creates a random ID
+            doc(collection(db, 'players'));
             
         await setDoc(playerRef, {
-            uuid,
             currentIgn,
+            uuid,
             pastIgns,
-            events,  // Include events array
+            events,
+            role: role || null,
             lastUpdated: new Date()
         }, { merge: true });
+        
     } catch (error) {
         console.error('Error updating player data:', error);
     }
 }
 
-// New function to update player's events array
+export async function deletePlayer(playerId: string): Promise<void> {
+    try {
+      const playerRef = doc(db, 'players', playerId);
+      await deleteDoc(playerRef);
+      console.log('Player deletion successful');
+    } catch (error) {
+      console.error('Error deleting player:', error);
+      throw error;
+    }
+  }
+
 export async function updatePlayerEvents(
     playerIgn: string, 
     eventId: string, 
@@ -66,10 +94,12 @@ export async function updatePlayerEvents(
 ): Promise<void> {
     try {
         const playersRef = collection(db, 'players');
-        const playerQuery = await getDocs(query(playersRef, where('currentIgn', '==', playerIgn)));
+        const allPlayersQuery = await getDocs(playersRef);
+        const playerDoc = allPlayersQuery.docs.find(doc => 
+            doc.data().currentIgn.toLowerCase() === playerIgn.toLowerCase()
+        );
         
-        if (!playerQuery.empty) {
-            const playerDoc = playerQuery.docs[0];
+        if (playerDoc) {
             const playerData = playerDoc.data();
             let events = playerData.events || [];
             
@@ -80,6 +110,9 @@ export async function updatePlayerEvents(
             }
             
             await setDoc(playerDoc.ref, { events }, { merge: true });
+            console.log(`Successfully ${action}ed event ${eventId} for player ${playerData.currentIgn}`);
+        } else {
+            console.warn(`No player document found for IGN: ${playerIgn}`);
         }
     } catch (error) {
         console.error('Error updating player events:', error);

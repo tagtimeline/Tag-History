@@ -59,7 +59,8 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
         cape: mojangData.textures.cape
       },
       hypixel: hypixelData,
-      events: dbPlayerData?.events || []
+      events: dbPlayerData?.events || [],
+      role: dbPlayerData?.role || null  // Add this line to include the role
     };
 
     const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);

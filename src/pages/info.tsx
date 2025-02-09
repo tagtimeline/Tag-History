@@ -26,12 +26,15 @@ const InfoPage: NextPage = () => {
           <Link href="/events">
             <button className={controlStyles.headerButton}>Events</button>
           </Link>
+          <Link href="/donate">
+            <button className={controlStyles.headerButton}>Donate</button>
+          </Link>
         </div>
       </Header>
             
       <main className="centered">
         <div className={styles.mainContent}>
-          <h2>The TNT Tag History Project</h2>
+          <title>The TNT Tag History Project</title>
           <p>
             The project is still under development,<br />
             and updates are being added frequently.<br />
@@ -86,6 +89,9 @@ const InfoPage: NextPage = () => {
             >
               Join Our Discord
             </button>
+            <Link href="/donate">
+              <button className={styles.donateButton}>Donate</button>
+            </Link>
           </section>
         </div>
       </main>

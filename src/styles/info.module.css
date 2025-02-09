@@ -61,8 +61,17 @@
     composes: button from './controls.module.css';
     margin: auto;
     padding: 0 16px;
-    width: auto;
+    width: 264px;
 }
+
+.donateButton {
+    composes: button from './controls.module.css';
+    margin: 5px auto;
+    color: #00ff37;
+    padding: 0 16px;
+    width: 264px;
+}
+
 
 /* Text Styles */
 .mainContent h1 {

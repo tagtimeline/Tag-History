@@ -1,7 +1,7 @@
 // pages/admin/player.tsx
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { collection, doc, updateDoc, onSnapshot, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { handleAdminLogout } from '@/components/admin/AuthHandler';
+import MassUpdatePlayers from '@/components/admin/MassUpdatePlayers';
 import { updatePlayerData } from '@/../lib/playerUtils';
 import { ROLE_ORDER, sortRolesByPriority } from '@/config/players';
 
@@ -24,7 +25,11 @@ interface Player {
   id: string;
   currentIgn: string;
   uuid: string;
-  pastIgns: string[];
+  pastIgns: Array<{
+    name: string; 
+    hidden: boolean;
+    number?: number;
+  }>;
   events: string[];
   lastUpdated: Date;
   role?: string | null;
@@ -122,14 +127,6 @@ export default function PlayerManagement() {
     setSuccess('');
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPlayerForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -137,95 +134,138 @@ export default function PlayerManagement() {
 
     try {
         // Basic validation
-        if (!playerForm.currentIgn?.trim() && !playerForm.uuid?.trim()) {
-            setError('Either Current IGN or UUID is required');
+        if (!playerForm.uuid?.trim()) {
+            setError('Player UUID is required');
+            return;
+        }
+
+        // Check if player already exists
+        const existingPlayer = players.find(p => 
+            p.uuid === playerForm.uuid && !selectedPlayer
+        );
+
+        if (existingPlayer) {
+            setError('This player already exists in the database');
             return;
         }
 
         // Clean up the form data
-        const cleanPastIgns = playerForm.pastIgns?.filter(ign => ign.trim() !== '') || [];
+        const cleanPastIgns = playerForm.pastIgns?.filter(ign => 
+            (typeof ign === 'string' ? ign : ign.name).trim() !== ''
+        ).map(ign => 
+            typeof ign === 'string' ? { name: ign, hidden: false } : ign
+        ) || [];
+        
         const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
 
-        // If we have a UUID but no IGN, fetch the IGN
-        if (playerForm.uuid?.trim() && !playerForm.currentIgn?.trim()) {
-            try {
-                const response = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${playerForm.uuid}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    playerForm.currentIgn = data.name;
-                } else {
-                    setError('Invalid UUID provided');
-                    return;
-                }
-            } catch {
-                setError('Failed to fetch player data from UUID');
-                return;
-            }
-        }
-
-        // If we have an IGN but no UUID, fetch the UUID
-        if (playerForm.currentIgn?.trim() && !playerForm.uuid?.trim()) {
-            try {
-                const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${playerForm.currentIgn.trim()}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    playerForm.uuid = data.uuid;
-                } else {
-                    setError('Invalid IGN provided');
-                    return;
-                }
-            } catch {
-                setError('Failed to fetch player data from IGN');
-                return;
-            }
-        }
-
-        // Validate alt accounts
-        if (cleanAltAccounts.includes(playerForm.currentIgn?.trim() || '') || 
-            cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
-            setError('A player cannot be their own alt account');
-            return;
-        }
-
-        // Check for duplicate alt accounts
-        const uniqueAlts = [...new Set(cleanAltAccounts)];
-        if (uniqueAlts.length !== cleanAltAccounts.length) {
-            setError('Duplicate alt accounts are not allowed');
-            return;
-        }
-
-        // If updating existing player
-        if (selectedPlayer?.id) {
-            const playerRef = doc(db, 'players', selectedPlayer.id);
-            
-            // Update the base player document first
-            await updateDoc(playerRef, {
-                currentIgn: playerForm.currentIgn?.trim() ?? '',
-                uuid: playerForm.uuid?.trim() ?? '',
-                pastIgns: cleanPastIgns,
-                role: playerForm.role || null,
-                lastUpdated: new Date()
-            });
-        }
-
-        // Process the player and their alt accounts
+        // Fetch latest data from Crafty API to ensure we have current info
         try {
-            await updatePlayerData(
-                playerForm.currentIgn?.trim() || '',
-                playerForm.role || null,
-                cleanAltAccounts
-            );
+            const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
+            if (!craftyResponse.ok) {
+                throw new Error('Failed to fetch player data');
+            }
+            
+            const craftyData = await craftyResponse.json();
+            if (!craftyData.success || !craftyData.data) {
+                throw new Error('Failed to fetch player data');
+            }
 
-            setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+            // Extract current IGN and past IGNs from Crafty data
+            const currentIgn = craftyData.data.username;
+            
+            // Get new IGNs from Crafty data
+            const newPastIgns = craftyData.data.usernames
+                .map((nameObj: any) => nameObj.username)
+                .filter((name: string) => 
+                    name.toLowerCase() !== currentIgn.toLowerCase()
+                )
+                .map((name: string) => ({ name, hidden: false }));
 
-            // Reset form and selection
-            setPlayerForm(initialPlayerForm);
-            setSelectedPlayer(null);
+            // Merge with existing past IGNs while preserving hidden status
+            const mergedPastIgns = newPastIgns.map((newIgn: { name: string; hidden: boolean }) => {
+                const existing = cleanPastIgns.find(existingIgn => 
+                    existingIgn.name.toLowerCase() === newIgn.name.toLowerCase()
+                );
+                return existing || newIgn;
+            });
+            
+            // Add any existing IGNs that weren't in the Crafty data
+            cleanPastIgns.forEach(existingIgn => {
+                if (!mergedPastIgns.some((ign: { name: string; hidden: boolean }) => 
+                    ign.name.toLowerCase() === existingIgn.name.toLowerCase()
+                )) {
+                    mergedPastIgns.push(existingIgn);
+                }
+            });
+
+            // Validate alt accounts
+            if (cleanAltAccounts.includes(currentIgn) || 
+                cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
+                setError('A player cannot be their own alt account');
+                return;
+            }
+
+            // Check for duplicate alt accounts
+            const uniqueAlts = [...new Set(cleanAltAccounts)];
+            if (uniqueAlts.length !== cleanAltAccounts.length) {
+                setError('Duplicate alt accounts are not allowed');
+                return;
+            }
+
+            // Prepare the player data object
+            const playerData = {
+              currentIgn: currentIgn,
+              uuid: playerForm.uuid.trim(),
+              pastIgns: cleanPastIgns
+                .map((ign, index, array) => ({
+                  ...ign,
+                  number: array.length - 1 - index, // Explicitly assign number based on order
+                  hidden: ign.hidden ?? false
+                }))
+                .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)), // Ensure sorted by number
+              role: playerForm.role || null,
+              altAccounts: cleanAltAccounts,
+              events: playerForm.events || [],
+              lastUpdated: new Date(),
+              mainAccount: playerForm.mainAccount || null
+            };
+
+            // If updating existing player
+            if (selectedPlayer?.id) {
+                const playerRef = doc(db, 'players', selectedPlayer.id);
+                await updateDoc(playerRef, playerData);
+            } else {
+                // Adding new player
+                await addDoc(collection(db, 'players'), playerData);
+            }
+
+            // Process the player and their alt accounts
+            try {
+                await updatePlayerData(
+                    currentIgn,
+                    playerForm.role || null,
+                    cleanAltAccounts
+                );
+
+                setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+
+                // Reset form and selection
+                setPlayerForm(initialPlayerForm);
+                setSelectedPlayer(null);
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(`Failed to process alt accounts: ${err.message}`);
+                } else {
+                    setError('Failed to process alt accounts');
+                }
+                return;
+            }
+
         } catch (err) {
             if (err instanceof Error) {
-                setError(`Failed to process alt accounts: ${err.message}`);
+                setError(`Failed to fetch player data: ${err.message}`);
             } else {
-                setError('Failed to process alt accounts');
+                setError('Failed to fetch player data');
             }
             return;
         }
@@ -244,9 +284,81 @@ export default function PlayerManagement() {
     setSearchTerm(e.target.value);
   };
 
+  const fetchPlayerData = async (input: string) => {
+    try {
+      // Check if input is UUID format
+      const uuidRegex = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+      let uuid;
+      
+      if (uuidRegex.test(input.replace(/-/g, ''))) {
+        // Input is UUID, format it properly
+        uuid = input.replace(/-/g, '').replace(
+          /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+          '$1-$2-$3-$4-$5'
+        );
+      } else {
+        // Input is IGN, need to lookup UUID first
+        const searchResponse = await fetch(`https://api.crafty.gg/api/v2/players/search?username=${input}`);
+        if (!searchResponse.ok) {
+          throw new Error('Failed to find player');
+        }
+        const searchData = await searchResponse.json();
+        if (!searchData.success || !searchData.data?.length) {
+          throw new Error('Player not found');
+        }
+        // Find exact username match
+        const player = searchData.data.find(
+          (p: any) => p.username.toLowerCase() === input.toLowerCase()
+        );
+        if (!player) {
+          throw new Error('Player not found');
+        }
+        uuid = player.uuid;
+      }
+  
+      // Get full player data from Crafty API
+      const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${uuid}`);
+      if (!craftyResponse.ok) {
+        throw new Error('Failed to fetch player data');
+      }
+      
+      const craftyData = await craftyResponse.json();
+      if (!craftyData.success || !craftyData.data) {
+        throw new Error('Failed to fetch player data');
+      }
+  
+      const currentIgn = craftyData.data.username;
+  
+      // Process past IGNs
+      const pastIgns = craftyData.data.usernames
+    .map((nameObj: any) => nameObj.username)
+    .filter((name: string) => 
+        name.toLowerCase() !== currentIgn.toLowerCase()
+    )
+    .map((name: string, index: number, array: string[]) => ({
+        name,
+        hidden: false,
+        number: array.length - 1 - index // Assign numbers so most recent has highest number
+    }));
+
+    setPlayerForm(prev => ({
+        ...prev,
+        currentIgn: currentIgn,
+        uuid: uuid,
+        pastIgns: pastIgns.sort((a: { name: string; hidden: boolean; number?: number }, b: { name: string; hidden: boolean; number?: number }) => (b.number ?? 0) - (a.number ?? 0)) // Ensure sorted
+    }));
+  
+    } catch (error) {
+      console.error('Error fetching player data:', error);
+      setError('Failed to fetch player data');
+    }
+  };
+
   const filteredPlayers = players.filter(player => 
     player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    player.pastIgns?.some(ign => ign.toLowerCase().includes(searchTerm.toLowerCase()))
+    player.pastIgns?.some(ign => 
+      (typeof ign === 'string' ? ign : ign.name).toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const sortedRoles = [...roles].sort((a, b) => {
@@ -286,15 +398,16 @@ export default function PlayerManagement() {
         <div className={baseStyles.editLayout}>
           {/* Players List Section */}
           <div className={baseStyles.formSection}>
-            <div 
-              className={baseStyles.header}
-              style={{ 
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                maxWidth: '650px',
-              }}
-            > 
-              <div className={baseStyles.title}>Players List</div>
+          <div 
+            className={baseStyles.header}
+            style={{ 
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              maxWidth: '650px',
+            }}
+          > 
+            <div className={baseStyles.title}>Players List</div>
+            <div className={playerStyles.headerButtons}>
               <button 
                 type="button" 
                 className={buttonStyles.addButton}
@@ -305,7 +418,9 @@ export default function PlayerManagement() {
               >
                 Add New Player
               </button>
+              <MassUpdatePlayers />
             </div>
+          </div>
   
             <div className={playerStyles.searchContainer}>
               <input
@@ -384,52 +499,70 @@ export default function PlayerManagement() {
   
               {/* Current IGN section */}
               <div className={playerStyles.formSection}>
-                <label htmlFor="uuid">UUID</label>
+                <label htmlFor="uuid">Player</label>
+                <div className={playerStyles.inputWithAvatar}>
                 <input
                   id="uuid"
                   name="uuid"
                   type="text"
                   className={formStyles.input}
-                  value={playerForm.uuid || ''}
-                  onChange={async (e) => {
-                    const uuid = e.target.value;
+                  value={playerForm.uuid ? `${playerForm.currentIgn} (${playerForm.uuid})` : playerForm.currentIgn}
+                  onChange={(e) => {
+                    // Just update the current IGN on change, don't fetch anything
+                    const inputValue = e.target.value;
+                    const cleanInput = inputValue.split('(')[0].trim();
+                    
                     setPlayerForm(prev => ({
                       ...prev,
-                      uuid
+                      currentIgn: cleanInput,
                     }));
+                  }}
+                  onBlur={async (e) => {
+                    const inputValue = e.target.value;
+                    const cleanInput = inputValue.split('(')[0].trim();
+
+                    // Don't try to fetch if input is too short or empty
+                    if (cleanInput.length < 3) return;
+
+                    const uuidRegex = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
                     
-                    // If valid UUID format, fetch current IGN
-                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-                    if (uuidRegex.test(uuid)) {
-                      try {
-                        const response = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
-                        if (response.ok) {
-                          const data = await response.json();
-                          setPlayerForm(prev => ({
-                            ...prev,
-                            currentIgn: data.name,
-                            uuid: uuid
-                          }));
+                    // First check if the input is a UUID
+                    if (uuidRegex.test(inputValue.replace(/-/g, ''))) {
+                      // Format UUID properly
+                      const formattedUUID = inputValue.replace(/-/g, '').replace(
+                        /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+                        '$1-$2-$3-$4-$5'
+                      );
+                      await fetchPlayerData(formattedUUID);
+                    } else {
+                      // Check if this player exists in our database
+                      const player = players.find(p => 
+                        p.currentIgn.toLowerCase() === cleanInput.toLowerCase() ||
+                        p.pastIgns?.some(ign => 
+                          (typeof ign === 'string' ? ign : ign.name).toLowerCase() === cleanInput.toLowerCase()
+                        )
+                      );
+                      
+                      if (player) {
+                        // If found in database, use their data
+                        setPlayerForm(prev => ({
+                          ...prev,
+                          currentIgn: player.currentIgn,
+                          uuid: player.uuid,
+                          pastIgns: player.pastIgns || []
+                        }));
+                      } else {
+                        // If not found, try to fetch from API
+                        try {
+                          await fetchPlayerData(cleanInput);
+                        } catch (error) {
+                          setError('Player not found');
                         }
-                      } catch (error) {
-                        console.error('Error fetching player data:', error);
                       }
                     }
                   }}
-                  placeholder="Enter UUID"
+                  placeholder="Enter username or UUID"
                 />
-                
-                <label htmlFor="currentIgn">Current IGN</label>
-                <div className={playerStyles.inputWithAvatar}>
-                  <input
-                    id="currentIgn"
-                    name="currentIgn"
-                    type="text"
-                    className={formStyles.input}
-                    value={playerForm.currentIgn}
-                    onChange={handleFormChange}
-                    required
-                  />
                   {playerForm.uuid && (
                     <div className={playerStyles.currentIgnAvatar}>
                       <Image
@@ -445,46 +578,122 @@ export default function PlayerManagement() {
   
               {/* Past IGNs section */}
               <div className={playerStyles.formSection}>
-                <label htmlFor="pastIgns">Past IGNs</label>
-                <div className={playerStyles.pastIgnsList}>
-                  {playerForm.pastIgns?.map((ign, index) => (
-                    <div key={index} className={playerStyles.pastIgnRow}>
-                      <input
-                        type="text"
-                        className={formStyles.input}
-                        value={ign}
-                        onChange={(e) => {
+                <label htmlFor="pastIgns">Name History</label>
+                <div 
+                  className={playerStyles.pastIgnsList}
+                  onDragOver={(e) => {
+                    e.preventDefault(); // Allow dropping
+                    e.stopPropagation();
+                  }}
+                >
+                  {playerForm.pastIgns
+                    ?.slice() // Create a copy
+                    .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)) // Sort by number descending
+                    .map((ign, index) => {
+                    const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
+                    const ignNumber = ignObj.number ?? 0;
+
+                    return (
+                      <div 
+                        key={index} 
+                        className={playerStyles.pastIgnRow}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', index.toString());
+                          e.currentTarget.classList.add(playerStyles.dragging);
+                        }}
+                        onDragEnd={(e) => {
+                          e.currentTarget.classList.remove(playerStyles.dragging);
+                        }}
+                        onDragEnter={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add(playerStyles.dragOver);
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove(playerStyles.dragOver);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const startIndex = parseInt(e.dataTransfer.getData('text'), 10);
+                          const endIndex = index;
+                          
                           const newPastIgns = [...(playerForm.pastIgns || [])];
-                          newPastIgns[index] = e.target.value;
+                          const [removed] = newPastIgns.splice(startIndex, 1);
+                          newPastIgns.splice(endIndex, 0, removed);
+                          
+                          // Explicitly reassign numbers based on new order
+                          const numberedPastIgns = newPastIgns.map((ign, idx, array) => ({
+                            ...ign,
+                            number: array.length - 1 - idx
+                          }));
+                          
                           setPlayerForm(prev => ({
                             ...prev,
-                            pastIgns: newPastIgns
+                            pastIgns: numberedPastIgns
                           }));
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className={buttonStyles.deleteButton}
-                        onClick={() => {
-                          const newPastIgns = [...(playerForm.pastIgns || [])];
-                          newPastIgns.splice(index, 1);
-                          setPlayerForm(prev => ({
-                            ...prev,
-                            pastIgns: newPastIgns
-                          }));
-                        }}
+                      }}
                       >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                        <span>{ignNumber}.</span>
+                        <input
+                          type="text"
+                          className={formStyles.input}
+                          value={ignObj.name}
+                          onChange={(e) => {
+                            const newPastIgns = [...(playerForm.pastIgns || [])];
+                            if (typeof newPastIgns[index] === 'string') {
+                              newPastIgns[index] = { name: e.target.value, hidden: false };
+                            } else {
+                              newPastIgns[index] = { ...newPastIgns[index], name: e.target.value };
+                            }
+                            setPlayerForm(prev => ({
+                              ...prev,
+                              pastIgns: newPastIgns
+                            }));
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className={`${buttonStyles.hideButton} ${ignObj.hidden ? buttonStyles.hidden : ''}`}
+                          onClick={() => {
+                            const newPastIgns = [...(playerForm.pastIgns || [])];
+                            if (typeof newPastIgns[index] === 'string') {
+                              newPastIgns[index] = { name: newPastIgns[index], hidden: true };
+                            } else {
+                              newPastIgns[index] = { ...newPastIgns[index], hidden: !newPastIgns[index].hidden };
+                            }
+                            setPlayerForm(prev => ({
+                              ...prev,
+                              pastIgns: newPastIgns
+                            }));
+                          }}
+                        >
+                          {ignObj.hidden ? 'Hidden' : 'Hide'}
+                        </button>
+                        <button
+                          type="button"
+                          className={buttonStyles.deleteButton}
+                          onClick={() => {
+                            const newPastIgns = [...(playerForm.pastIgns || [])];
+                            newPastIgns.splice(index, 1);
+                            setPlayerForm(prev => ({
+                              ...prev,
+                              pastIgns: newPastIgns
+                            }));
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    );
+                  })}
                   <button
                     type="button"
                     className={playerStyles.addIgnButton}
                     onClick={() => {
                       setPlayerForm(prev => ({
                         ...prev,
-                        pastIgns: [...(prev.pastIgns || []), '']
+                        pastIgns: [...(prev.pastIgns || []), { name: '', hidden: false }]
                       }));
                     }}
                   >
@@ -624,7 +833,9 @@ export default function PlayerManagement() {
                                 } else {
                                   const player = players.find(p => 
                                     p.currentIgn.toLowerCase() === inputValue.toLowerCase() ||
-                                    p.pastIgns?.some(ign => ign.toLowerCase() === inputValue.toLowerCase())
+                                    p.pastIgns?.some(ign => 
+                                      (typeof ign === 'string' ? ign : ign.name).toLowerCase() === inputValue.toLowerCase()
+                                    )
                                   );
                                   if (player) {
                                     newAltAccounts[index] = player.uuid;
@@ -715,12 +926,25 @@ export default function PlayerManagement() {
                 </div>
               )}
   
+              {/* Submit and delete buttons */}
               <div className={playerStyles.buttonGroup}>
                 <button 
                   type="submit" 
                   className={buttonStyles.submitButton}
                 >
                   {selectedPlayer ? 'Update Player' : 'Add Player'}
+                </button>
+                <button 
+                  type="button" 
+                  className={buttonStyles.clearButton}
+                  onClick={() => {
+                    setSelectedPlayer(null);
+                    setPlayerForm(initialPlayerForm);
+                    setError('');
+                    setSuccess('');
+                  }}
+                >
+                  Clear Fields
                 </button>
                 {selectedPlayer && (
                   <button 

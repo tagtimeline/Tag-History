@@ -53,6 +53,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [players, setPlayers] = useState<{currentIgn: string; uuid: string}[]>([]);
   
+  const [isNameHistoryExpanded, setIsNameHistoryExpanded] = useState(false);
   const [isAltAccountsExpanded, setIsAltAccountsExpanded] = useState(false);
   const [isMainAccountExpanded, setIsMainAccountExpanded] = useState(false);
 
@@ -259,6 +260,60 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
               currentIgn={currentIgn}
               playerData={playerData}
             />
+
+            {/* Name History Section */}
+            <div className={styles.nameHistorySection}>
+              <div className={styles.accountGroup}>
+                <button
+                  className={styles.accountHeader}
+                  onClick={() => setIsNameHistoryExpanded(!isNameHistoryExpanded)}
+                >
+                  {isNameHistoryExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                  <span>Name History</span>
+                </button>
+                {isNameHistoryExpanded && (
+                  <div className={styles.accountList}>
+                    {playerData.pastIgns && playerData.pastIgns.length > 0 ? (
+                      <>
+                        <div className={styles.accountItem}>
+                          <span className={styles.nameHistoryNumber}>{playerData.pastIgns.length + 1}</span>
+                          <span className={styles.accountName}>{currentIgn}</span>
+                        </div>
+                        {playerData.pastIgns.map((ign, index) => {
+                          const isHidden = typeof ign === 'object' && ign.hidden;
+                          const name = typeof ign === 'object' ? ign.name : ign;
+
+                          return (
+                            <div key={index} className={styles.accountItem}>
+                              <span className={styles.nameHistoryNumber}>
+                                {playerData.pastIgns!.length - index}
+                              </span>
+                              <span
+                                className={styles.accountName}
+                                style={{
+                                  color: isHidden ? '#666' : 'white',
+                                }}
+                              >
+                                {isHidden ? 'Hidden' : name}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      <div className={styles.accountItem}>
+                        <span className={styles.nameHistoryNumber}>1</span>
+                        <span className={styles.accountName}>{currentIgn}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Alt/Main Accounts Section */}
             {((playerData.altAccounts && playerData.altAccounts.length > 0) || playerData.mainAccount) && (

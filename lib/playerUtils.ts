@@ -2,6 +2,27 @@
 import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
+interface PastIgn {
+  name: string;
+  hidden: boolean;
+}
+
+async function fetchCraftyData(uuid: string) {
+  try {
+    const response = await fetch(`https://api.crafty.gg/api/v2/players/${uuid}`);
+    if (!response.ok) {
+      console.log(`[CraftyAPI] Failed to fetch data for UUID ${uuid}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[CraftyAPI] Error fetching data:', error);
+    return null;
+  }
+}
+
 async function processAltAccount(input: string, mainPlayerUuid: string): Promise<string | null> {
     try {
         const playersRef = collection(db, 'players');
@@ -88,7 +109,12 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
             }
         }
 
-        // Rest of the function remains the same...
+        // Check Crafty.gg for username history
+        const craftyData = await fetchCraftyData(uuid);
+        if (craftyData?.data?.username) {
+            currentIgn = craftyData.data.username;
+        }
+
         const existingPlayerQuery = await getDocs(query(playersRef, where('uuid', '==', uuid)));
         if (!existingPlayerQuery.empty) {
             const existingPlayer = existingPlayerQuery.docs[0];
@@ -103,11 +129,26 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
             return existingData.uuid;
         }
 
+        // Get past usernames from Crafty.gg
+        let pastIgns: PastIgn[] = [];
+        if (craftyData?.data?.usernames) {
+            pastIgns = Array.from(new Set<string>(
+                craftyData.data.usernames
+                    .filter((username: any) => {
+                        const name = typeof username === 'string' ? username : username.username;
+                        return name && name.toLowerCase() !== currentIgn.toLowerCase();
+                    })
+                    .map((username: any) => 
+                        typeof username === 'string' ? username : username.username
+                    )
+            )).map((name: string) => ({ name, hidden: false }));
+        }
+
         const playerRef = doc(collection(db, 'players'));
         await setDoc(playerRef, {
             currentIgn,
             uuid,
-            pastIgns: [],
+            pastIgns,
             events: [],
             role: null,
             mainAccount: mainPlayerUuid,
@@ -128,25 +169,21 @@ export async function updatePlayerData(
     altAccounts: string[] = []
 ): Promise<void> {
     try {
-        // First check if player already exists (case insensitive)
         const playersRef = collection(db, 'players');
         const existingPlayerQuery = await getDocs(playersRef);
         const existingPlayer = existingPlayerQuery.docs.find(doc => 
             doc.data().currentIgn.toLowerCase() === playerIgn.toLowerCase()
         );
 
-        // If player exists and is an alt account, don't process further
         if (existingPlayer && existingPlayer.data().mainAccount) {
             console.warn(`Cannot update ${playerIgn} as it is an alt account`);
             return;
         }
 
-        // Fetch main player data from Minecraft API
         const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${playerIgn}`);
         if (!response.ok) {
             console.warn(`Unable to fetch Minecraft data for player ${playerIgn}`);
             
-            // Create minimal player record if API fails
             if (!existingPlayer) {
                 const playerRef = doc(collection(db, 'players'));
                 await setDoc(playerRef, {
@@ -163,9 +200,30 @@ export async function updatePlayerData(
         
         const data = await response.json();
         const uuid = data.uuid;
-        const currentIgn = data.username;
+        let currentIgn = data.username;
+
+        const craftyData = await fetchCraftyData(uuid);
+        let newPastIgns: PastIgn[] = [];
         
-        // Process all alt accounts
+        if (craftyData?.data?.usernames) {
+            newPastIgns = craftyData.data.usernames
+                .filter((username: any) => {
+                    const name = typeof username === 'string' ? username : username.username;
+                    return name && name.toLowerCase() !== currentIgn.toLowerCase();
+                })
+                .map((username: any) => ({
+                    name: typeof username === 'string' ? username : username.username,
+                    hidden: false
+                }));
+                        
+            if (craftyData.data.username && 
+                craftyData.data.username.toLowerCase() !== currentIgn.toLowerCase()) {
+                console.log(`[CraftyAPI] Username mismatch detected. Updating to: ${craftyData.data.username}`);
+                currentIgn = craftyData.data.username;
+            }
+        }
+        
+        // Process alt accounts
         const processedAltUuids = await Promise.all(
             altAccounts
                 .filter(alt => alt.trim() !== '')
@@ -174,24 +232,35 @@ export async function updatePlayerData(
         
         const validAltUuids = processedAltUuids.filter((uuid): uuid is string => uuid !== null);
         
-        // Update or create main player document
         const playerRef = existingPlayer ? 
             doc(db, 'players', existingPlayer.id) : 
             doc(collection(db, 'players'));
             
         const existingData = existingPlayer?.data();
         
+        // Merge past IGNs while preserving hidden status
+        const existingPastIgns = (existingData?.pastIgns || []).map((ign: PastIgn | string) => 
+            typeof ign === 'string' ? { name: ign, hidden: false } : ign
+        );
+        
+        const mergedPastIgns = newPastIgns.map(newIgn => {
+            const existing = existingPastIgns.find((existing: PastIgn) => 
+                existing.name.toLowerCase() === newIgn.name.toLowerCase()
+            );
+            return existing || newIgn;
+        });
+
         await setDoc(playerRef, {
             currentIgn,
             uuid,
-            pastIgns: existingData?.pastIgns || [],
+            pastIgns: mergedPastIgns,
             events: existingData?.events || [],
             role: role || null,
             altAccounts: validAltUuids,
             lastUpdated: new Date()
         }, { merge: true });
         
-        // Remove this player as an alt from any other accounts if it was previously an alt
+        // Update alt relationships
         const mainAccountQuery = await getDocs(
             query(playersRef, where('altAccounts', 'array-contains', uuid))
         );
@@ -215,7 +284,6 @@ export async function deletePlayer(playerId: string): Promise<void> {
         if (playerDoc.exists()) {
             const playerData = playerDoc.data();
             
-            // If this is a main account, update all its alts
             if (playerData.altAccounts?.length > 0) {
                 const playersRef = collection(db, 'players');
                 for (const altUuid of playerData.altAccounts) {
@@ -228,7 +296,6 @@ export async function deletePlayer(playerId: string): Promise<void> {
                 }
             }
             
-            // If this is an alt account, update its main account
             if (playerData.mainAccount) {
                 const mainQuery = await getDocs(
                     query(collection(db, 'players'), where('uuid', '==', playerData.mainAccount))
@@ -289,21 +356,26 @@ export async function getAllIgnsForPlayer(uuid: string): Promise<string[]> {
         
         if (!playerQuery.empty) {
             const playerData = playerQuery.docs[0].data();
-            const igns = [playerData.currentIgn, ...playerData.pastIgns];
+            const igns = [
+                playerData.currentIgn,
+                ...playerData.pastIgns.map((ign: PastIgn | string) => 
+                    typeof ign === 'string' ? ign : ign.name
+                )
+            ];
             
-            // Include alt account IGNs if this is a main account
             if (playerData.altAccounts?.length > 0) {
                 for (const altUuid of playerData.altAccounts) {
                     const altQuery = await getDocs(query(playersRef, where('uuid', '==', altUuid)));
                     if (!altQuery.empty) {
                         const altData = altQuery.docs[0].data();
                         igns.push(altData.currentIgn);
-                        igns.push(...(altData.pastIgns || []));
+                        igns.push(...altData.pastIgns.map((ign: PastIgn | string) => 
+                            typeof ign === 'string' ? ign : ign.name
+                        ));
                     }
                 }
             }
             
-            // Include main account IGNs if this is an alt account
             if (playerData.mainAccount) {
                 const mainQuery = await getDocs(
                     query(playersRef, where('uuid', '==', playerData.mainAccount))
@@ -311,11 +383,13 @@ export async function getAllIgnsForPlayer(uuid: string): Promise<string[]> {
                 if (!mainQuery.empty) {
                     const mainData = mainQuery.docs[0].data();
                     igns.push(mainData.currentIgn);
-                    igns.push(...(mainData.pastIgns || []));
+                    igns.push(...mainData.pastIgns.map((ign: PastIgn | string) => 
+                        typeof ign === 'string' ? ign : ign.name
+                    ));
                 }
             }
             
-            return [...new Set(igns)]; // Remove duplicates
+            return [...new Set(igns)];
         }
         return [];
     } catch (error) {

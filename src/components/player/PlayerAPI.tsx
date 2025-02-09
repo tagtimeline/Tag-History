@@ -62,11 +62,12 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
       events: dbPlayerData?.events || [],
       role: dbPlayerData?.role || null,
       altAccounts: dbPlayerData?.altAccounts || [],
-      mainAccount: dbPlayerData?.mainAccount || null
+      mainAccount: dbPlayerData?.mainAccount || null,
+      pastIgns: dbPlayerData?.pastIgns || []
     };
 
     const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);
-    // console.log(`[PlayerAPI] All usernames for player:`, allUsernames);
+    console.log(`[PlayerAPI] All usernames for player:`, playerData.pastIgns);
 
     return {
       historicalIgn: ign,

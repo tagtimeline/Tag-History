@@ -5,10 +5,12 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'discord.com',
-      'crafthead.net', 
+      'crafthead.net',
       'visage.surgeplay.com',
       'textures.minecraft.net',
       'sessionserver.mojang.com',
+      'laby.net',
+      'api.crafty.gg',
       'api.capes.dev',
       'api.hypixel.net',
       'imgur.com',

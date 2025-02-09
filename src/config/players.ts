@@ -11,20 +11,21 @@ export function sortRolesByPriority(roleIds: (typeof ROLE_ORDER[number])[]): (ty
   });
 }
 
-
 interface GuildInfo {
   name: string;
   rank?: string;
+}
+
+export interface UsernameHistoryItem {
+  username: string;
+  changedToAt?: number;
 }
 
 export interface PlayerProfile {
   username: string;
   uuid: string;
   created_at: string;
-  username_history: {
-    username: string;
-    changed_at?: string;
-  }[];
+  username_history: UsernameHistoryItem[];
   textures: {
     skin: {
       url: string;
@@ -54,8 +55,8 @@ export interface PlayerProfile {
   playerId?: string;
   altAccounts?: string[];
   mainAccount?: string | null;
+  pastIgns?: Array<string | { name: string; hidden: boolean }>;
 }
-
 
 export const getCurrentUsername = async (historicalIgn: string): Promise<string | null> => {
   try {

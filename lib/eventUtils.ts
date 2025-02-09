@@ -1,5 +1,5 @@
 // lib/eventUtils.ts
-import { collection, getDocs, doc, getDoc, deleteDoc, writeBatch, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, deleteDoc, writeBatch, query, where, updateDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { TimelineEvent } from '@/data/events';
 import { extractPlayersFromEvent } from '../src/config/players';
@@ -38,6 +38,66 @@ export async function getEventById(id: string): Promise<TimelineEvent | null> {
   }
 }
 
+// Helper function to get player ref by name
+async function getPlayerRefByName(name: string) {
+  const playersRef = collection(db, 'players');
+  const querySnapshot = await getDocs(
+    query(playersRef, where('currentIgn', '==', name))
+  );
+  
+  if (!querySnapshot.empty) {
+    return doc(db, 'players', querySnapshot.docs[0].id);
+  }
+  
+  return null;
+}
+
+// Helper function to update player names from Crafty.gg
+async function updatePlayerNameHistory(name: string): Promise<void> {
+  const playerRef = await getPlayerRefByName(name);
+  if (!playerRef) {
+    console.log(`No existing player found for ${name}, will create new`);
+    return;
+  }
+
+  const playerDoc = await getDoc(playerRef);
+  if (!playerDoc.exists()) return;
+
+  const playerData = playerDoc.data();
+  try {
+    const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerData.uuid}`);
+    if (!craftyResponse.ok) {
+      console.log(`Failed to fetch Crafty.gg data for ${name}`);
+      return;
+    }
+
+    const craftyData = await craftyResponse.json();
+    const currentIgn = craftyData.usernames[0];
+    const pastIgns = Array.from(new Set(
+      craftyData.usernames.filter((n: string) => 
+        n.toLowerCase() !== currentIgn.toLowerCase()
+      )
+    ));
+
+    // Only update if there are changes
+    if (currentIgn.toLowerCase() !== playerData.currentIgn.toLowerCase() || 
+        JSON.stringify(pastIgns.sort()) !== JSON.stringify(playerData.pastIgns.sort())) {
+      
+      console.log(`Updating ${playerData.currentIgn} -> ${currentIgn}`);
+      await updateDoc(playerRef, {
+        currentIgn,
+        pastIgns,
+        lastUpdated: new Date()
+      });
+    }
+
+    // Small delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 500));
+  } catch (error) {
+    console.error(`Error updating name history for ${name}:`, error);
+  }
+}
+
 export async function createEvent(eventData: Omit<TimelineEvent, 'id'>): Promise<string> {
   console.log('createEvent called with data:', eventData);
   try {
@@ -71,6 +131,10 @@ export async function createEvent(eventData: Omit<TimelineEvent, 'id'>): Promise
     // After event is created, update player references
     for (const name of playerNames) {
       try {
+        // First update name history
+        await updatePlayerNameHistory(name);
+        
+        // Then ensure player exists and is linked to event
         await updatePlayerData(name);
         await updatePlayerEvents(name, newEventRef.id, 'add');
       } catch (error) {
@@ -128,12 +192,14 @@ export async function updateEvent(id: string, eventData: Partial<TimelineEvent>)
       }
     }
 
-    // Then, add event to all new players (ensures clean state)
+    // Then, process all new players
     for (const player of newPlayers) {
       try {
-        // Always update player data first to ensure player exists
+        // First update name history
+        await updatePlayerNameHistory(player);
+        
+        // Then ensure player exists and is linked to event
         await updatePlayerData(player);
-        // Then add the event
         await updatePlayerEvents(player, id, 'add');
         console.log(`Added/Verified event ${id} for player ${player}`);
       } catch (error) {
@@ -197,7 +263,6 @@ export async function deleteEvent(id: string): Promise<void> {
   }
 }
 
-// Helper function to get all events for a specific player
 export async function getPlayerEvents(playerIds: string[]): Promise<TimelineEvent[]> {
   try {
     const eventsRef = collection(db, 'events');

@@ -1,72 +1,84 @@
 /* src/styles/admin/buttons.module.css */
 
 .button {
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 14px;
-    height: 30px;
-    padding: 0 12px;
-    transition: all 0.2s ease;
-    width: fit-content;
-  }
-  
-  .button:hover {
-    background-color: #444;
-    transform: scale(1.02);
-  }
-  
-  .addButton,
-  .submitButton,
-  .duplicateButton {
-    composes: button;
-  }
-  
-  .removeButton,
-  .deleteButton,
-  .clearButton {
-    composes: button;
-    color: #FF5555;
-  }
-  
-  .buttonGroup {
-    grid-column: 1 / -1;
-    display: flex;
-    gap: 5px;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 10px;
-  }
-  
-  .alignRight {
-    margin-left: auto;
-  }
-  
-  .markdownInfoButton {
-    font-family: 'Minecraft', sans-serif;
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
-    text-decoration: underline;
-    padding: 0;
-  }
-  
-  .markdownInfoButton:hover {
-    color: #fff;
-  }
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Minecraft', sans-serif;
+  font-size: 14px;
+  height: 30px;
+  padding: 0 12px;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.button:hover {
+  background-color: #444;
+  transform: scale(1.02);
+}
+
+.addButton,
+.submitButton,
+.duplicateButton {
+  composes: button;
+}
+
+.removeButton,
+.deleteButton,
+.clearButton {
+  composes: button;
+  color: #FF5555;
+}
+
+.hideButton {
+  composes: button;
+  width: 128px !important;
+  color: #AAAAAA;
+}
+
+.hideButton.hidden {
+  background-color: #222;
+  color: #666666;
+  border-color: #444;
+}
+
+.buttonGroup {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.alignRight {
+  margin-left: auto;
+}
+
+.markdownInfoButton {
+  font-family: 'Minecraft', sans-serif;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 10px;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.markdownInfoButton:hover {
+  color: #fff;
+}
 
 .settingsSave {
-    composes: button;
-    margin-top: 15px;
-    width: 300px;
+  composes: button;
+  margin-top: 15px;
+  width: 300px;
 }
 
 .settingsSave:hover {
-    background: #444;
+  background: #444;
 }

@@ -1,5 +1,5 @@
 // lib/playerUtils.ts
-import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
 interface PastIgn {
@@ -7,7 +7,27 @@ interface PastIgn {
   hidden: boolean;
 }
 
-async function fetchCraftyData(uuid: string) {
+interface CraftyUsername {
+  username?: string;
+}
+
+interface CraftyData {
+  username?: string;
+  usernames?: (string | CraftyUsername)[];
+}
+
+interface PlayerDocument {
+  currentIgn: string;
+  uuid: string;
+  pastIgns: PastIgn[];
+  events: string[];
+  role: string | null;
+  mainAccount?: string | null;
+  altAccounts: string[];
+  lastUpdated: Date;
+}
+
+async function fetchCraftyData(uuid: string): Promise<{ data?: CraftyData } | null> {
   try {
     const response = await fetch(`https://api.crafty.gg/api/v2/players/${uuid}`);
     if (!response.ok) {
@@ -40,7 +60,7 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
                     // If API fails, check database
                     const existingPlayerQuery = await getDocs(query(playersRef, where('uuid', '==', input)));
                     if (!existingPlayerQuery.empty) {
-                        const existingData = existingPlayerQuery.docs[0].data();
+                        const existingData = existingPlayerQuery.docs[0].data() as PlayerDocument;
                         uuid = input;
                         currentIgn = existingData.currentIgn;
                     } else {
@@ -56,7 +76,7 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
                 // Check database as fallback
                 const existingPlayerQuery = await getDocs(query(playersRef, where('uuid', '==', input)));
                 if (!existingPlayerQuery.empty) {
-                    const existingData = existingPlayerQuery.docs[0].data();
+                    const existingData = existingPlayerQuery.docs[0].data() as PlayerDocument;
                     uuid = input;
                     currentIgn = existingData.currentIgn;
                 } else {
@@ -81,7 +101,7 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
                             query(playersRef, where('currentIgn', '==', input))
                         );
                         if (!existingPlayerQuery.empty) {
-                            const existingData = existingPlayerQuery.docs[0].data();
+                            const existingData = existingPlayerQuery.docs[0].data() as PlayerDocument;
                             uuid = existingData.uuid;
                             currentIgn = input;
                         } else {
@@ -100,7 +120,7 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
                     query(playersRef, where('currentIgn', '==', input))
                 );
                 if (!existingPlayerQuery.empty) {
-                    const existingData = existingPlayerQuery.docs[0].data();
+                    const existingData = existingPlayerQuery.docs[0].data() as PlayerDocument;
                     uuid = existingData.uuid;
                     currentIgn = input;
                 } else {
@@ -118,7 +138,7 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
         const existingPlayerQuery = await getDocs(query(playersRef, where('uuid', '==', uuid)));
         if (!existingPlayerQuery.empty) {
             const existingPlayer = existingPlayerQuery.docs[0];
-            const existingData = existingPlayer.data();
+            const existingData = existingPlayer.data() as PlayerDocument;
             
             if (!existingData.mainAccount) {
                 await updateDoc(existingPlayer.ref, {
@@ -134,13 +154,16 @@ async function processAltAccount(input: string, mainPlayerUuid: string): Promise
         if (craftyData?.data?.usernames) {
             pastIgns = Array.from(new Set<string>(
                 craftyData.data.usernames
-                    .filter((username: any) => {
-                        const name = typeof username === 'string' ? username : username.username;
+                    .filter((username: string | CraftyUsername) => {
+                        const name = typeof username === 'string' 
+                            ? username 
+                            : username.username;
                         return name && name.toLowerCase() !== currentIgn.toLowerCase();
                     })
-                    .map((username: any) => 
+                    .map((username: string | CraftyUsername) => 
                         typeof username === 'string' ? username : username.username
                     )
+                    .filter((name): name is string => name !== undefined)
             )).map((name: string) => ({ name, hidden: false }));
         }
 
@@ -172,10 +195,10 @@ export async function updatePlayerData(
         const playersRef = collection(db, 'players');
         const existingPlayerQuery = await getDocs(playersRef);
         const existingPlayer = existingPlayerQuery.docs.find(doc => 
-            doc.data().currentIgn.toLowerCase() === playerIgn.toLowerCase()
+            (doc.data() as PlayerDocument).currentIgn.toLowerCase() === playerIgn.toLowerCase()
         );
 
-        if (existingPlayer && existingPlayer.data().mainAccount) {
+        if (existingPlayer && (existingPlayer.data() as PlayerDocument).mainAccount) {
             console.warn(`Cannot update ${playerIgn} as it is an alt account`);
             return;
         }
@@ -207,12 +230,16 @@ export async function updatePlayerData(
         
         if (craftyData?.data?.usernames) {
             newPastIgns = craftyData.data.usernames
-                .filter((username: any) => {
-                    const name = typeof username === 'string' ? username : username.username;
+                .filter((username: string | CraftyUsername) => {
+                    const name = typeof username === 'string' 
+                        ? username 
+                        : username.username;
                     return name && name.toLowerCase() !== currentIgn.toLowerCase();
                 })
-                .map((username: any) => ({
-                    name: typeof username === 'string' ? username : username.username,
+                .map((username: string | CraftyUsername) => ({
+                    name: typeof username === 'string' 
+                        ? username 
+                        : username.username || '',
                     hidden: false
                 }));
                         
@@ -236,7 +263,7 @@ export async function updatePlayerData(
             doc(db, 'players', existingPlayer.id) : 
             doc(collection(db, 'players'));
             
-        const existingData = existingPlayer?.data();
+        const existingData = existingPlayer?.data() as PlayerDocument | undefined;
         
         // Merge past IGNs while preserving hidden status
         const existingPastIgns = (existingData?.pastIgns || []).map((ign: PastIgn | string) => 
@@ -266,8 +293,9 @@ export async function updatePlayerData(
         );
         
         for (const doc of mainAccountQuery.docs) {
+            const docData = doc.data() as PlayerDocument;
             await updateDoc(doc.ref, {
-                altAccounts: doc.data().altAccounts.filter((id: string) => id !== uuid)
+                altAccounts: docData.altAccounts.filter((id: string) => id !== uuid)
             });
         }
         
@@ -282,7 +310,7 @@ export async function deletePlayer(playerId: string): Promise<void> {
         const playerDoc = await getDoc(playerRef);
         
         if (playerDoc.exists()) {
-            const playerData = playerDoc.data();
+            const playerData = playerDoc.data() as PlayerDocument;
             
             if (playerData.altAccounts?.length > 0) {
                 const playersRef = collection(db, 'players');
@@ -302,8 +330,9 @@ export async function deletePlayer(playerId: string): Promise<void> {
                 );
                 if (!mainQuery.empty) {
                     const mainDoc = mainQuery.docs[0];
+                    const mainData = mainDoc.data() as PlayerDocument;
                     await updateDoc(mainDoc.ref, {
-                        altAccounts: mainDoc.data().altAccounts.filter((id: string) => id !== playerData.uuid)
+                        altAccounts: mainData.altAccounts.filter((id: string) => id !== playerData.uuid)
                     });
                 }
             }
@@ -326,11 +355,11 @@ export async function updatePlayerEvents(
         const playersRef = collection(db, 'players');
         const allPlayersQuery = await getDocs(playersRef);
         const playerDoc = allPlayersQuery.docs.find(doc => 
-            doc.data().currentIgn.toLowerCase() === playerIgn.toLowerCase()
+            (doc.data() as PlayerDocument).currentIgn.toLowerCase() === playerIgn.toLowerCase()
         );
         
         if (playerDoc) {
-            const playerData = playerDoc.data();
+            const playerData = playerDoc.data() as PlayerDocument;
             let events = playerData.events || [];
             
             if (action === 'add' && !events.includes(eventId)) {

@@ -1,6 +1,6 @@
 // components/admin/MassUpdatePlayers.tsx
-import { useState, useRef } from 'react';
-import { doc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
+import { useState } from 'react';
+import { collection, query, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
 import buttonStyles from '@/styles/admin/buttons.module.css';
 import playerStyles from '@/styles/admin/players.module.css';
@@ -78,12 +78,27 @@ export default function MassUpdatePlayers() {
               .map((nameObj: any) => nameObj.username)
               .filter((name: string) => {
                 if (typeof name === 'string') {
-                  return name.toLowerCase() !== currentIgn.toLowerCase();
+                  // Check if the name is not already in existing past IGNs
+                  return name.toLowerCase() !== currentIgn.toLowerCase() && 
+                         !playerData.pastIgns?.some(
+                           (existingIgn: any) => 
+                             (typeof existingIgn === 'string' ? existingIgn : existingIgn.name).toLowerCase() === name.toLowerCase()
+                         );
                 }
                 return false;
               })
+              .map((name: string) => ({
+                name,
+                hidden: false,
+                number: playerData.pastIgns?.length ? 
+                  Math.max(...playerData.pastIgns.map((ign: any) => 
+                    typeof ign === 'object' ? (ign.number ?? 0) : 0
+                  )) + 1 : 
+                  0
+              }))
           ]));
 
+        
           // Update if current IGN is different or if past IGNs have changed
           const currentIgnDifferent = currentIgn.toLowerCase() !== playerData.currentIgn.toLowerCase();
           const pastIgnsDifferent = JSON.stringify([...pastIgns].sort()) !== 
@@ -94,17 +109,29 @@ export default function MassUpdatePlayers() {
               addLog(`📝 Updating current IGN: ${playerData.currentIgn} -> ${currentIgn}`);
             }
             if (pastIgnsDifferent) {
-              const newIgns = pastIgns.filter(ign => !playerData.pastIgns?.includes(ign));
-              if (newIgns.length > 0) {
-                addLog(`📝 Adding new past IGNs: ${newIgns.join(', ')}`);
+                const newIgns = pastIgns
+                  .filter(ign => 
+                    typeof ign === 'object' && 
+                    !playerData.pastIgns?.some(
+                      (existingIgn: any) => 
+                        (typeof existingIgn === 'string' ? existingIgn : existingIgn.name).toLowerCase() === ign.name.toLowerCase()
+                    )
+                  )
+                  .map(ign => ign.name);  // Extract just the names for logging
+              
+                if (newIgns.length > 0) {
+                  addLog(`📝 Adding new past IGNs: ${newIgns.join(', ')}`);
+                }
               }
-            }
             
             await updateDoc(playerDoc.ref, {
-              currentIgn,
-              pastIgns,
-              lastUpdated: new Date()
-            });
+                currentIgn,
+                pastIgns: pastIgns.map((ign, index, array) => ({
+                  ...ign,
+                  number: array.length - 1 - index
+                })),
+                lastUpdated: new Date()
+              });
             
             addLog(`✅ Successfully updated ${currentIgn}`);
           } else {

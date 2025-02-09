@@ -1,5 +1,5 @@
 // lib/playerUtils.ts
-import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, query, where, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
 interface PastIgn {

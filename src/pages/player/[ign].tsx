@@ -2,6 +2,7 @@
 import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
@@ -343,12 +344,12 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
                               className={styles.accountItem}
                             >
                               <div className={styles.accountAvatar}>
-                                <img 
-                                  src={`https://crafthead.net/avatar/${uuid}`}
-                                  alt="Player avatar"
-                                  width={16}
-                                  height={16}
-                                />
+                              <Image
+                                src={`https://crafthead.net/avatar/${uuid}`}
+                                alt="Player avatar"
+                                width={16}
+                                height={16}
+                              />
                               </div>
                               <span className={styles.accountName}>
                                 {altPlayer.currentIgn}
@@ -385,7 +386,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
                               className={styles.accountItem}
                             >
                               <div className={styles.accountAvatar}>
-                                <img 
+                                <Image 
                                   src={`https://crafthead.net/avatar/${playerData.mainAccount}`}
                                   alt="Player avatar"
                                   width={16}

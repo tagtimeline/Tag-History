@@ -10,6 +10,10 @@ interface UpdateLogProps {
   onClear: () => void;
 }
 
+interface CraftyUsername {
+    username: string;
+}
+
 const UpdateLog: React.FC<UpdateLogProps> = ({ logs, onClear }) => (
   <div className={playerStyles.updateOverlay}>
     <div className={playerStyles.logsContainer}>
@@ -75,7 +79,7 @@ export default function MassUpdatePlayers() {
           const pastIgns = Array.from(new Set([
             ...(playerData.pastIgns || []), // Keep existing past IGNs
             ...craftyData.data.usernames
-              .map((nameObj: any) => nameObj.username)
+              .map((nameObj: CraftyUsername) => nameObj.username)
               .filter((name: string) => {
                 if (typeof name === 'string') {
                   // Check if the name is not already in existing past IGNs

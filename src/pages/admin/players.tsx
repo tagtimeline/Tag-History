@@ -43,6 +43,11 @@ interface Role {
   color: string;
 }
 
+interface CraftySearchResult {
+  username: string;
+  uuid: string;
+}
+
 const initialPlayerForm: Partial<Player> = {
   currentIgn: '',
   pastIgns: [],
@@ -302,13 +307,16 @@ export default function PlayerManagement() {
         if (!searchResponse.ok) {
           throw new Error('Failed to find player');
         }
-        const searchData = await searchResponse.json();
+        const searchData = await searchResponse.json() as {
+          success: boolean;
+          data?: CraftySearchResult[];
+        };
         if (!searchData.success || !searchData.data?.length) {
           throw new Error('Player not found');
         }
         // Find exact username match
-        const player = searchData.data.find(
-          (p: any) => p.username.toLowerCase() === input.toLowerCase()
+        const player = searchData.data?.find(
+          (p: CraftySearchResult) => p.username.toLowerCase() === input.toLowerCase()
         );
         if (!player) {
           throw new Error('Player not found');

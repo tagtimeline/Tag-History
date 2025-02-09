@@ -1,7 +1,7 @@
 // pages/admin/player.tsx
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, updateDoc, onSnapshot, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, doc, updateDoc, onSnapshot, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -133,157 +133,172 @@ export default function PlayerManagement() {
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+      e.preventDefault();
+      setError('');
+      setSuccess('');
 
-    try {
-        // Basic validation
-        if (!playerForm.uuid?.trim()) {
-            setError('Player UUID is required');
-            return;
-        }
+      try {
+          // Basic validation
+          if (!playerForm.uuid?.trim()) {
+              setError('Player UUID is required');
+              return;
+          }
 
-        // Check if player already exists
-        const existingPlayer = players.find(p => 
-            p.uuid === playerForm.uuid && !selectedPlayer
-        );
+          // Check if player already exists
+          const existingPlayer = players.find(p => 
+              p.uuid === playerForm.uuid && !selectedPlayer
+          );
 
-        if (existingPlayer) {
-            setError('This player already exists in the database');
-            return;
-        }
+          if (existingPlayer) {
+              setError('This player already exists in the database');
+              return;
+          }
 
-        // Clean up the form data
-        const cleanPastIgns = playerForm.pastIgns?.filter(ign => 
-            (typeof ign === 'string' ? ign : ign.name).trim() !== ''
-        ).map(ign => 
-            typeof ign === 'string' ? { name: ign, hidden: false } : ign
-        ) || [];
-        
-        const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
+          // Clean up the form data - ensure proper filtering and numbering of past IGNs
+          const cleanPastIgns = (playerForm.pastIgns || [])
+              .filter(ign => {
+                  const name = typeof ign === 'string' ? ign : ign.name;
+                  return name && name.trim() !== '';
+              })
+              .map((ign, index, array) => {
+                  const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
+                  return {
+                      ...ignObj,
+                      number: array.length - 1 - index // Ensure proper sequential numbering
+                  };
+              });
+          
+          const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
 
-        // Fetch latest data from Crafty API to ensure we have current info
-        try {
-            const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
-            if (!craftyResponse.ok) {
-                throw new Error('Failed to fetch player data');
-            }
-            
-            const craftyData = await craftyResponse.json();
-            if (!craftyData.success || !craftyData.data) {
-                throw new Error('Failed to fetch player data');
-            }
+          // Fetch latest data from Crafty API to ensure we have current info
+          try {
+              const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
+              if (!craftyResponse.ok) {
+                  throw new Error('Failed to fetch player data');
+              }
+              
+              const craftyData = await craftyResponse.json();
+              if (!craftyData.success || !craftyData.data) {
+                  throw new Error('Failed to fetch player data');
+              }
 
-            // Extract current IGN and past IGNs from Crafty data
-            const currentIgn = craftyData.data.username;
-            
-            // Get new IGNs from Crafty data
-            const newPastIgns = craftyData.data.usernames
-                .map((nameObj: any) => nameObj.username)
-                .filter((name: string) => 
-                    name.toLowerCase() !== currentIgn.toLowerCase()
-                )
-                .map((name: string) => ({ name, hidden: false }));
+              // Extract current IGN from Crafty data
+                const currentIgn = craftyData.data.username;
 
-            // Merge with existing past IGNs while preserving hidden status
-            const mergedPastIgns = newPastIgns.map((newIgn: { name: string; hidden: boolean }) => {
-                const existing = cleanPastIgns.find(existingIgn => 
-                    existingIgn.name.toLowerCase() === newIgn.name.toLowerCase()
-                );
-                return existing || newIgn;
-            });
-            
-            // Add any existing IGNs that weren't in the Crafty data
-            cleanPastIgns.forEach(existingIgn => {
-                if (!mergedPastIgns.some((ign: { name: string; hidden: boolean }) => 
-                    ign.name.toLowerCase() === existingIgn.name.toLowerCase()
-                )) {
-                    mergedPastIgns.push(existingIgn);
-                }
-            });
+                // This is important - we want to keep ALL manual IGNs
+                const manualPastIgns = [...cleanPastIgns];
 
-            // Validate alt accounts
-            if (cleanAltAccounts.includes(currentIgn) || 
-                cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
-                setError('A player cannot be their own alt account');
-                return;
-            }
+                // Get IGNs from Crafty API
+                const craftyPastIgns = craftyData.data.usernames
+                    .map((nameObj: any) => nameObj.username)
+                    .filter((name: string) => 
+                        name.toLowerCase() !== currentIgn.toLowerCase()
+                    )
+                    .map((name: string) => ({ 
+                        name, 
+                        hidden: false,
+                        number: 0 // Temporary number
+                    }));
 
-            // Check for duplicate alt accounts
-            const uniqueAlts = [...new Set(cleanAltAccounts)];
-            if (uniqueAlts.length !== cleanAltAccounts.length) {
-                setError('Duplicate alt accounts are not allowed');
-                return;
-            }
+                // Start with manual IGNs, add any Crafty IGNs that aren't in the manual list
+                const mergedPastIgns = [...manualPastIgns];
+                craftyPastIgns.forEach((craftyIgn: { name: string; hidden: boolean; number: number }) => {
+                    const existingIgn = mergedPastIgns.find(existing => 
+                        existing.name.toLowerCase() === craftyIgn.name.toLowerCase()
+                    );
+                    
+                    // If this IGN isn't in our list yet, add it
+                    if (!existingIgn) {
+                        mergedPastIgns.push({
+                            name: craftyIgn.name,
+                            hidden: false,
+                            number: mergedPastIgns.length
+                        });
+                    }
+                });
 
-            // Prepare the player data object
-            const playerData = {
-              currentIgn: currentIgn,
-              uuid: playerForm.uuid.trim(),
-              pastIgns: cleanPastIgns
-                .map((ign, index, array) => ({
-                  ...ign,
-                  number: array.length - 1 - index, // Explicitly assign number based on order
-                  hidden: ign.hidden ?? false
-                }))
-                .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)), // Ensure sorted by number
-              role: playerForm.role || null,
-              altAccounts: cleanAltAccounts,
-              events: playerForm.events || [],
-              lastUpdated: new Date(),
-              mainAccount: playerForm.mainAccount || null
-            };
+              // Validate alt accounts
+              if (cleanAltAccounts.includes(currentIgn) || 
+                  cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
+                  setError('A player cannot be their own alt account');
+                  return;
+              }
 
-            // If updating existing player
-            if (selectedPlayer?.id) {
-                const playerRef = doc(db, 'players', selectedPlayer.id);
-                await updateDoc(playerRef, playerData);
-            } else {
-                // Adding new player
-                await addDoc(collection(db, 'players'), playerData);
-            }
+              // Check for duplicate alt accounts
+              const uniqueAlts = [...new Set(cleanAltAccounts)];
+              if (uniqueAlts.length !== cleanAltAccounts.length) {
+                  setError('Duplicate alt accounts are not allowed');
+                  return;
+              }
 
-            // Process the player and their alt accounts
-            try {
-                await updatePlayerData(
-                    currentIgn,
-                    playerForm.role || null,
-                    cleanAltAccounts
-                );
+              // Prepare the player data object
+              const playerData = {
+                  currentIgn: currentIgn,
+                  uuid: playerForm.uuid.trim(),
+                  pastIgns: mergedPastIgns
+                  .map((ign, index, array) => ({
+                    ...ign,
+                    number: array.length - 1 - index, // Explicitly assign number based on order
+                    hidden: ign.hidden ?? false
+                  }))
+                  .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)), // Ensure sorted by number
+                  role: playerForm.role || null,
+                  altAccounts: cleanAltAccounts,
+                  events: playerForm.events || [],
+                  lastUpdated: new Date(),
+                  mainAccount: playerForm.mainAccount || null
+              };
 
-                setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+              // If updating existing player
+              if (selectedPlayer?.id) {
+                  const playerRef = doc(db, 'players', selectedPlayer.id);
+                  // Use setDoc instead of updateDoc to ensure complete replacement
+                  await setDoc(playerRef, playerData);
+              } else {
+                  // Adding new player
+                  await addDoc(collection(db, 'players'), playerData);
+              }
 
-                // Reset form and selection
-                setPlayerForm(initialPlayerForm);
-                setSelectedPlayer(null);
-            } catch (err) {
-                if (err instanceof Error) {
-                    setError(`Failed to process alt accounts: ${err.message}`);
-                } else {
-                    setError('Failed to process alt accounts');
-                }
-                return;
-            }
+              // Process the player and their alt accounts
+              try {
+                  await updatePlayerData(
+                      currentIgn,
+                      playerForm.role || null,
+                      cleanAltAccounts
+                  );
 
-        } catch (err) {
-            if (err instanceof Error) {
-                setError(`Failed to fetch player data: ${err.message}`);
-            } else {
-                setError('Failed to fetch player data');
-            }
-            return;
-        }
+                  setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
 
-    } catch (err) {
-        console.error('Error saving player:', err);
-        if (err instanceof Error) {
-            setError(`Failed to save player: ${err.message}`);
-        } else {
-            setError('Failed to save player. Please try again.');
-        }
-    }
-};
+                  // Reset form and selection
+                  setPlayerForm(initialPlayerForm);
+                  setSelectedPlayer(null);
+              } catch (err) {
+                  if (err instanceof Error) {
+                      setError(`Failed to process alt accounts: ${err.message}`);
+                  } else {
+                      setError('Failed to process alt accounts');
+                  }
+                  return;
+              }
+
+          } catch (err) {
+              if (err instanceof Error) {
+                  setError(`Failed to fetch player data: ${err.message}`);
+              } else {
+                  setError('Failed to fetch player data');
+              }
+              return;
+          }
+
+      } catch (err) {
+          console.error('Error saving player:', err);
+          if (err instanceof Error) {
+              setError(`Failed to save player: ${err.message}`);
+          } else {
+              setError('Failed to save player. Please try again.');
+          }
+      }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -337,30 +352,53 @@ export default function PlayerManagement() {
   
       const currentIgn = craftyData.data.username;
   
-      // Process past IGNs
-      const pastIgns = craftyData.data.usernames
-    .map((nameObj: any) => nameObj.username)
-    .filter((name: string) => 
-        name.toLowerCase() !== currentIgn.toLowerCase()
-    )
-    .map((name: string, index: number, array: string[]) => ({
-        name,
-        hidden: false,
-        number: array.length - 1 - index // Assign numbers so most recent has highest number
-    }));
+      // Process past IGNs from Crafty
+      const craftyPastIgns = craftyData.data.usernames
+        .map((nameObj: any) => nameObj.username)
+        .filter((name: string) => 
+            name.toLowerCase() !== currentIgn.toLowerCase()
+        )
+        .map((name: string, index: number, array: string[]) => ({
+            name,
+            hidden: false,
+            number: array.length - 1 - index
+        }));
 
-    setPlayerForm(prev => ({
-        ...prev,
-        currentIgn: currentIgn,
-        uuid: uuid,
-        pastIgns: pastIgns.sort((a: { name: string; hidden: boolean; number?: number }, b: { name: string; hidden: boolean; number?: number }) => (b.number ?? 0) - (a.number ?? 0)) // Ensure sorted
-    }));
+      setPlayerForm(prev => {
+        // Start with existing past IGNs
+        const existingPastIgns = [...(prev.pastIgns || [])];
+        
+        // Add new IGNs from Crafty that aren't already in the list
+        craftyPastIgns.forEach((newIgn: { name: string; hidden: boolean; number: number }) => {
+          if (!existingPastIgns.some(existing => 
+              existing.name.toLowerCase() === newIgn.name.toLowerCase()
+          )) {
+            existingPastIgns.push({
+              ...newIgn,
+              number: existingPastIgns.length // New IGN gets next number
+            });
+          }
+        });
+
+        // Return updated form with merged IGNs
+        return {
+          ...prev,
+          currentIgn: currentIgn,
+          uuid: uuid,
+          pastIgns: existingPastIgns
+            .map((ign, index, array) => ({
+              ...ign,
+              number: array.length - 1 - index
+            }))
+            .sort((a, b) => (b.number ?? 0) - (a.number ?? 0))
+        };
+      });
   
     } catch (error) {
       console.error('Error fetching player data:', error);
       setError('Failed to fetch player data');
     }
-  };
+};
 
   const filteredPlayers = players.filter(player => 
     player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -621,26 +659,26 @@ export default function PlayerManagement() {
                           e.currentTarget.classList.remove(playerStyles.dragOver);
                         }}
                         onDrop={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const startIndex = parseInt(e.dataTransfer.getData('text'), 10);
-                          const endIndex = index;
-                          
-                          const newPastIgns = [...(playerForm.pastIgns || [])];
-                          const [removed] = newPastIgns.splice(startIndex, 1);
-                          newPastIgns.splice(endIndex, 0, removed);
-                          
-                          // Explicitly reassign numbers based on new order
-                          const numberedPastIgns = newPastIgns.map((ign, idx, array) => ({
-                            ...ign,
-                            number: array.length - 1 - idx
-                          }));
-                          
-                          setPlayerForm(prev => ({
-                            ...prev,
-                            pastIgns: numberedPastIgns
-                          }));
-                      }}
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const startIndex = parseInt(e.dataTransfer.getData('text'), 10);
+                            const endIndex = index;
+                            
+                            const newPastIgns = [...(playerForm.pastIgns || [])];
+                            const [removed] = newPastIgns.splice(startIndex, 1);
+                            newPastIgns.splice(endIndex, 0, removed);
+                            
+                            // Reassign numbers based on new order
+                            const numberedPastIgns = newPastIgns.map((ign, idx, array) => ({
+                                ...ign,
+                                number: array.length - 1 - idx // Highest number at the top
+                            }));
+                            
+                            setPlayerForm(prev => ({
+                                ...prev,
+                                pastIgns: numberedPastIgns
+                            }));
+                        }}
                       >
                         <span>{ignNumber}.</span>
                         <input
@@ -683,10 +721,18 @@ export default function PlayerManagement() {
                           className={buttonStyles.deleteButton}
                           onClick={() => {
                             const newPastIgns = [...(playerForm.pastIgns || [])];
+                            // Completely remove the IGN at this index
                             newPastIgns.splice(index, 1);
+                            
+                            // Reassign numbers for remaining IGNs
+                            const renumberedPastIgns = newPastIgns.map((ign, idx, array) => ({
+                              ...ign,
+                              number: array.length - 1 - idx
+                            }));
+
                             setPlayerForm(prev => ({
                               ...prev,
-                              pastIgns: newPastIgns
+                              pastIgns: renumberedPastIgns
                             }));
                           }}
                         >
@@ -696,16 +742,29 @@ export default function PlayerManagement() {
                     );
                   })}
                   <button
-                    type="button"
-                    className={playerStyles.addIgnButton}
-                    onClick={() => {
-                      setPlayerForm(prev => ({
-                        ...prev,
-                        pastIgns: [...(prev.pastIgns || []), { name: '', hidden: false }]
-                      }));
-                    }}
+                      type="button"
+                      className={playerStyles.addIgnButton}
+                      onClick={() => {
+                          setPlayerForm(prev => {
+                              const currentPastIgns = [...(prev.pastIgns || [])];
+                              // Add new IGN with proper number
+                              const newIgn = {
+                                  name: '',
+                                  hidden: false,
+                                  number: currentPastIgns.length // New IGN gets highest number
+                              };
+                              const updatedPastIgns = [...currentPastIgns, newIgn].map((ign, index, array) => ({
+                                  ...ign,
+                                  number: array.length - 1 - index // Reassign all numbers
+                              }));
+                              return {
+                                  ...prev,
+                                  pastIgns: updatedPastIgns
+                              };
+                          });
+                      }}
                   >
-                    Add Past IGN
+                      Add Past IGN
                   </button>
                 </div>
               </div>

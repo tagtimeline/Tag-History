@@ -270,11 +270,16 @@ export async function updatePlayerData(
             typeof ign === 'string' ? { name: ign, hidden: false } : ign
         );
         
-        const mergedPastIgns = newPastIgns.map(newIgn => {
-            const existing = existingPastIgns.find((existing: PastIgn) => 
+        // Start with all existing past IGNs
+        const mergedPastIgns = [...existingPastIgns];
+
+        // Add any new IGNs from Crafty that aren't already in the list
+        newPastIgns.forEach(newIgn => {
+            if (!mergedPastIgns.some(existing => 
                 existing.name.toLowerCase() === newIgn.name.toLowerCase()
-            );
-            return existing || newIgn;
+            )) {
+                mergedPastIgns.push(newIgn);
+            }
         });
 
         await setDoc(playerRef, {

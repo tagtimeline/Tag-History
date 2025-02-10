@@ -4,6 +4,7 @@ import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
 import { fetchCategories, type Category } from '@/config/categories';
 import { TimelineEvent, Table } from '@/data/events';
 import TableManager from './TableManager';
+import PlayerSelector from './PlayerSelector';
 import MarkdownGuidePopup from './MarkdownGuidePopup';
 import {
   saveDraft,
@@ -22,6 +23,18 @@ interface SideEvent {
   id: string;
   title: string;
   description: string;
+}
+
+interface Player {
+  id: string;
+  currentIgn: string;
+  uuid: string;
+}
+
+interface CellPosition {
+  tableIndex: number;
+  rowIndex: number;
+  columnIndex: number;
 }
 
 export interface EventFormData {
@@ -73,6 +86,34 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [hasDraftState, setHasDraftState] = useState(false);
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  const [showPlayerSelector, setShowPlayerSelector] = useState(false);
+  const [currentField, setCurrentField] = useState<string>('');
+  const [currentCellPosition, setCurrentCellPosition] = useState<CellPosition | null>(null);
+
+
+  const insertPlayerTag = (
+    fieldName: 'description' | 'sideEvents' | 'tables', 
+    index?: number,
+    rowIndex?: number,
+    columnIndex?: number
+  ) => {
+    if (fieldName === 'tables' && typeof index === 'number' && 
+        typeof rowIndex === 'number' && typeof columnIndex === 'number') {
+      setCurrentCellPosition({ 
+        tableIndex: index, 
+        rowIndex, 
+        columnIndex 
+      });
+    } else {
+      setCurrentCellPosition(null);
+      const fieldId = fieldName === 'description' ? 'description' :
+                     fieldName === 'sideEvents' ? `sideEvent-${index}` :
+                     `table-${index}`;
+      setCurrentField(fieldId);
+    }
+    setShowPlayerSelector(true);
+  };
 
   // Load categories when component mounts
   useEffect(() => {
@@ -246,6 +287,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
   
 
+  // In the EventForm component return statement:
+
   return (
     <form onSubmit={handleSubmit} className={formStyles.form}>
       {hasDraftState && (
@@ -284,19 +327,21 @@ export const EventForm: React.FC<EventFormProps> = ({
           </span>
         </div>
       )}
+
       {showSuccessMessage && (
         <div className={baseStyles.successMessage}>
           <span className={baseStyles.successText}>Event updated successfully!</span>
         </div>
       )}
+
       {errorMessage && (
         <div className={baseStyles.errorMessage}>
           <span className={baseStyles.errorText}>{errorMessage}</span>
         </div>
       )}
-  
+
       <div className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}>
-      <div className={formStyles.inputContainer}>
+        <div className={formStyles.inputContainer}>
           <label htmlFor="title">Event Title</label>
           <input
             id="title"
@@ -316,7 +361,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           Special Event
         </div>
       </div>
-  
+
       <div className={`${formStyles.dateGroup} ${formStyles.fullWidth}`}>
         <div className={formStyles.formSection}>
           <label htmlFor="startDate">Start Date</label>
@@ -340,7 +385,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           />
         </div>
       </div>
-  
+
       <div className={formStyles.formSection}>
         <label htmlFor="category">Category</label>
         <select
@@ -361,18 +406,27 @@ export const EventForm: React.FC<EventFormProps> = ({
           ))}
         </select>
       </div>
-  
+
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
-        <label htmlFor="description">
-          Description
-          <button 
+        <div className={formStyles.labelWithButton}>
+          <label htmlFor="description">
+            Description
+            <button 
+              type="button"
+              onClick={() => setShowMarkdownGuide(true)}
+              className={buttonStyles.markdownInfoButton}
+            >
+              (Markdown Info)
+            </button>
+          </label>
+          <button
             type="button"
-            onClick={() => setShowMarkdownGuide(true)}
-            className={buttonStyles.markdownInfoButton}
+            onClick={() => insertPlayerTag('description')}
+            className={buttonStyles.addPlayerButton}
           >
-            (Markdown Info)
+            Add Player
           </button>
-        </label>
+        </div>
         <textarea
           id="description"
           className={formStyles.textarea}
@@ -391,7 +445,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           <MarkdownGuidePopup onClose={() => setShowMarkdownGuide(false)} />
         )}
       </div>
-  
+
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="tags">Tags (comma-separated)</label>
         <input
@@ -404,7 +458,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           required
         />
       </div>
-  
+
       <div className={formStyles.sideEvents}>
         <div className={formStyles.sideEventsHeader}>
           Side Events
@@ -422,11 +476,18 @@ export const EventForm: React.FC<EventFormProps> = ({
             Add Side Event
           </button>
         </div>
-  
+
         {formData.sideEvents.map((sideEvent, index) => (
           <div key={sideEvent.id} className={formStyles.sideEventGroup}>
-            <div className={formStyles.sideEventHeader}>
+            <div className={formStyles.labelWithButton}>
               <div>Side {index}</div>
+              <button
+                type="button"
+                onClick={() => insertPlayerTag('sideEvents', index)}
+                className={buttonStyles.addPlayerButton}
+              >
+                Add Player
+              </button>
             </div>
             <input
               type="text"
@@ -436,6 +497,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               onChange={(e) => handleSideEventChange(index, 'title', e.target.value)}
             />
             <textarea
+              id={`sideEvent-${index}`}
               className={formStyles.textarea}
               placeholder="Side Event Description"
               value={sideEvent.description}
@@ -464,11 +526,18 @@ export const EventForm: React.FC<EventFormProps> = ({
           </div>
         ))}
       </div>
-  
+
       <TableManager 
         tables={formData.tables}
         currentDescription={formData.description}
         onChange={handleTablesChange}
+        onAddPlayer={(tableIndex) => {
+          // Find the last edited cell in the table and use those coordinates
+          const table = formData.tables[tableIndex];
+          const lastRowIndex = table.rows.length - 1;
+          const lastColumnIndex = table.rows[lastRowIndex].cells.length - 1;
+          insertPlayerTag('tables', tableIndex, lastRowIndex, lastColumnIndex);
+        }}
       />
 
       <hr className={formStyles.divider} />
@@ -503,7 +572,69 @@ export const EventForm: React.FC<EventFormProps> = ({
           </button>
         )}
       </div>
+
+      {/* Player Selector Modal */}
+      {showPlayerSelector && (
+      <PlayerSelector
+        onSelect={(player) => {
+          const playerTag = `<${player.currentIgn}:${player.id}>`;  // Updated format
+          
+          if (currentCellPosition) {
+            // Handle table cell updates
+            const { tableIndex, rowIndex, columnIndex } = currentCellPosition;
+            const newTables = [...formData.tables];
+            const textArea = document.getElementById(
+              `table-${tableIndex}-${rowIndex}-${columnIndex}`
+            ) as HTMLTextAreaElement;
+
+            const currentContent = newTables[tableIndex].rows[rowIndex].cells[columnIndex].content;
+            
+            const cursorPos = document.activeElement === textArea 
+              ? textArea.selectionStart 
+              : currentContent.length;
+
+            const before = currentContent.substring(0, cursorPos);
+            const after = currentContent.substring(cursorPos);
+            
+            newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = 
+              `${before}${playerTag}${after}`;
+            
+            handleTablesChange(newTables);
+            
+            setTimeout(() => {
+              if (textArea) {
+                textArea.focus();
+                const newCursorPos = cursorPos + playerTag.length;
+                textArea.setSelectionRange(newCursorPos, newCursorPos);
+              }
+            }, 0);
+          } else {
+            // Handle other text areas
+            const textArea = document.getElementById(currentField) as HTMLTextAreaElement;
+            if (textArea) {
+              const cursorPos = textArea.selectionStart;
+              const text = textArea.value;
+              const before = text.substring(0, cursorPos);
+              const after = text.substring(cursorPos);
+              const newText = `${before}${playerTag}${after}`;
+              
+              if (currentField === 'description') {
+                handleFormChange({ ...formData, description: newText });
+              } else if (currentField.startsWith('sideEvent-')) {
+                const index = parseInt(currentField.split('-')[1]);
+                handleSideEventChange(index, 'description', newText);
+              }
+            }
+          }
+          setShowPlayerSelector(false);
+          setCurrentCellPosition(null);
+        }}
+        onClose={() => {
+          setShowPlayerSelector(false);
+          setCurrentCellPosition(null);
+        }}
+      />
+    )}
     </form>
-    );
-  };
-  
+  );
+};

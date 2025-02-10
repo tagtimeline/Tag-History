@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/../lib/firebaseConfig';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
@@ -503,7 +503,27 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
 
     // Decode the IGN from the URL
     const decodedIgn = decodeURIComponent(ign);
-    const playerData = await getPlayerData(decodedIgn);
+
+    // Check if the input is a document ID by querying Firebase directly
+    const playersRef = collection(db, 'players');
+    const docRef = doc(playersRef, decodedIgn);
+    const docSnap = await getDoc(docRef);
+    
+    let playerData;
+    
+    if (docSnap.exists()) {
+      // If it's a valid document ID, get the current IGN and redirect
+      const docData = docSnap.data();
+      return {
+        redirect: {
+          destination: `/player/${encodeURIComponent(docData.currentIgn)}`,
+          permanent: false,
+        }
+      };
+    } else {
+      // If not a document ID, proceed with normal IGN lookup
+      playerData = await getPlayerData(decodedIgn);
+    }
     
     // Handle redirect for old IGNs
     if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedIgn.toLowerCase()) {

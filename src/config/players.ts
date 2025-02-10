@@ -84,11 +84,14 @@ export const getCurrentUsername = async (historicalIgn: string): Promise<string 
 
 // Function to extract player IGNs from text
 export function extractPlayerNames(text: string): string[] {
-  const regex = /<([^>]+)>/g;
+  const regex = /<([^:]+):([^>]+)>/gi;
   const matches = text.match(regex) || [];
-  const names = [...new Set(matches.map(match => match.slice(1, -1).trim()))];
-  console.log('Extracted names from text:', { text, names });
-  return names;
+  // Extract the document ID (second capture group) instead of UUIDs
+  const documentIds = [...new Set(matches.map(match => {
+    const [, , documentId] = match.match(/<([^:]+):([^>]+)>/) || [];
+    return documentId;
+  }))];
+  return documentIds.filter(id => id); // Filter out any undefined/null values
 }
 
 export function extractPlayersFromEvent(event: Partial<TimelineEvent> | Record<string, string | object | null>): string[] {
@@ -122,7 +125,8 @@ export function extractPlayersFromEvent(event: Partial<TimelineEvent> | Record<s
 
 // Function to format text with player names and links
 export const formatPlayerNames = (text: string): string => {
-  return text.replace(/<([^>]+)>/g, (match, ign) => {
-    return `<${ign}>`; // Keep the original IGN in text
-  });
+  return text.replace(/<([^:]+):([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})>/gi, 
+    (match, name, uuid) => {
+      return `<${name}:${uuid}>`; 
+    });
 };

@@ -25,6 +25,12 @@
 
 .tableButton {
     composes: input from './forms.module.css';
+    height: 32px;
+    width: max-content;
+    min-width: fit-content;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .alignDropdown {
@@ -109,3 +115,39 @@
     min-height: 60px;
     resize: vertical;
 }
+
+.cellControls {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    position: relative;
+  }
+  
+.cellControls textarea {
+    flex: 1;
+    min-height: 60px;
+    resize: vertical;
+    margin-bottom: 5px;
+}
+  
+.cellControls button {
+    align-self: flex-start;
+    white-space: nowrap;
+}
+  
+
+  .tableHeader {
+    display: flex;
+    margin: 0;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .tableControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+  }
+  

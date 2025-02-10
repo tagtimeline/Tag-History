@@ -10,6 +10,7 @@ interface TableManagerProps {
   tables: Table[];
   onChange: (tables: Table[], description?: string) => void;
   currentDescription: string;
+  onAddPlayer: (tableIndex: number, rowIndex?: number, columnIndex?: number) => void;
 }
 
 const insertTableMarker = (description: string, tableIndex: number) => {
@@ -17,7 +18,12 @@ const insertTableMarker = (description: string, tableIndex: number) => {
   return description + (description.endsWith('\n') ? '' : '\n') + marker + '\n';
 };
 
-export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, currentDescription }) => {
+export const TableManager: React.FC<TableManagerProps> = ({ 
+  tables, 
+  onChange, 
+  currentDescription,
+  onAddPlayer
+}) => {
   const addTable = () => {
     const newTables = [
       ...tables,
@@ -135,12 +141,19 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, cu
           Add Table
         </button>
       </div>
-
+  
       {tables.map((table, tableIndex) => (
         <div key={tableIndex} className={tableStyles.tableWrapper}>
           <div className={tableStyles.tableHeader}>
             <div>Table {tableIndex}</div>
             <div className={tableStyles.tableControls}>
+              <button 
+                type="button"
+                onClick={() => onAddPlayer(tableIndex)}
+                className={tableStyles.tableButton}
+              >
+                Add Player
+              </button>
               <button 
                 type="button"
                 onClick={() => addColumn(tableIndex)}
@@ -164,13 +177,13 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, cu
                   onChange(newTables);
                 }}
               >
-                <option value="left">Left Align</option>
-                <option value="center">Center Align</option>
-                <option value="right">Right Align</option>
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
               </select>
             </div>
           </div>
-
+  
           <div className={tableStyles.tableEditor}>
             <div className={tableStyles.tableGrid}>
               {table.headers.map((header, columnIndex) => (
@@ -210,7 +223,7 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, cu
                   </div>
                 </div>
               ))}
-
+  
               {table.rows.map((row, rowIndex) => (
                 <div key={rowIndex} className={tableStyles.tableRow}>
                   {row.cells.map((cell, columnIndex) => (
@@ -222,34 +235,39 @@ export const TableManager: React.FC<TableManagerProps> = ({ tables, onChange, cu
                         gridRow: `${rowIndex + 2} / span 1`,
                       }}
                     >
-                      <textarea
-                        className={formStyles.input}
-                        value={cell.content}
-                        onChange={(e) => {
-                          const newTables = [...tables];
-                          newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = e.target.value;
-                          onChange(newTables);
-                        }}
-                        placeholder="Cell content"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
-                            removeRow(tableIndex, rowIndex);
-                          }
-                        }}
-                        className={tableStyles.removeRowButton}
-                      >
-                        ×
-                      </button>
+                      <div className={tableStyles.cellControls}>
+                        <textarea
+                          id={`table-${tableIndex}-${rowIndex}-${columnIndex}`}
+                          className={formStyles.input}
+                          value={cell.content}
+                          onChange={(e) => {
+                            const newTables = [...tables];
+                            newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = e.target.value;
+                            onChange(newTables);
+                          }}
+                          placeholder="Cell content"
+                        />
+                      </div>
+                      {row.cells.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
+                              removeRow(tableIndex, rowIndex);
+                            }
+                          }}
+                          className={tableStyles.removeRowButton}
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
               ))}
             </div>
           </div>
-
+  
           <button
             type="button"
             onClick={() => confirmRemove(tableIndex)}

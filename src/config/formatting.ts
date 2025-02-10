@@ -15,6 +15,7 @@ export const patterns = {
   subtext: /^-#\s*(.*)/,
   headertext: /^#\s*(.*)/,
   eventLink: /\[event:([^\]]+)\]/g,
+  playerMention: /<([^:]+):([^>]+)>/g,
  };
  
  interface Link {

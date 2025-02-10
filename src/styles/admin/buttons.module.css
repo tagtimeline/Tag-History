@@ -8,7 +8,7 @@
   cursor: pointer;
   font-family: 'Minecraft', sans-serif;
   font-size: 14px;
-  height: 30px;
+  height: 32px;
   padding: 0 12px;
   transition: all 0.2s ease;
   width: fit-content;
@@ -20,6 +20,7 @@
 }
 
 .addButton,
+.addPlayerButton,
 .submitButton,
 .duplicateButton {
   composes: button;

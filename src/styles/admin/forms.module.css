@@ -152,3 +152,10 @@
     margin-bottom: 0px;
     width: 100%;
 }
+
+.labelWithButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}

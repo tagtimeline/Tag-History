@@ -133,172 +133,125 @@ export default function PlayerManagement() {
   };
 
   const handleSubmit = async (e: FormEvent) => {
-      e.preventDefault();
-      setError('');
-      setSuccess('');
-
-      try {
-          // Basic validation
-          if (!playerForm.uuid?.trim()) {
-              setError('Player UUID is required');
-              return;
-          }
-
-          // Check if player already exists
-          const existingPlayer = players.find(p => 
-              p.uuid === playerForm.uuid && !selectedPlayer
-          );
-
-          if (existingPlayer) {
-              setError('This player already exists in the database');
-              return;
-          }
-
-          // Clean up the form data - ensure proper filtering and numbering of past IGNs
-          const cleanPastIgns = (playerForm.pastIgns || [])
-              .filter(ign => {
-                  const name = typeof ign === 'string' ? ign : ign.name;
-                  return name && name.trim() !== '';
-              })
-              .map((ign, index, array) => {
-                  const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
-                  return {
-                      ...ignObj,
-                      number: array.length - 1 - index // Ensure proper sequential numbering
-                  };
-              });
-          
-          const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
-
-          // Fetch latest data from Crafty API to ensure we have current info
-          try {
-              const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
-              if (!craftyResponse.ok) {
-                  throw new Error('Failed to fetch player data');
-              }
-              
-              const craftyData = await craftyResponse.json();
-              if (!craftyData.success || !craftyData.data) {
-                  throw new Error('Failed to fetch player data');
-              }
-
-              // Extract current IGN from Crafty data
-                const currentIgn = craftyData.data.username;
-
-                // This is important - we want to keep ALL manual IGNs
-                const manualPastIgns = [...cleanPastIgns];
-
-                // Get IGNs from Crafty API
-                const craftyPastIgns = craftyData.data.usernames
-                    .map((nameObj: any) => nameObj.username)
-                    .filter((name: string) => 
-                        name.toLowerCase() !== currentIgn.toLowerCase()
-                    )
-                    .map((name: string) => ({ 
-                        name, 
-                        hidden: false,
-                        number: 0 // Temporary number
-                    }));
-
-                // Start with manual IGNs, add any Crafty IGNs that aren't in the manual list
-                const mergedPastIgns = [...manualPastIgns];
-                craftyPastIgns.forEach((craftyIgn: { name: string; hidden: boolean; number: number }) => {
-                    const existingIgn = mergedPastIgns.find(existing => 
-                        existing.name.toLowerCase() === craftyIgn.name.toLowerCase()
-                    );
-                    
-                    // If this IGN isn't in our list yet, add it
-                    if (!existingIgn) {
-                        mergedPastIgns.push({
-                            name: craftyIgn.name,
-                            hidden: false,
-                            number: mergedPastIgns.length
-                        });
-                    }
-                });
-
-              // Validate alt accounts
-              if (cleanAltAccounts.includes(currentIgn) || 
-                  cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
-                  setError('A player cannot be their own alt account');
-                  return;
-              }
-
-              // Check for duplicate alt accounts
-              const uniqueAlts = [...new Set(cleanAltAccounts)];
-              if (uniqueAlts.length !== cleanAltAccounts.length) {
-                  setError('Duplicate alt accounts are not allowed');
-                  return;
-              }
-
-              // Prepare the player data object
-              const playerData = {
-                  currentIgn: currentIgn,
-                  uuid: playerForm.uuid.trim(),
-                  pastIgns: mergedPastIgns
-                  .map((ign, index, array) => ({
-                    ...ign,
-                    number: array.length - 1 - index, // Explicitly assign number based on order
-                    hidden: ign.hidden ?? false
-                  }))
-                  .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)), // Ensure sorted by number
-                  role: playerForm.role || null,
-                  altAccounts: cleanAltAccounts,
-                  events: playerForm.events || [],
-                  lastUpdated: new Date(),
-                  mainAccount: playerForm.mainAccount || null
-              };
-
-              // If updating existing player
-              if (selectedPlayer?.id) {
-                  const playerRef = doc(db, 'players', selectedPlayer.id);
-                  // Use setDoc instead of updateDoc to ensure complete replacement
-                  await setDoc(playerRef, playerData);
-              } else {
-                  // Adding new player
-                  await addDoc(collection(db, 'players'), playerData);
-              }
-
-              // Process the player and their alt accounts
-              try {
-                  await updatePlayerData(
-                      currentIgn,
-                      playerForm.role || null,
-                      cleanAltAccounts
-                  );
-
-                  setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
-
-                  // Reset form and selection
-                  setPlayerForm(initialPlayerForm);
-                  setSelectedPlayer(null);
-              } catch (err) {
-                  if (err instanceof Error) {
-                      setError(`Failed to process alt accounts: ${err.message}`);
-                  } else {
-                      setError('Failed to process alt accounts');
-                  }
-                  return;
-              }
-
-          } catch (err) {
-              if (err instanceof Error) {
-                  setError(`Failed to fetch player data: ${err.message}`);
-              } else {
-                  setError('Failed to fetch player data');
-              }
-              return;
-          }
-
-      } catch (err) {
-          console.error('Error saving player:', err);
-          if (err instanceof Error) {
-              setError(`Failed to save player: ${err.message}`);
-          } else {
-              setError('Failed to save player. Please try again.');
-          }
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+   
+    try {
+      if (!playerForm.uuid?.trim()) {
+        setError('Player UUID is required');
+        return;
       }
-  };
+   
+      const existingPlayer = players.find(p => 
+        p.uuid === playerForm.uuid && !selectedPlayer
+      );
+   
+      if (existingPlayer) {
+        setError('This player already exists in the database');
+        return;
+      }
+   
+      const cleanPastIgns = (playerForm.pastIgns || [])
+        .filter(ign => {
+          const name = typeof ign === 'string' ? ign : ign.name;
+          return name && name.trim() !== '';
+        })
+        .map((ign, index, array) => {
+          const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
+          return {
+            ...ignObj,
+            number: array.length - 1 - index
+          };
+        });
+      
+      const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
+   
+      const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
+      if (!craftyResponse.ok) {
+        throw new Error('Failed to fetch player data');
+      }
+      
+      const craftyData = await craftyResponse.json();
+      if (!craftyData.success || !craftyData.data) {
+        throw new Error('Failed to fetch player data');
+      }
+   
+      const currentIgn = craftyData.data.username;
+   
+      const manualPastIgns = [...cleanPastIgns];
+      const craftyPastIgns = craftyData.data.usernames
+        .map((nameObj: any) => nameObj.username)
+        .filter((name: string) => 
+          name.toLowerCase() !== currentIgn.toLowerCase()
+        )
+        .map((name: string) => ({ 
+          name, 
+          hidden: false,
+          number: 0
+        }));
+   
+      const mergedPastIgns = [...manualPastIgns];
+      craftyPastIgns.forEach((craftyIgn: { name: string; hidden: boolean; number: number }) => {
+        if (!mergedPastIgns.some(existing => 
+          existing.name.toLowerCase() === craftyIgn.name.toLowerCase()
+        )) {
+          mergedPastIgns.push({
+            ...craftyIgn,
+            number: mergedPastIgns.length
+          });
+        }
+      });
+   
+      if (cleanAltAccounts.includes(currentIgn) || cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
+        setError('A player cannot be their own alt account');
+        return;
+      }
+   
+      const uniqueAlts = [...new Set(cleanAltAccounts)];
+      if (uniqueAlts.length !== cleanAltAccounts.length) {
+        setError('Duplicate alt accounts are not allowed');
+        return;
+      }
+   
+      const playerData = {
+        currentIgn: currentIgn,
+        uuid: playerForm.uuid.trim(),
+        pastIgns: mergedPastIgns
+          .map((ign, index, array) => ({
+            ...ign,
+            number: array.length - 1 - index,
+            hidden: ign.hidden ?? false
+          }))
+          .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)),
+        role: playerForm.role || null,
+        altAccounts: cleanAltAccounts,
+        events: playerForm.events || [],
+        lastUpdated: new Date(),
+        mainAccount: playerForm.mainAccount || null
+      };
+   
+      if (selectedPlayer?.id) {
+        const playerRef = doc(db, 'players', selectedPlayer.id);
+        await setDoc(playerRef, playerData);
+      } else {
+        const docRef = await addDoc(collection(db, 'players'), playerData);
+        await updatePlayerData(
+          currentIgn,
+          playerForm.role || null,
+          cleanAltAccounts
+        );
+      }
+   
+      setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+      setPlayerForm(initialPlayerForm);
+      setSelectedPlayer(null);
+   
+    } catch (err) {
+      console.error('Error saving player:', err);
+      setError(`Failed to save player: ${err instanceof Error ? err.message : 'Please try again.'}`);
+    }
+   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -526,9 +479,9 @@ export default function PlayerManagement() {
   
           {/* Player Form Section */}
           <div className={baseStyles.formSection}>
-            <div className={baseStyles.header}>
+          <div className={baseStyles.header}>
               <div className={baseStyles.title}>
-                {selectedPlayer ? 'Edit Player' : 'Add New Player'}
+                {selectedPlayer ? `Edit Player (ID: ${selectedPlayer.id})` : 'Add New Player'}
               </div>
             </div>
             <form onSubmit={handleSubmit} className={playerStyles.playerForm}>

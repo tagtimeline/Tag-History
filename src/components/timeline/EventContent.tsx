@@ -192,48 +192,51 @@ const renderTextWithLinks = (
   return parts;
   };
 
-const processPlayerMentions = (text: string, keyPrefix: string) => {
- const parts = [];
- const playerPattern = /<([^>]+)>/g;
- let lastIndex = 0;
- let match;
-
- while ((match = playerPattern.exec(text)) !== null) {
-   if (match.index > lastIndex) {
-     const beforeText = text.slice(lastIndex, match.index);
-     parts.push(
-       <span 
-         key={`text-${keyPrefix}-${lastIndex}`} 
-         dangerouslySetInnerHTML={{ __html: formatText(beforeText) }} 
-       />
-     );
-   }
-
-   parts.push(
-     <Link
-       key={`player-${keyPrefix}-${match.index}`}
-       href={`/player/${match[1]}`}
-       className={formatStyles.playerLink}
-     >
-       {match[1]}
-     </Link>
-   );
-
-   lastIndex = match.index + match[0].length;
- }
-
- if (lastIndex < text.length) {
-   const afterText = text.slice(lastIndex);
-   parts.push(
-     <span 
-       key={`text-${keyPrefix}-${lastIndex}`} 
-       dangerouslySetInnerHTML={{ __html: formatText(afterText) }} 
-     />
-   );
- }
-
- return parts;
-};
+  const processPlayerMentions = (text: string, keyPrefix: string) => {
+    const parts = [];
+    const playerPattern = /<([^:]+):([^>]+)>/g;
+    let lastIndex = 0;
+    let match;
+  
+    while ((match = playerPattern.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        const beforeText = text.slice(lastIndex, match.index);
+        parts.push(
+          <span 
+            key={`text-${keyPrefix}-${lastIndex}`} 
+            dangerouslySetInnerHTML={{ __html: formatText(beforeText) }} 
+          />
+        );
+      }
+  
+      // Extract just the name for display, use the documentId for the link
+      const [, playerName, documentId] = match;
+      
+      parts.push(
+        <Link
+          key={`player-${keyPrefix}-${match.index}`}
+          href={`/player/${documentId}`}
+          className={formatStyles.playerLink}
+        >
+          {playerName}
+        </Link>
+      );
+  
+      lastIndex = match.index + match[0].length;
+    }
+  
+    if (lastIndex < text.length) {
+      const afterText = text.slice(lastIndex);
+      parts.push(
+        <span 
+          key={`text-${keyPrefix}-${lastIndex}`} 
+          dangerouslySetInnerHTML={{ __html: formatText(afterText) }} 
+        />
+      );
+    }
+  
+    return parts;
+  };
 
 const parseLine = (line: string, index: number, getEventTitle?: (id: string) => string | undefined) => {
   if (isHeadertext(line)) {

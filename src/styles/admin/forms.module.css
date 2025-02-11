@@ -134,12 +134,25 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.sideSubEventHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #242424;
+    border: 1px solid #333;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 4px;
+}
   
 .sideEventGroup {
     background-color: #1a1a1a;
     border: 1px solid #444;
     border-radius: 4px;
-    padding: 10px;
+    padding: 5px;
     display: flex;
     flex-direction: column;
     gap: 5px;

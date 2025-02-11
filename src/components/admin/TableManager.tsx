@@ -1,6 +1,7 @@
-// components/admin/TableManager.tsx
-import React from 'react';
+// Modified TableManager.tsx
+import React, { useState } from 'react';
 import { Table } from '@/data/events';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import tableStyles from '@/styles/admin/tables.module.css';
 import formStyles from '@/styles/admin/forms.module.css';
@@ -11,19 +12,38 @@ interface TableManagerProps {
   onChange: (tables: Table[], description?: string) => void;
   currentDescription: string;
   onAddPlayer: (tableIndex: number, rowIndex?: number, columnIndex?: number) => void;
+  // New props for side event support
+  isSideEvent?: boolean;
+  sideEventIndex?: number;
+  sideEventDescription?: string;
+  onSideEventChange?: (index: number, description: string) => void;
 }
 
-const insertTableMarker = (description: string, tableIndex: number) => {
-  const marker = `[TABLE-${tableIndex}]`;
+const insertTableMarker = (description: string, tableIndex: number, isSideEvent: boolean, sideEventIndex?: number) => {
+  const marker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${tableIndex}]`;
   return description + (description.endsWith('\n') ? '' : '\n') + marker + '\n';
 };
+
 
 export const TableManager: React.FC<TableManagerProps> = ({ 
   tables, 
   onChange, 
   currentDescription,
-  onAddPlayer
+  onAddPlayer,
+  isSideEvent = false,
+  sideEventIndex,
+  sideEventDescription,
+  onSideEventChange
 }) => {
+  const [collapsedTables, setCollapsedTables] = useState<Record<number, boolean>>({});
+
+  const toggleTable = (index: number) => {
+    setCollapsedTables(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
   const addTable = () => {
     const newTables = [
       ...tables,
@@ -35,31 +55,51 @@ export const TableManager: React.FC<TableManagerProps> = ({
       }
     ];
 
-    // Add table marker to description
-    const updatedDescription = insertTableMarker(currentDescription, tables.length);
-    
-    onChange(newTables, updatedDescription);
+    // Add table marker to the appropriate description
+    const description = isSideEvent ? sideEventDescription : currentDescription;
+    if (description !== undefined) {
+      const updatedDescription = insertTableMarker(
+        description, 
+        tables.length, 
+        isSideEvent, 
+        sideEventIndex
+      );
+      
+      if (isSideEvent && onSideEventChange && typeof sideEventIndex === 'number') {
+        onSideEventChange(sideEventIndex, updatedDescription);
+      } else {
+        onChange(newTables, updatedDescription);
+      }
+    } else {
+      onChange(newTables);
+    }
   };
 
   const confirmRemove = (tableIndex: number) => {
-    if (typeof window !== 'undefined') {
-      if (window.confirm('Are you sure you want to remove this table? This cannot be undone.')) {
-        const newTables = [...tables];
-        newTables.splice(tableIndex, 1);
-        
-        // Update description by removing the table marker and updating remaining ones
-        let updatedDescription = currentDescription;
-        const oldMarker = `[TABLE-${tableIndex}]`;
-        updatedDescription = updatedDescription.replace(oldMarker + '\n', '');
+    if (window.confirm('Are you sure you want to remove this table? This cannot be undone.')) {
+      const newTables = [...tables];
+      newTables.splice(tableIndex, 1);
+      
+      // Update description by removing the table marker and updating remaining ones
+      let description = isSideEvent ? sideEventDescription : currentDescription;
+      if (description) {
+        const oldMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${tableIndex}]`;
+        description = description.replace(oldMarker + '\n', '');
         
         // Update remaining table markers
         for (let i = tableIndex + 1; i < tables.length; i++) {
-          const oldTableMarker = `[TABLE-${i}]`;
-          const newTableMarker = `[TABLE-${i - 1}]`;
-          updatedDescription = updatedDescription.replace(oldTableMarker, newTableMarker);
+          const oldTableMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${i}]`;
+          const newTableMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${i - 1}]`;
+          description = description.replace(oldTableMarker, newTableMarker);
         }
         
-        onChange(newTables, updatedDescription);
+        if (isSideEvent && onSideEventChange && typeof sideEventIndex === 'number') {
+          onSideEventChange(sideEventIndex, description);
+        } else {
+          onChange(newTables, description);
+        }
+      } else {
+        onChange(newTables);
       }
     }
   };
@@ -144,16 +184,15 @@ export const TableManager: React.FC<TableManagerProps> = ({
   
       {tables.map((table, tableIndex) => (
         <div key={tableIndex} className={tableStyles.tableWrapper}>
-          <div className={tableStyles.tableHeader}>
-            <div>Table {tableIndex}</div>
+          <div className={tableStyles.tableSubHeader}>
+            <div 
+              className={tableStyles.tableIdentifier}
+              onClick={() => toggleTable(tableIndex)}
+              style={{ cursor: 'pointer' }}
+            >
+              Table {tableIndex}
+            </div>
             <div className={tableStyles.tableControls}>
-              <button 
-                type="button"
-                onClick={() => onAddPlayer(tableIndex)}
-                className={tableStyles.tableButton}
-              >
-                Add Player
-              </button>
               <button 
                 type="button"
                 onClick={() => addColumn(tableIndex)}
@@ -181,100 +220,110 @@ export const TableManager: React.FC<TableManagerProps> = ({
                 <option value="center">Center</option>
                 <option value="right">Right</option>
               </select>
+              <button 
+                type="button"
+                onClick={() => onAddPlayer(tableIndex)}
+                className={tableStyles.tableButton}
+              >
+                Add Player
+              </button>
             </div>
           </div>
-  
-          <div className={tableStyles.tableEditor}>
-            <div className={tableStyles.tableGrid}>
-              {table.headers.map((header, columnIndex) => (
-                <div key={columnIndex} className={tableStyles.headerCell}>
-                  <input
-                    type="text"
-                    className={formStyles.input}
-                    value={header}
-                    onChange={(e) => {
-                      const newTables = [...tables];
-                      newTables[tableIndex].headers[columnIndex] = e.target.value;
-                      onChange(newTables);
-                    }}
-                    placeholder="Header"
-                  />
-                  <div className={tableStyles.widthInput}>
-                    Width <input
-                      type="text"
-                      className={formStyles.input}
-                      value={table.columnWidths?.[columnIndex]?.replace(/%$/, '') || ''}
-                      onChange={(e) => updateColumnWidth(tableIndex, columnIndex, e.target.value)}
-                      placeholder="Width"
-                    /> %
-                    {table.headers.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
-                            removeColumn(tableIndex, columnIndex);
-                          }
+
+          {!collapsedTables[tableIndex] && (
+            <>
+              <div className={tableStyles.tableEditor}>
+                <div className={tableStyles.tableGrid}>
+                  {table.headers.map((header, columnIndex) => (
+                    <div key={columnIndex} className={tableStyles.headerCell}>
+                      <input
+                        type="text"
+                        className={formStyles.input}
+                        value={header}
+                        onChange={(e) => {
+                          const newTables = [...tables];
+                          newTables[tableIndex].headers[columnIndex] = e.target.value;
+                          onChange(newTables);
                         }}
-                        className={tableStyles.removeColumnButton}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-  
-              {table.rows.map((row, rowIndex) => (
-                <div key={rowIndex} className={tableStyles.tableRow}>
-                  {row.cells.map((cell, columnIndex) => (
-                    <div
-                      key={columnIndex}
-                      className={tableStyles.tableCell}
-                      style={{
-                        gridColumn: `${columnIndex + 1} / span 1`,
-                        gridRow: `${rowIndex + 2} / span 1`,
-                      }}
-                    >
-                      <div className={tableStyles.cellControls}>
-                        <textarea
-                          id={`table-${tableIndex}-${rowIndex}-${columnIndex}`}
+                        placeholder="Header"
+                      />
+                      <div className={tableStyles.widthInput}>
+                        Width <input
+                          type="text"
                           className={formStyles.input}
-                          value={cell.content}
-                          onChange={(e) => {
-                            const newTables = [...tables];
-                            newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = e.target.value;
-                            onChange(newTables);
-                          }}
-                          placeholder="Cell content"
-                        />
+                          value={table.columnWidths?.[columnIndex]?.replace(/%$/, '') || ''}
+                          onChange={(e) => updateColumnWidth(tableIndex, columnIndex, e.target.value)}
+                          placeholder="Width"
+                        /> %
+                        {table.headers.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
+                                removeColumn(tableIndex, columnIndex);
+                              }
+                            }}
+                            className={tableStyles.removeColumnButton}
+                          >
+                            ×
+                          </button>
+                        )}
                       </div>
-                      {row.cells.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
-                              removeRow(tableIndex, rowIndex);
-                            }
-                          }}
-                          className={tableStyles.removeRowButton}
-                        >
-                          ×
-                        </button>
-                      )}
                     </div>
                   ))}
-                </div>
-              ))}
-            </div>
-          </div>
   
-          <button
-            type="button"
-            onClick={() => confirmRemove(tableIndex)}
-            className={buttonStyles.removeButton}
-          >
-            Remove Table
-          </button>
+                  {table.rows.map((row, rowIndex) => (
+                    <div key={rowIndex} className={tableStyles.tableRow}>
+                      {row.cells.map((cell, columnIndex) => (
+                        <div
+                          key={columnIndex}
+                          className={tableStyles.tableCell}
+                          style={{
+                            gridColumn: `${columnIndex + 1} / span 1`,
+                            gridRow: `${rowIndex + 2} / span 1`,
+                          }}
+                        >
+                          <div className={tableStyles.cellControls}>
+                            <textarea
+                              id={`table-${tableIndex}-${rowIndex}-${columnIndex}`}
+                              className={formStyles.input}
+                              value={cell.content}
+                              onChange={(e) => {
+                                const newTables = [...tables];
+                                newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = e.target.value;
+                                onChange(newTables);
+                              }}
+                              placeholder="Cell content"
+                            />
+                          </div>
+                          {row.cells.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
+                                  removeRow(tableIndex, rowIndex);
+                                }
+                              }}
+                              className={tableStyles.removeRowButton}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+            </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => confirmRemove(tableIndex)}
+                className={buttonStyles.removeButton}
+              >
+                Remove Table
+              </button>
+            </>
+          )}
         </div>
       ))}
     </div>

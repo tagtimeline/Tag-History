@@ -20,13 +20,14 @@ export interface SideEvent {
   id: string;
   title: string;
   description: string;
+  tables?: Table[];
 }
 
 export interface Player {
   uuid: string;
   currentIgn: string;
   pastIgns: string[];
-  events: string[];  // Array of event IDs
+  events: string[]; 
   lastUpdated: Date;
 }
 

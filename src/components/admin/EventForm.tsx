@@ -18,11 +18,13 @@ import {
 import baseStyles from '@/styles/admin/base.module.css';
 import buttonStyles from '@/styles/admin/buttons.module.css';
 import formStyles from '@/styles/admin/forms.module.css';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface SideEvent {
   id: string;
   title: string;
   description: string;
+  tables?: Table[];
 }
 
 interface Player {
@@ -91,6 +93,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [currentField, setCurrentField] = useState<string>('');
   const [currentCellPosition, setCurrentCellPosition] = useState<CellPosition | null>(null);
 
+  const [collapsedSideEvents, setCollapsedSideEvents] = useState<Record<string, boolean>>({});
+
 
   const insertPlayerTag = (
     fieldName: 'description' | 'sideEvents' | 'tables', 
@@ -113,6 +117,13 @@ export const EventForm: React.FC<EventFormProps> = ({
       setCurrentField(fieldId);
     }
     setShowPlayerSelector(true);
+  };
+
+  const toggleSideEvent = (id: string) => {
+    setCollapsedSideEvents(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   // Load categories when component mounts
@@ -189,9 +200,20 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
     const newSideEvents = [...formData.sideEvents];
     if (!newSideEvents[index]) {
-      newSideEvents[index] = { id: `side${Date.now()}`, title: '', description: '' };
+      newSideEvents[index] = { 
+        id: `side${Date.now()}`, 
+        title: '', 
+        description: '', 
+        tables: [] 
+      };
     }
-    newSideEvents[index] = { ...newSideEvents[index], [field]: value };
+    // Preserve existing tables when updating other fields
+    const existingTables = newSideEvents[index].tables || [];
+    newSideEvents[index] = { 
+      ...newSideEvents[index], 
+      [field]: value,
+      tables: existingTables 
+    };
     handleFormChange({ ...formData, sideEvents: newSideEvents });
   };
 
@@ -262,7 +284,8 @@ export const EventForm: React.FC<EventFormProps> = ({
           .map(event => ({
             id: event.id,
             title: event.title.trim(),
-            description: event.description.trim()
+            description: event.description.trim(),
+            tables: event.tables || []
           })),
         tables: formData.tables
       };
@@ -340,6 +363,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         </div>
       )}
 
+      {/* Title */}
       <div className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}>
         <div className={formStyles.inputContainer}>
           <label htmlFor="title">Event Title</label>
@@ -362,6 +386,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         </div>
       </div>
 
+      {/* Date */}
       <div className={`${formStyles.dateGroup} ${formStyles.fullWidth}`}>
         <div className={formStyles.formSection}>
           <label htmlFor="startDate">Start Date</label>
@@ -386,6 +411,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         </div>
       </div>
 
+      {/* Category */}
       <div className={formStyles.formSection}>
         <label htmlFor="category">Category</label>
         <select
@@ -407,6 +433,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         </select>
       </div>
 
+      {/* Description */}
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <div className={formStyles.labelWithButton}>
           <label htmlFor="description">
@@ -446,6 +473,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         )}
       </div>
 
+      {/* Tags */}
       <div className={`${formStyles.formSection} ${formStyles.fullWidth}`}>
         <label htmlFor="tags">Tags (comma-separated)</label>
         <input
@@ -459,16 +487,18 @@ export const EventForm: React.FC<EventFormProps> = ({
         />
       </div>
 
+
+      {/* Side Events */}
       <div className={formStyles.sideEvents}>
         <div className={formStyles.sideEventsHeader}>
-          Side Events
+            Side Events
           <button 
             type="button"
             onClick={() => onChange({
               ...formData,
               sideEvents: [
                 ...formData.sideEvents,
-                { id: `side${Date.now()}`, title: '', description: '' }
+                { id: `side${Date.now()}`, title: '', description: '', tables: [] }
               ]
             })}
             className={buttonStyles.addButton}
@@ -479,54 +509,71 @@ export const EventForm: React.FC<EventFormProps> = ({
 
         {formData.sideEvents.map((sideEvent, index) => (
           <div key={sideEvent.id} className={formStyles.sideEventGroup}>
-            <div className={formStyles.labelWithButton}>
-              <div>Side {index}</div>
+            <div className={formStyles.sideSubEventHeader}>
+            <div 
+              onClick={() => toggleSideEvent(sideEvent.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              Side {index}
+            </div>
               <button
                 type="button"
-                onClick={() => insertPlayerTag('sideEvents', index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  insertPlayerTag('sideEvents', index);
+                }}
                 className={buttonStyles.addPlayerButton}
               >
                 Add Player
               </button>
             </div>
-            <input
-              type="text"
-              className={formStyles.input}
-              placeholder="Side Event Title"
-              value={sideEvent.title}
-              onChange={(e) => handleSideEventChange(index, 'title', e.target.value)}
-            />
-            <textarea
-              id={`sideEvent-${index}`}
-              className={formStyles.textarea}
-              placeholder="Side Event Description"
-              value={sideEvent.description}
-              onChange={(e) => {
-                handleSideEventChange(index, 'description', e.target.value);
-                autoResizeTextArea(e.target);
-              }}
-              onInput={(e) => autoResizeTextArea(e.target as HTMLTextAreaElement)}
-              ref={(ref) => {
-                if (ref) autoResizeTextArea(ref);
-              }}
-            />
-            <button 
-              type="button"
-              onClick={() => {
-                if (window.confirm('Are you sure you want to remove this side event?')) {
-                  const newSideEvents = [...formData.sideEvents];
-                  newSideEvents.splice(index, 1);
-                  onChange({ ...formData, sideEvents: newSideEvents });
-                }
-              }}
-              className={buttonStyles.removeButton}
-            >
-              Remove Side Event
-            </button>
+
+            {!collapsedSideEvents[sideEvent.id] && (
+              <>
+                <input
+                  type="text"
+                  className={formStyles.input}
+                  placeholder="Side Event Title"
+                  value={sideEvent.title}
+                  onChange={(e) => handleSideEventChange(index, 'title', e.target.value)}
+                />
+                <textarea
+                  id={`sideEvent-${index}`}
+                  className={formStyles.textarea}
+                  placeholder="Side Event Description"
+                  value={sideEvent.description}
+                  onChange={(e) => {
+                    handleSideEventChange(index, 'description', e.target.value);
+                    autoResizeTextArea(e.target);
+                  }}
+                  onInput={(e) => autoResizeTextArea(e.target as HTMLTextAreaElement)}
+                  ref={(ref) => {
+                    if (ref) autoResizeTextArea(ref);
+                  }}
+                />
+              </>
+            )}
+
+            {!collapsedSideEvents[sideEvent.id] && (
+              <button 
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to remove this side event?')) {
+                    const newSideEvents = [...formData.sideEvents];
+                    newSideEvents.splice(index, 1);
+                    onChange({ ...formData, sideEvents: newSideEvents });
+                  }
+                }}
+                className={buttonStyles.removeButton}
+              >
+                Remove Side Event
+              </button>
+            )}
           </div>
         ))}
       </div>
 
+      {/* Tables */}
       <TableManager 
         tables={formData.tables}
         currentDescription={formData.description}
@@ -540,6 +587,8 @@ export const EventForm: React.FC<EventFormProps> = ({
         }}
       />
 
+
+      {/* Divider and Buttons */}
       <hr className={formStyles.divider} />
       <div className={`${buttonStyles.buttonGroup} ${buttonStyles.alignRight}`}>
         <button type="submit" className={buttonStyles.submitButton}>

@@ -69,14 +69,25 @@ const PlayerSearch: React.FC = () => {
     
     if (value.trim()) {
       const lowercaseValue = value.toLowerCase();
-      const filtered = players.filter(player => 
-        player?.currentIgn?.toLowerCase().startsWith(lowercaseValue)
+      // First try to find exact document ID match
+      const documentMatch = players.find(player => 
+        player.id.toLowerCase() === lowercaseValue
       );
-      setSearchResults(filtered);
+  
+      if (documentMatch) {
+        setSearchResults([documentMatch]);
+      } else {
+        // Fall back to filtering by IGN only if no document ID match
+        const filtered = players.filter(player => 
+          player?.currentIgn?.toLowerCase().startsWith(lowercaseValue)
+        );
+        setSearchResults(filtered);
+      }
     } else {
       setSearchResults(players);
     }
   };
+  
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
@@ -87,12 +98,14 @@ const PlayerSearch: React.FC = () => {
     }
   };
 
-  const handleResultClick = (playerIgn: string) => {
-    router.push(`/player/${playerIgn}`);
+  const handleResultClick = (player: Player) => {
+    // Use document ID instead of IGN for navigation
+    router.push(`/player/${player.id}`);
     setSearchTerm('');
     setSearchResults([]);
     setIsFocused(false);
   };
+
 
   return (
     <div className={searchStyles.searchContainer}>
@@ -122,7 +135,7 @@ const PlayerSearch: React.FC = () => {
               <div 
                 key={player.id} 
                 className={searchStyles.playerResultItem}
-                onClick={() => handleResultClick(player.currentIgn)}
+                onClick={() => handleResultClick(player)}
               >
                 <div className={searchStyles.avatarWrapper}>
                   <Image

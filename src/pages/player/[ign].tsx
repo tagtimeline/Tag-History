@@ -502,31 +502,27 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
     }
 
     // Decode the IGN from the URL
-    const decodedIgn = decodeURIComponent(ign);
+    const decodedId = decodeURIComponent(ign);
 
-    // Check if the input is a document ID by querying Firebase directly
-    const playersRef = collection(db, 'players');
-    const docRef = doc(playersRef, decodedIgn);
+    // Always try to get the document by ID first
+    const docRef = doc(db, 'players', decodedId);
     const docSnap = await getDoc(docRef);
     
-    let playerData;
-    
     if (docSnap.exists()) {
-      // If it's a valid document ID, get the current IGN and redirect
       const docData = docSnap.data();
+      // Redirect to the current IGN URL
       return {
         redirect: {
           destination: `/player/${encodeURIComponent(docData.currentIgn)}`,
           permanent: false,
         }
       };
-    } else {
-      // If not a document ID, proceed with normal IGN lookup
-      playerData = await getPlayerData(decodedIgn);
     }
+
+    // If not found by document ID, proceed with normal IGN lookup
+    const playerData = await getPlayerData(decodedId);
     
-    // Handle redirect for old IGNs
-    if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedIgn.toLowerCase()) {
+    if (playerData.currentIgn && playerData.currentIgn.toLowerCase() !== decodedId.toLowerCase()) {
       return {
         redirect: {
           destination: `/player/${encodeURIComponent(playerData.currentIgn)}`,
@@ -535,15 +531,12 @@ export const getServerSideProps: GetServerSideProps<PlayerPageProps> = async ({ 
       };
     }
 
-    // Ensure initialEvents is fully serializable
-    const serializedInitialEvents = JSON.parse(JSON.stringify(playerData.initialEvents));
-    
     return { 
       props: {
-        historicalIgn: decodedIgn,
+        historicalIgn: decodedId,
         currentIgn: playerData.currentIgn,
         playerData: playerData.playerData,
-        initialEvents: serializedInitialEvents
+        initialEvents: JSON.parse(JSON.stringify(playerData.initialEvents))
       }
     };
 

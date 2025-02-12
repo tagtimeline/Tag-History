@@ -4,10 +4,10 @@
     flex-direction: column;
     gap: 10px;
     max-width: 800px;
-    margin: 20px auto;
+    margin: 20px auto 50px;
   }
   
-  .eventItem {
+.eventItem {
     background-color: #333;
     border-radius: 4px;
     cursor: pointer;
@@ -15,28 +15,28 @@
     transition: all 0.2s ease;
     width: 500px !important;
     margin: 0 auto;
-  }
+}
   
-  .eventItem:hover {
+.eventItem:hover {
     background-color: #444;
     transform: scale(1.02);
-  }
+}
   
-  .eventsHeader {
+.eventsHeader {
     width: 100%;
     margin-bottom: 15px;
-  }
+}
   
-  .eventsControls {
+.eventsControls {
     width: 100%;
     display: flex;
     gap: 5px;
     align-items: center;
     margin-bottom: 20px;
     border-radius: 4px;
-  }
+}
   
-  .searchInput {
+.searchInput {
     background-color: #333;
     border: 2px solid #555;
     border-radius: 4px;
@@ -46,15 +46,15 @@
     height: 32px;
     padding: 0 8px;
     width: 200px;
-  }
+}
   
-  .categoryDropdown {
+.categoryDropdown {
     composes: searchInput;
-  }
+}
   
-  .sortButtonContainer {
+.sortButtonContainer {
     flex: 1;
-  }
+}
   
 .sortButton {
     width: 100%;

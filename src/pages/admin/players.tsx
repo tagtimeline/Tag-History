@@ -1,32 +1,40 @@
 // pages/admin/player.tsx
-import { useState, useEffect, FormEvent, useRef } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, updateDoc, onSnapshot, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/../lib/firebaseConfig';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import Image from 'next/image';
+import { useState, useEffect, FormEvent, useRef } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  collection,
+  doc,
+  updateDoc,
+  onSnapshot,
+  deleteDoc,
+  addDoc,
+  setDoc,
+} from "firebase/firestore";
+import { db } from "@/../lib/firebaseConfig";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import Image from "next/image";
 
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { handleAdminLogout } from '@/components/admin/AuthHandler';
-import MassUpdatePlayers from '@/components/admin/MassUpdatePlayers';
-import { updatePlayerData } from '@/../lib/playerUtils';
-import { ROLE_ORDER, sortRolesByPriority } from '@/config/players';
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { handleAdminLogout } from "@/components/admin/AuthHandler";
+import MassUpdatePlayers from "@/components/admin/MassUpdatePlayers";
+import { updatePlayerData } from "@/../lib/playerUtils";
+import { ROLE_ORDER, sortRolesByPriority } from "@/config/players";
 
-import baseStyles from '@/styles/admin/base.module.css';
-import playerStyles from '@/styles/admin/players.module.css';
-import controlStyles from '@/styles/controls.module.css';
-import formStyles from '@/styles/admin/forms.module.css';
-import buttonStyles from '@/styles/admin/buttons.module.css';
+import baseStyles from "@/styles/admin/base.module.css";
+import playerStyles from "@/styles/admin/players.module.css";
+import controlStyles from "@/styles/controls.module.css";
+import formStyles from "@/styles/admin/forms.module.css";
+import buttonStyles from "@/styles/admin/buttons.module.css";
 
 interface Player {
   id: string;
   currentIgn: string;
   uuid: string;
   pastIgns: Array<{
-    name: string; 
+    name: string;
     hidden: boolean;
     number?: number;
   }>;
@@ -49,10 +57,10 @@ interface CraftySearchResult {
 }
 
 const initialPlayerForm: Partial<Player> = {
-  currentIgn: '',
+  currentIgn: "",
   pastIgns: [],
   events: [],
-  altAccounts: []
+  altAccounts: [],
 };
 
 export default function PlayerManagement() {
@@ -63,9 +71,9 @@ export default function PlayerManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerForm, setPlayerForm] = useState(initialPlayerForm);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +84,7 @@ export default function PlayerManagement() {
       if (user) {
         setIsAuthenticated(true);
       } else {
-        router.replace('/admin/password');
+        router.replace("/admin/password");
       }
       setIsLoading(false);
     });
@@ -86,14 +94,19 @@ export default function PlayerManagement() {
 
   // Fetch players
   useEffect(() => {
-    const playersRef = collection(db, 'players');
+    const playersRef = collection(db, "players");
     const unsubscribe = onSnapshot(playersRef, (snapshot) => {
-      const fetchedPlayers: Player[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Player));
-      
-      setPlayers(fetchedPlayers.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn)));
+      const fetchedPlayers: Player[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Player)
+      );
+
+      setPlayers(
+        fetchedPlayers.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn))
+      );
     });
 
     return () => unsubscribe();
@@ -101,119 +114,137 @@ export default function PlayerManagement() {
 
   // Fetch roles
   useEffect(() => {
-    const rolesRef = collection(db, 'roles');
+    const rolesRef = collection(db, "roles");
     const unsubscribe = onSnapshot(rolesRef, (snapshot) => {
-      const fetchedRoles: Role[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Role));
+      const fetchedRoles: Role[] = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Role)
+      );
       setRoles(fetchedRoles);
     });
-  
+
     return () => unsubscribe();
   }, []);
 
   // Handle clicking outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsRoleDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handlePlayerSelect = (player: Player) => {
     setSelectedPlayer(player);
     setPlayerForm({ ...player });
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-   
+    setError("");
+    setSuccess("");
+
     try {
       if (!playerForm.uuid?.trim()) {
-        setError('Player UUID is required');
+        setError("Player UUID is required");
         return;
       }
-   
-      const existingPlayer = players.find(p => 
-        p.uuid === playerForm.uuid && !selectedPlayer
+
+      const existingPlayer = players.find(
+        (p) => p.uuid === playerForm.uuid && !selectedPlayer
       );
-   
+
       if (existingPlayer) {
-        setError('This player already exists in the database');
+        setError("This player already exists in the database");
         return;
       }
-   
+
       const cleanPastIgns = (playerForm.pastIgns || [])
-        .filter(ign => {
-          const name = typeof ign === 'string' ? ign : ign.name;
-          return name && name.trim() !== '';
+        .filter((ign) => {
+          const name = typeof ign === "string" ? ign : ign.name;
+          return name && name.trim() !== "";
         })
         .map((ign, index, array) => {
-          const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
+          const ignObj =
+            typeof ign === "string" ? { name: ign, hidden: false } : ign;
           return {
             ...ignObj,
-            number: array.length - 1 - index
+            number: array.length - 1 - index,
           };
         });
-      
-      const cleanAltAccounts = playerForm.altAccounts?.filter(alt => alt.trim() !== '') || [];
-   
-      const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${playerForm.uuid}`);
+
+      const cleanAltAccounts =
+        playerForm.altAccounts?.filter((alt) => alt.trim() !== "") || [];
+
+      const craftyResponse = await fetch(
+        `https://api.crafty.gg/api/v2/players/${playerForm.uuid}`
+      );
       if (!craftyResponse.ok) {
-        throw new Error('Failed to fetch player data');
+        throw new Error("Failed to fetch player data");
       }
-      
+
       const craftyData = await craftyResponse.json();
       if (!craftyData.success || !craftyData.data) {
-        throw new Error('Failed to fetch player data');
+        throw new Error("Failed to fetch player data");
       }
-   
+
       const currentIgn = craftyData.data.username;
-   
+
       const manualPastIgns = [...cleanPastIgns];
       const craftyPastIgns = craftyData.data.usernames
         .map((nameObj: any) => nameObj.username)
-        .filter((name: string) => 
-          name.toLowerCase() !== currentIgn.toLowerCase()
+        .filter(
+          (name: string) => name.toLowerCase() !== currentIgn.toLowerCase()
         )
-        .map((name: string) => ({ 
-          name, 
+        .map((name: string) => ({
+          name,
           hidden: false,
-          number: 0
+          number: 0,
         }));
-   
+
       const mergedPastIgns = [...manualPastIgns];
-      craftyPastIgns.forEach((craftyIgn: { name: string; hidden: boolean; number: number }) => {
-        if (!mergedPastIgns.some(existing => 
-          existing.name.toLowerCase() === craftyIgn.name.toLowerCase()
-        )) {
-          mergedPastIgns.push({
-            ...craftyIgn,
-            number: mergedPastIgns.length
-          });
+      craftyPastIgns.forEach(
+        (craftyIgn: { name: string; hidden: boolean; number: number }) => {
+          if (
+            !mergedPastIgns.some(
+              (existing) =>
+                existing.name.toLowerCase() === craftyIgn.name.toLowerCase()
+            )
+          ) {
+            mergedPastIgns.push({
+              ...craftyIgn,
+              number: mergedPastIgns.length,
+            });
+          }
         }
-      });
-   
-      if (cleanAltAccounts.includes(currentIgn) || cleanAltAccounts.includes(playerForm.uuid?.trim() || '')) {
-        setError('A player cannot be their own alt account');
+      );
+
+      if (
+        cleanAltAccounts.includes(currentIgn) ||
+        cleanAltAccounts.includes(playerForm.uuid?.trim() || "")
+      ) {
+        setError("A player cannot be their own alt account");
         return;
       }
-   
+
       const uniqueAlts = [...new Set(cleanAltAccounts)];
       if (uniqueAlts.length !== cleanAltAccounts.length) {
-        setError('Duplicate alt accounts are not allowed');
+        setError("Duplicate alt accounts are not allowed");
         return;
       }
-   
+
       const playerData = {
         currentIgn: currentIgn,
         uuid: playerForm.uuid.trim(),
@@ -221,37 +252,44 @@ export default function PlayerManagement() {
           .map((ign, index, array) => ({
             ...ign,
             number: array.length - 1 - index,
-            hidden: ign.hidden ?? false
+            hidden: ign.hidden ?? false,
           }))
           .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)),
         role: playerForm.role || null,
         altAccounts: cleanAltAccounts,
         events: playerForm.events || [],
         lastUpdated: new Date(),
-        mainAccount: playerForm.mainAccount || null
+        mainAccount: playerForm.mainAccount || null,
       };
-   
+
       if (selectedPlayer?.id) {
-        const playerRef = doc(db, 'players', selectedPlayer.id);
+        const playerRef = doc(db, "players", selectedPlayer.id);
         await setDoc(playerRef, playerData);
       } else {
-        const docRef = await addDoc(collection(db, 'players'), playerData);
+        const docRef = await addDoc(collection(db, "players"), playerData);
         await updatePlayerData(
           currentIgn,
           playerForm.role || null,
           cleanAltAccounts
         );
       }
-   
-      setSuccess(selectedPlayer ? 'Player updated successfully' : 'Player added successfully');
+
+      setSuccess(
+        selectedPlayer
+          ? "Player updated successfully"
+          : "Player added successfully"
+      );
       setPlayerForm(initialPlayerForm);
       setSelectedPlayer(null);
-   
     } catch (err) {
-      console.error('Error saving player:', err);
-      setError(`Failed to save player: ${err instanceof Error ? err.message : 'Please try again.'}`);
+      console.error("Error saving player:", err);
+      setError(
+        `Failed to save player: ${
+          err instanceof Error ? err.message : "Please try again."
+        }`
+      );
     }
-   };
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -260,78 +298,91 @@ export default function PlayerManagement() {
   const fetchPlayerData = async (input: string) => {
     try {
       // Check if input is UUID format
-      const uuidRegex = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
       let uuid;
-      
-      if (uuidRegex.test(input.replace(/-/g, ''))) {
+
+      if (uuidRegex.test(input.replace(/-/g, ""))) {
         // Input is UUID, format it properly
-        uuid = input.replace(/-/g, '').replace(
-          /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
-          '$1-$2-$3-$4-$5'
-        );
+        uuid = input
+          .replace(/-/g, "")
+          .replace(
+            /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+            "$1-$2-$3-$4-$5"
+          );
       } else {
         // Input is IGN, need to lookup UUID first
-        const searchResponse = await fetch(`https://api.crafty.gg/api/v2/players/search?username=${input}`);
+        const searchResponse = await fetch(
+          `https://api.crafty.gg/api/v2/players/search?username=${input}`
+        );
         if (!searchResponse.ok) {
-          throw new Error('Failed to find player');
+          throw new Error("Failed to find player");
         }
-        const searchData = await searchResponse.json() as {
+        const searchData = (await searchResponse.json()) as {
           success: boolean;
           data?: CraftySearchResult[];
         };
         if (!searchData.success || !searchData.data?.length) {
-          throw new Error('Player not found');
+          throw new Error("Player not found");
         }
         // Find exact username match
         const player = searchData.data?.find(
-          (p: CraftySearchResult) => p.username.toLowerCase() === input.toLowerCase()
+          (p: CraftySearchResult) =>
+            p.username.toLowerCase() === input.toLowerCase()
         );
         if (!player) {
-          throw new Error('Player not found');
+          throw new Error("Player not found");
         }
         uuid = player.uuid;
       }
-  
+
       // Get full player data from Crafty API
-      const craftyResponse = await fetch(`https://api.crafty.gg/api/v2/players/${uuid}`);
+      const craftyResponse = await fetch(
+        `https://api.crafty.gg/api/v2/players/${uuid}`
+      );
       if (!craftyResponse.ok) {
-        throw new Error('Failed to fetch player data');
+        throw new Error("Failed to fetch player data");
       }
-      
+
       const craftyData = await craftyResponse.json();
       if (!craftyData.success || !craftyData.data) {
-        throw new Error('Failed to fetch player data');
+        throw new Error("Failed to fetch player data");
       }
-  
+
       const currentIgn = craftyData.data.username;
-  
+
       // Process past IGNs from Crafty
       const craftyPastIgns = craftyData.data.usernames
         .map((nameObj: any) => nameObj.username)
-        .filter((name: string) => 
-            name.toLowerCase() !== currentIgn.toLowerCase()
+        .filter(
+          (name: string) => name.toLowerCase() !== currentIgn.toLowerCase()
         )
         .map((name: string, index: number, array: string[]) => ({
-            name,
-            hidden: false,
-            number: array.length - 1 - index
+          name,
+          hidden: false,
+          number: array.length - 1 - index,
         }));
 
-      setPlayerForm(prev => {
+      setPlayerForm((prev) => {
         // Start with existing past IGNs
         const existingPastIgns = [...(prev.pastIgns || [])];
-        
+
         // Add new IGNs from Crafty that aren't already in the list
-        craftyPastIgns.forEach((newIgn: { name: string; hidden: boolean; number: number }) => {
-          if (!existingPastIgns.some(existing => 
-              existing.name.toLowerCase() === newIgn.name.toLowerCase()
-          )) {
-            existingPastIgns.push({
-              ...newIgn,
-              number: existingPastIgns.length // New IGN gets next number
-            });
+        craftyPastIgns.forEach(
+          (newIgn: { name: string; hidden: boolean; number: number }) => {
+            if (
+              !existingPastIgns.some(
+                (existing) =>
+                  existing.name.toLowerCase() === newIgn.name.toLowerCase()
+              )
+            ) {
+              existingPastIgns.push({
+                ...newIgn,
+                number: existingPastIgns.length, // New IGN gets next number
+              });
+            }
           }
-        });
+        );
 
         // Return updated form with merged IGNs
         return {
@@ -341,28 +392,30 @@ export default function PlayerManagement() {
           pastIgns: existingPastIgns
             .map((ign, index, array) => ({
               ...ign,
-              number: array.length - 1 - index
+              number: array.length - 1 - index,
             }))
-            .sort((a, b) => (b.number ?? 0) - (a.number ?? 0))
+            .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)),
         };
       });
-  
     } catch (error) {
-      console.error('Error fetching player data:', error);
-      setError('Failed to fetch player data');
+      console.error("Error fetching player data:", error);
+      setError("Failed to fetch player data");
     }
-};
+  };
 
-  const filteredPlayers = players.filter(player => 
-    player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    player.pastIgns?.some(ign => 
-      (typeof ign === 'string' ? ign : ign.name).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredPlayers = players.filter(
+    (player) =>
+      player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      player.pastIgns?.some((ign) =>
+        (typeof ign === "string" ? ign : ign.name)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
   );
 
   const sortedRoles = [...roles].sort((a, b) => {
-    const aIndex = ROLE_ORDER.indexOf(a.id as typeof ROLE_ORDER[number]);
-    const bIndex = ROLE_ORDER.indexOf(b.id as typeof ROLE_ORDER[number]);
+    const aIndex = ROLE_ORDER.indexOf(a.id as (typeof ROLE_ORDER)[number]);
+    const bIndex = ROLE_ORDER.indexOf(b.id as (typeof ROLE_ORDER)[number]);
     if (aIndex === -1 && bIndex === -1) return 0;
     if (aIndex === -1) return 1;
     if (bIndex === -1) return -1;
@@ -383,7 +436,10 @@ export default function PlayerManagement() {
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/admin">
-            <button className={controlStyles.headerButton} style={{ width: 'auto' }}>
+            <button
+              className={controlStyles.headerButton}
+              style={{ width: "auto" }}
+            >
               Dashboard
             </button>
           </Link>
@@ -392,35 +448,35 @@ export default function PlayerManagement() {
           </button>
         </div>
       </Header>
-      
+
       <main className={baseStyles.mainContent}>
         <div className={baseStyles.editLayout}>
           {/* Players List Section */}
           <div className={baseStyles.formSection}>
-          <div 
-            className={baseStyles.header}
-            style={{ 
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              maxWidth: '650px',
-            }}
-          > 
-            <div className={baseStyles.title}>Players List</div>
-            <div className={playerStyles.headerButtons}>
-              <button 
-                type="button" 
-                className={buttonStyles.addButton}
-                onClick={() => {
-                  setSelectedPlayer(null);
-                  setPlayerForm(initialPlayerForm);
-                }}
-              >
-                Add New Player
-              </button>
-              <MassUpdatePlayers />
+            <div
+              className={baseStyles.header}
+              style={{
+                marginLeft: "auto",
+                marginRight: "auto",
+                maxWidth: "650px",
+              }}
+            >
+              <div className={baseStyles.title}>Players List</div>
+              <div className={playerStyles.headerButtons}>
+                <button
+                  type="button"
+                  className={buttonStyles.addButton}
+                  onClick={() => {
+                    setSelectedPlayer(null);
+                    setPlayerForm(initialPlayerForm);
+                  }}
+                >
+                  Add New Player
+                </button>
+                <MassUpdatePlayers />
+              </div>
             </div>
-          </div>
-  
+
             <div className={playerStyles.searchContainer}>
               <input
                 type="text"
@@ -430,12 +486,16 @@ export default function PlayerManagement() {
                 className={playerStyles.searchInput}
               />
             </div>
-  
+
             <div className={playerStyles.playersList}>
-              {filteredPlayers.map(player => (
-                <div 
-                  key={player.id} 
-                  className={`${playerStyles.playerItem} ${selectedPlayer?.id === player.id ? playerStyles.selected : ''}`}
+              {filteredPlayers.map((player) => (
+                <div
+                  key={player.id}
+                  className={`${playerStyles.playerItem} ${
+                    selectedPlayer?.id === player.id
+                      ? playerStyles.selected
+                      : ""
+                  }`}
                   onClick={() => handlePlayerSelect(player)}
                 >
                   <div className={playerStyles.playerItemLeft}>
@@ -452,19 +512,30 @@ export default function PlayerManagement() {
                   {player.role && (
                     <div className={playerStyles.playerRole}>
                       {(() => {
-                        const roleIds = player.role.split(',');
-                        const primaryRoleId = sortRolesByPriority(roleIds.filter((id): id is typeof ROLE_ORDER[number] => 
-                          ROLE_ORDER.includes(id as typeof ROLE_ORDER[number])
-                        ))[0];
-                        const role = roles.find(r => r.id === primaryRoleId);
+                        const roleIds = player.role.split(",");
+                        const primaryRoleId = sortRolesByPriority(
+                          roleIds.filter(
+                            (id): id is (typeof ROLE_ORDER)[number] =>
+                              ROLE_ORDER.includes(
+                                id as (typeof ROLE_ORDER)[number]
+                              )
+                          )
+                        )[0];
+                        const role = roles.find((r) => r.id === primaryRoleId);
                         if (!role) return null;
                         return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
                             {role.tag}
-                            <span 
+                            <span
                               className={playerStyles.roleColor}
                               style={{
-                                backgroundColor: `#${role.color}`
+                                backgroundColor: `#${role.color}`,
                               }}
                             />
                           </div>
@@ -476,12 +547,14 @@ export default function PlayerManagement() {
               ))}
             </div>
           </div>
-  
+
           {/* Player Form Section */}
           <div className={baseStyles.formSection}>
-          <div className={baseStyles.header}>
+            <div className={baseStyles.header}>
               <div className={baseStyles.title}>
-                {selectedPlayer ? `Edit Player (ID: ${selectedPlayer.id})` : 'Add New Player'}
+                {selectedPlayer
+                  ? `Edit Player (ID: ${selectedPlayer.id})`
+                  : "Add New Player"}
               </div>
             </div>
             <form onSubmit={handleSubmit} className={playerStyles.playerForm}>
@@ -495,78 +568,91 @@ export default function PlayerManagement() {
                   <span className={baseStyles.successText}>{success}</span>
                 </div>
               )}
-  
+
               {/* Current IGN section */}
               <div className={playerStyles.formSection}>
                 <label htmlFor="uuid">Player</label>
                 <div className={playerStyles.inputWithAvatar}>
-                <input
-                  id="uuid"
-                  name="uuid"
-                  type="text"
-                  className={formStyles.input}
-                  value={playerForm.uuid ? `${playerForm.currentIgn} (${playerForm.uuid})` : playerForm.currentIgn}
-                  onChange={(e) => {
-                    // Just update the current IGN on change, don't fetch anything
-                    const inputValue = e.target.value;
-                    const cleanInput = inputValue.split('(')[0].trim();
-                    
-                    setPlayerForm(prev => ({
-                      ...prev,
-                      currentIgn: cleanInput,
-                    }));
-                  }}
-                  onBlur={async (e) => {
-                    const inputValue = e.target.value;
-                    const cleanInput = inputValue.split('(')[0].trim();
+                  <input
+                    id="uuid"
+                    name="uuid"
+                    type="text"
+                    className={formStyles.input}
+                    value={
+                      playerForm.uuid
+                        ? `${playerForm.currentIgn} (${playerForm.uuid})`
+                        : playerForm.currentIgn
+                    }
+                    onChange={(e) => {
+                      // Just update the current IGN on change, don't fetch anything
+                      const inputValue = e.target.value;
+                      const cleanInput = inputValue.split("(")[0].trim();
 
-                    // Don't try to fetch if input is too short or empty
-                    if (cleanInput.length < 3) return;
+                      setPlayerForm((prev) => ({
+                        ...prev,
+                        currentIgn: cleanInput,
+                      }));
+                    }}
+                    onBlur={async (e) => {
+                      const inputValue = e.target.value;
+                      const cleanInput = inputValue.split("(")[0].trim();
 
-                    const uuidRegex = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
-                    
-                    // First check if the input is a UUID
-                    if (uuidRegex.test(inputValue.replace(/-/g, ''))) {
-                      // Format UUID properly
-                      const formattedUUID = inputValue.replace(/-/g, '').replace(
-                        /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
-                        '$1-$2-$3-$4-$5'
-                      );
-                      await fetchPlayerData(formattedUUID);
-                    } else {
-                      // Check if this player exists in our database
-                      const player = players.find(p => 
-                        p.currentIgn.toLowerCase() === cleanInput.toLowerCase() ||
-                        p.pastIgns?.some(ign => 
-                          (typeof ign === 'string' ? ign : ign.name).toLowerCase() === cleanInput.toLowerCase()
-                        )
-                      );
-                      
-                      if (player) {
-                        // If found in database, use their data
-                        setPlayerForm(prev => ({
-                          ...prev,
-                          currentIgn: player.currentIgn,
-                          uuid: player.uuid,
-                          pastIgns: player.pastIgns || []
-                        }));
+                      // Don't try to fetch if input is too short or empty
+                      if (cleanInput.length < 3) return;
+
+                      const uuidRegex =
+                        /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+
+                      // First check if the input is a UUID
+                      if (uuidRegex.test(inputValue.replace(/-/g, ""))) {
+                        // Format UUID properly
+                        const formattedUUID = inputValue
+                          .replace(/-/g, "")
+                          .replace(
+                            /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+                            "$1-$2-$3-$4-$5"
+                          );
+                        await fetchPlayerData(formattedUUID);
                       } else {
-                        // If not found, try to fetch from API
-                        try {
-                          await fetchPlayerData(cleanInput);
-                        } catch (error) {
-                          setError('Player not found');
+                        // Check if this player exists in our database
+                        const player = players.find(
+                          (p) =>
+                            p.currentIgn.toLowerCase() ===
+                              cleanInput.toLowerCase() ||
+                            p.pastIgns?.some(
+                              (ign) =>
+                                (typeof ign === "string"
+                                  ? ign
+                                  : ign.name
+                                ).toLowerCase() === cleanInput.toLowerCase()
+                            )
+                        );
+
+                        if (player) {
+                          // If found in database, use their data
+                          setPlayerForm((prev) => ({
+                            ...prev,
+                            currentIgn: player.currentIgn,
+                            uuid: player.uuid,
+                            pastIgns: player.pastIgns || [],
+                          }));
+                        } else {
+                          // If not found, try to fetch from API
+                          try {
+                            await fetchPlayerData(cleanInput);
+                          } catch (error) {
+                            setError("Player not found");
+                          }
                         }
                       }
-                    }
-                  }}
-                  placeholder="Enter username or UUID"
-                />
+                    }}
+                    placeholder="Enter username or UUID"
+                  />
                   {playerForm.uuid && (
                     <div className={playerStyles.currentIgnAvatar}>
                       <Image
                         src={`https://crafthead.net/avatar/${playerForm.uuid}`}
-                        alt={playerForm.currentIgn || 'Player avatar'}
+                        alt={playerForm.currentIgn || "Player avatar"}
                         width={30}
                         height={30}
                       />
@@ -574,11 +660,11 @@ export default function PlayerManagement() {
                   )}
                 </div>
               </div>
-  
+
               {/* Past IGNs section */}
               <div className={playerStyles.formSection}>
                 <label htmlFor="pastIgns">Name History</label>
-                <div 
+                <div
                   className={playerStyles.pastIgnsList}
                   onDragOver={(e) => {
                     e.preventDefault(); // Allow dropping
@@ -589,135 +675,181 @@ export default function PlayerManagement() {
                     ?.slice() // Create a copy
                     .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)) // Sort by number descending
                     .map((ign, index) => {
-                    const ignObj = typeof ign === 'string' ? { name: ign, hidden: false } : ign;
-                    const ignNumber = ignObj.number ?? 0;
+                      const ignObj =
+                        typeof ign === "string"
+                          ? { name: ign, hidden: false }
+                          : ign;
+                      const ignNumber = ignObj.number ?? 0;
 
-                    return (
-                      <div 
-                        key={index} 
-                        className={playerStyles.pastIgnRow}
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', index.toString());
-                          e.currentTarget.classList.add(playerStyles.dragging);
-                        }}
-                        onDragEnd={(e) => {
-                          e.currentTarget.classList.remove(playerStyles.dragging);
-                        }}
-                        onDragEnter={(e) => {
-                          e.preventDefault();
-                          e.currentTarget.classList.add(playerStyles.dragOver);
-                        }}
-                        onDragLeave={(e) => {
-                          e.currentTarget.classList.remove(playerStyles.dragOver);
-                        }}
-                        onDrop={(e) => {
+                      return (
+                        <div
+                          key={index}
+                          className={playerStyles.pastIgnRow}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData(
+                              "text/plain",
+                              index.toString()
+                            );
+                            e.currentTarget.classList.add(
+                              playerStyles.dragging
+                            );
+                          }}
+                          onDragEnd={(e) => {
+                            e.currentTarget.classList.remove(
+                              playerStyles.dragging
+                            );
+                          }}
+                          onDragEnter={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.add(
+                              playerStyles.dragOver
+                            );
+                          }}
+                          onDragLeave={(e) => {
+                            e.currentTarget.classList.remove(
+                              playerStyles.dragOver
+                            );
+                          }}
+                          onDrop={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const startIndex = parseInt(e.dataTransfer.getData('text'), 10);
+                            const startIndex = parseInt(
+                              e.dataTransfer.getData("text"),
+                              10
+                            );
                             const endIndex = index;
-                            
-                            const newPastIgns = [...(playerForm.pastIgns || [])];
+
+                            const newPastIgns = [
+                              ...(playerForm.pastIgns || []),
+                            ];
                             const [removed] = newPastIgns.splice(startIndex, 1);
                             newPastIgns.splice(endIndex, 0, removed);
-                            
-                            // Reassign numbers based on new order
-                            const numberedPastIgns = newPastIgns.map((ign, idx, array) => ({
-                                ...ign,
-                                number: array.length - 1 - idx // Highest number at the top
-                            }));
-                            
-                            setPlayerForm(prev => ({
-                                ...prev,
-                                pastIgns: numberedPastIgns
-                            }));
-                        }}
-                      >
-                        <span>{ignNumber}.</span>
-                        <input
-                          type="text"
-                          className={formStyles.input}
-                          value={ignObj.name}
-                          onChange={(e) => {
-                            const newPastIgns = [...(playerForm.pastIgns || [])];
-                            if (typeof newPastIgns[index] === 'string') {
-                              newPastIgns[index] = { name: e.target.value, hidden: false };
-                            } else {
-                              newPastIgns[index] = { ...newPastIgns[index], name: e.target.value };
-                            }
-                            setPlayerForm(prev => ({
-                              ...prev,
-                              pastIgns: newPastIgns
-                            }));
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className={`${buttonStyles.hideButton} ${ignObj.hidden ? buttonStyles.hidden : ''}`}
-                          onClick={() => {
-                            const newPastIgns = [...(playerForm.pastIgns || [])];
-                            if (typeof newPastIgns[index] === 'string') {
-                              newPastIgns[index] = { name: newPastIgns[index], hidden: true };
-                            } else {
-                              newPastIgns[index] = { ...newPastIgns[index], hidden: !newPastIgns[index].hidden };
-                            }
-                            setPlayerForm(prev => ({
-                              ...prev,
-                              pastIgns: newPastIgns
-                            }));
-                          }}
-                        >
-                          {ignObj.hidden ? 'Hidden' : 'Hide'}
-                        </button>
-                        <button
-                          type="button"
-                          className={buttonStyles.deleteButton}
-                          onClick={() => {
-                            const newPastIgns = [...(playerForm.pastIgns || [])];
-                            // Completely remove the IGN at this index
-                            newPastIgns.splice(index, 1);
-                            
-                            // Reassign numbers for remaining IGNs
-                            const renumberedPastIgns = newPastIgns.map((ign, idx, array) => ({
-                              ...ign,
-                              number: array.length - 1 - idx
-                            }));
 
-                            setPlayerForm(prev => ({
+                            // Reassign numbers based on new order
+                            const numberedPastIgns = newPastIgns.map(
+                              (ign, idx, array) => ({
+                                ...ign,
+                                number: array.length - 1 - idx, // Highest number at the top
+                              })
+                            );
+
+                            setPlayerForm((prev) => ({
                               ...prev,
-                              pastIgns: renumberedPastIgns
+                              pastIgns: numberedPastIgns,
                             }));
                           }}
                         >
-                          Remove
-                        </button>
-                      </div>
-                    );
-                  })}
-                  <button
-                      type="button"
-                      className={playerStyles.addIgnButton}
-                      onClick={() => {
-                          setPlayerForm(prev => {
-                              const currentPastIgns = [...(prev.pastIgns || [])];
-                              // Add new IGN with proper number
-                              const newIgn = {
-                                  name: '',
+                          <span>{ignNumber}.</span>
+                          <input
+                            type="text"
+                            className={formStyles.input}
+                            value={ignObj.name}
+                            onChange={(e) => {
+                              const newPastIgns = [
+                                ...(playerForm.pastIgns || []),
+                              ];
+                              if (typeof newPastIgns[index] === "string") {
+                                newPastIgns[index] = {
+                                  name: e.target.value,
                                   hidden: false,
-                                  number: currentPastIgns.length // New IGN gets highest number
-                              };
-                              const updatedPastIgns = [...currentPastIgns, newIgn].map((ign, index, array) => ({
-                                  ...ign,
-                                  number: array.length - 1 - index // Reassign all numbers
+                                };
+                              } else {
+                                newPastIgns[index] = {
+                                  ...newPastIgns[index],
+                                  name: e.target.value,
+                                };
+                              }
+                              setPlayerForm((prev) => ({
+                                ...prev,
+                                pastIgns: newPastIgns,
                               }));
-                              return {
-                                  ...prev,
-                                  pastIgns: updatedPastIgns
-                              };
-                          });
-                      }}
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className={`${buttonStyles.hideButton} ${
+                              ignObj.hidden ? buttonStyles.hidden : ""
+                            }`}
+                            onClick={() => {
+                              const newPastIgns = [
+                                ...(playerForm.pastIgns || []),
+                              ];
+                              if (typeof newPastIgns[index] === "string") {
+                                newPastIgns[index] = {
+                                  name: newPastIgns[index],
+                                  hidden: true,
+                                };
+                              } else {
+                                newPastIgns[index] = {
+                                  ...newPastIgns[index],
+                                  hidden: !newPastIgns[index].hidden,
+                                };
+                              }
+                              setPlayerForm((prev) => ({
+                                ...prev,
+                                pastIgns: newPastIgns,
+                              }));
+                            }}
+                          >
+                            {ignObj.hidden ? "Hidden" : "Hide"}
+                          </button>
+                          <button
+                            type="button"
+                            className={buttonStyles.deleteButton}
+                            onClick={() => {
+                              const newPastIgns = [
+                                ...(playerForm.pastIgns || []),
+                              ];
+                              // Completely remove the IGN at this index
+                              newPastIgns.splice(index, 1);
+
+                              // Reassign numbers for remaining IGNs
+                              const renumberedPastIgns = newPastIgns.map(
+                                (ign, idx, array) => ({
+                                  ...ign,
+                                  number: array.length - 1 - idx,
+                                })
+                              );
+
+                              setPlayerForm((prev) => ({
+                                ...prev,
+                                pastIgns: renumberedPastIgns,
+                              }));
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })}
+                  <button
+                    type="button"
+                    className={playerStyles.addIgnButton}
+                    onClick={() => {
+                      setPlayerForm((prev) => {
+                        const currentPastIgns = [...(prev.pastIgns || [])];
+                        // Add new IGN with proper number
+                        const newIgn = {
+                          name: "",
+                          hidden: false,
+                          number: currentPastIgns.length, // New IGN gets highest number
+                        };
+                        const updatedPastIgns = [
+                          ...currentPastIgns,
+                          newIgn,
+                        ].map((ign, index, array) => ({
+                          ...ign,
+                          number: array.length - 1 - index, // Reassign all numbers
+                        }));
+                        return {
+                          ...prev,
+                          pastIgns: updatedPastIgns,
+                        };
+                      });
+                    }}
                   >
-                      Add Past IGN
+                    Add Past IGN
                   </button>
                 </div>
               </div>
@@ -725,52 +857,66 @@ export default function PlayerManagement() {
               {/* Roles dropdown */}
               <div className={playerStyles.formSection}>
                 <label>Roles</label>
-                <div 
-                  className={controlStyles.dropdown} 
+                <div
+                  className={controlStyles.dropdown}
                   ref={roleDropdownRef}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 >
-                  <div 
+                  <div
                     className={controlStyles.dropdownHeader}
                     onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                   >
                     <span className={controlStyles.label}>
-                      {playerForm.role ? 
-                        sortRolesByPriority(playerForm.role.split(',').filter((id): id is typeof ROLE_ORDER[number] => 
-                          ROLE_ORDER.includes(id as typeof ROLE_ORDER[number])
-                        ))
-                          .map(id => roles.find(r => r.id === id.trim())?.tag)
-                          .join(', ') 
-                        : 'Select roles...'
-                      }
+                      {playerForm.role
+                        ? sortRolesByPriority(
+                            playerForm.role
+                              .split(",")
+                              .filter((id): id is (typeof ROLE_ORDER)[number] =>
+                                ROLE_ORDER.includes(
+                                  id as (typeof ROLE_ORDER)[number]
+                                )
+                              )
+                          )
+                            .map(
+                              (id) => roles.find((r) => r.id === id.trim())?.tag
+                            )
+                            .join(", ")
+                        : "Select roles..."}
                     </span>
                   </div>
                   {isRoleDropdownOpen && (
                     <ul className={controlStyles.dropdownMenu}>
                       {sortedRoles.map((role) => (
-                        <li 
+                        <li
                           key={role.id}
                           className={`${controlStyles.dropdownItem} ${
-                            playerForm.role?.includes(role.id) ? controlStyles.selected : ''
+                            playerForm.role?.includes(role.id)
+                              ? controlStyles.selected
+                              : ""
                           }`}
                           onClick={() => {
-                            const currentRoles = playerForm.role ? playerForm.role.split(',') : [];
+                            const currentRoles = playerForm.role
+                              ? playerForm.role.split(",")
+                              : [];
                             let newRoles;
-                            
+
                             if (currentRoles.includes(role.id)) {
-                              newRoles = currentRoles.filter(id => id !== role.id);
+                              newRoles = currentRoles.filter(
+                                (id) => id !== role.id
+                              );
                             } else {
                               newRoles = [...currentRoles, role.id];
                             }
-                            
-                            setPlayerForm(prev => ({
+
+                            setPlayerForm((prev) => ({
                               ...prev,
-                              role: newRoles.length > 0 ? newRoles.join(',') : null
+                              role:
+                                newRoles.length > 0 ? newRoles.join(",") : null,
                             }));
                           }}
                         >
-                          <span 
-                            className={controlStyles.categoryColor} 
+                          <span
+                            className={controlStyles.categoryColor}
                             style={{ backgroundColor: `#${role.color}` }}
                           />
                           {role.tag}
@@ -790,8 +936,10 @@ export default function PlayerManagement() {
                     <div className={playerStyles.pastIgnsList}>
                       <div className={playerStyles.pastIgnRow}>
                         {(() => {
-                          const mainPlayer = players.find(p => p.uuid === playerForm.mainAccount);
-                          const displayValue = mainPlayer 
+                          const mainPlayer = players.find(
+                            (p) => p.uuid === playerForm.mainAccount
+                          );
+                          const displayValue = mainPlayer
                             ? `${mainPlayer.currentIgn} (${playerForm.mainAccount})`
                             : playerForm.mainAccount;
 
@@ -806,11 +954,11 @@ export default function PlayerManagement() {
                               />
                               {mainPlayer && (
                                 <div className={playerStyles.altAccountInfo}>
-                                  <div 
+                                  <div
                                     className={playerStyles.playerAvatar}
-                                    style={{ 
-                                      width: '30px',
-                                      height: '30px'
+                                    style={{
+                                      width: "30px",
+                                      height: "30px",
                                     }}
                                   >
                                     <Image
@@ -834,8 +982,12 @@ export default function PlayerManagement() {
                     <label htmlFor="altAccounts">Alt Accounts</label>
                     <div className={playerStyles.pastIgnsList}>
                       {playerForm.altAccounts?.map((account, index) => {
-                        const altPlayer = players.find(p => p.uuid === account);
-                        const displayValue = altPlayer ? `${altPlayer.currentIgn} (${account})` : account;
+                        const altPlayer = players.find(
+                          (p) => p.uuid === account
+                        );
+                        const displayValue = altPlayer
+                          ? `${altPlayer.currentIgn} (${account})`
+                          : account;
 
                         return (
                           <div key={index} className={playerStyles.pastIgnRow}>
@@ -844,18 +996,28 @@ export default function PlayerManagement() {
                               className={formStyles.input}
                               value={displayValue}
                               onChange={(e) => {
-                                const newAltAccounts = [...(playerForm.altAccounts || [])];
+                                const newAltAccounts = [
+                                  ...(playerForm.altAccounts || []),
+                                ];
                                 const inputValue = e.target.value;
-                                
-                                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+                                const uuidRegex =
+                                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                                 if (uuidRegex.test(inputValue)) {
                                   newAltAccounts[index] = inputValue;
                                 } else {
-                                  const player = players.find(p => 
-                                    p.currentIgn.toLowerCase() === inputValue.toLowerCase() ||
-                                    p.pastIgns?.some(ign => 
-                                      (typeof ign === 'string' ? ign : ign.name).toLowerCase() === inputValue.toLowerCase()
-                                    )
+                                  const player = players.find(
+                                    (p) =>
+                                      p.currentIgn.toLowerCase() ===
+                                        inputValue.toLowerCase() ||
+                                      p.pastIgns?.some(
+                                        (ign) =>
+                                          (typeof ign === "string"
+                                            ? ign
+                                            : ign.name
+                                          ).toLowerCase() ===
+                                          inputValue.toLowerCase()
+                                      )
                                   );
                                   if (player) {
                                     newAltAccounts[index] = player.uuid;
@@ -863,21 +1025,21 @@ export default function PlayerManagement() {
                                     newAltAccounts[index] = inputValue;
                                   }
                                 }
-                                
-                                setPlayerForm(prev => ({
+
+                                setPlayerForm((prev) => ({
                                   ...prev,
-                                  altAccounts: newAltAccounts
+                                  altAccounts: newAltAccounts,
                                 }));
                               }}
                               placeholder="Enter IGN or UUID"
                             />
                             <div className={playerStyles.altAccountInfo}>
                               {altPlayer && (
-                                <div 
+                                <div
                                   className={playerStyles.playerAvatar}
-                                  style={{ 
-                                    width: '30px',
-                                    height: '30px'
+                                  style={{
+                                    width: "30px",
+                                    height: "30px",
                                   }}
                                 >
                                   <Image
@@ -893,11 +1055,13 @@ export default function PlayerManagement() {
                               type="button"
                               className={buttonStyles.deleteButton}
                               onClick={() => {
-                                const newAltAccounts = [...(playerForm.altAccounts || [])];
+                                const newAltAccounts = [
+                                  ...(playerForm.altAccounts || []),
+                                ];
                                 newAltAccounts.splice(index, 1);
-                                setPlayerForm(prev => ({
+                                setPlayerForm((prev) => ({
                                   ...prev,
-                                  altAccounts: newAltAccounts
+                                  altAccounts: newAltAccounts,
                                 }));
                               }}
                             >
@@ -910,9 +1074,9 @@ export default function PlayerManagement() {
                         type="button"
                         className={playerStyles.addIgnButton}
                         onClick={() => {
-                          setPlayerForm(prev => ({
+                          setPlayerForm((prev) => ({
                             ...prev,
-                            altAccounts: [...(prev.altAccounts || []), '']
+                            altAccounts: [...(prev.altAccounts || []), ""],
                           }));
                         }}
                       >
@@ -922,66 +1086,70 @@ export default function PlayerManagement() {
                   </>
                 )}
               </div>
-  
+
               {/* Events section */}
               {selectedPlayer && (
                 <div className={playerStyles.formSection}>
                   <label>Events (Read-only)</label>
                   <div className={playerStyles.eventsDisplay}>
-                    {playerForm.events?.length ? 
-                      playerForm.events.map((eventId, index) => (
-                        <div key={index} className={playerStyles.eventLink}>
-                          <Link 
-                            href={`/admin/event/${eventId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {eventId}
-                          </Link>
-                        </div>
-                      )) : 
-                      'No events'
-                    }
+                    {playerForm.events?.length
+                      ? playerForm.events.map((eventId, index) => (
+                          <div key={index} className={playerStyles.eventLink}>
+                            <Link
+                              href={`/admin/event/${eventId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {eventId}
+                            </Link>
+                          </div>
+                        ))
+                      : "No events"}
                   </div>
                 </div>
               )}
-  
+
               {/* Submit and delete buttons */}
               <div className={playerStyles.buttonGroup}>
-                <button 
-                  type="submit" 
-                  className={buttonStyles.submitButton}
-                >
-                  {selectedPlayer ? 'Update Player' : 'Add Player'}
+                <button type="submit" className={buttonStyles.submitButton}>
+                  {selectedPlayer ? "Update Player" : "Add Player"}
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={buttonStyles.clearButton}
                   onClick={() => {
                     setSelectedPlayer(null);
                     setPlayerForm(initialPlayerForm);
-                    setError('');
-                    setSuccess('');
+                    setError("");
+                    setSuccess("");
                   }}
                 >
                   Clear Fields
                 </button>
                 {selectedPlayer && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={async () => {
-                      if (window.confirm('Are you sure you want to delete this player? This action cannot be undone.')) {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this player? This action cannot be undone."
+                        )
+                      ) {
                         try {
-                          await deleteDoc(doc(db, 'players', selectedPlayer.id));
-                          setSuccess('Player deleted successfully');
+                          await deleteDoc(
+                            doc(db, "players", selectedPlayer.id)
+                          );
+                          setSuccess("Player deleted successfully");
                           setPlayerForm(initialPlayerForm);
                           setSelectedPlayer(null);
                         } catch (err) {
-                          console.error('Error deleting player:', err);
-                          setError('Failed to delete player. Please try again.');
+                          console.error("Error deleting player:", err);
+                          setError(
+                            "Failed to delete player. Please try again."
+                          );
                         }
                       }
-                    }} 
+                    }}
                     className={buttonStyles.deleteButton}
                   >
                     Delete Player
@@ -992,7 +1160,7 @@ export default function PlayerManagement() {
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

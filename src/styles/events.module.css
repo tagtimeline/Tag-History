@@ -2,552 +2,550 @@
 
 /* Event Box Base */
 .eventBox {
-    background: #333;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    cursor: grab;
-    padding: 6px 8px;
-    position: absolute;
-    transition: all 0.1s ease;
-    user-select: none;
-    width: 300px;
-    z-index: 3;
+  background: #333;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  padding: 6px 8px;
+  position: absolute;
+  transition: all 0.1s ease;
+  user-select: none;
+  width: 300px;
+  z-index: 3;
 }
 
 /* Connection Lines */
 .connectionLine {
-    background: #444;
-    height: 2px;
-    left: 100px;
-    position: absolute;
-    transform-origin: left;
-    transition: height 0.2s ease, background-color 0.2s ease;
+  background: #444;
+  height: 2px;
+  left: 100px;
+  position: absolute;
+  transform-origin: left;
+  transition: height 0.2s ease, background-color 0.2s ease;
 }
 
 .verticalLine {
-    background: #444;
-    position: absolute;
-    transition: background-color 0.2s ease;
-    width: 2px;
+  background: #444;
+  position: absolute;
+  transition: background-color 0.2s ease;
+  width: 2px;
+  box-shadow: -2px 0 0 #202020, 2px 0 0 #202020;
+  z-index: 1;
 }
 
 .horizontalStartLine,
 .horizontalEndLine {
-    background: #444;
-    height: 2px;
-    left: 100px;
-    position: absolute;
-    transition: background-color 0.2s ease;
-    z-index: 1;
+  background: #444;
+  height: 2px;
+  left: 100px;
+  position: absolute;
+  transition: background-color 0.2s ease;
+  z-index: 2;
 }
 
 .eventConnector {
-    background: #444;
-    height: 2px;
-    position: absolute;
-    transform-origin: left;
-    transition: background-color 0.2s ease;
-    z-index: 1;
+  background: #444;
+  height: 2px;
+  position: absolute;
+  transform-origin: left;
+  transition: background-color 0.2s ease;
+  z-index: 1;
 }
 
 .dateMarker {
-    background: #444;
-    border-radius: 50%;
-    height: 8px;
-    left: 96px;
-    position: absolute;
-    transition: background-color 0.2s ease;
-    width: 8px;
-    z-index: 2;
+  background: #444;
+  border-radius: 50%;
+  height: 8px;
+  left: 96px;
+  position: absolute;
+  transition: background-color 0.2s ease;
+  width: 8px;
+  z-index: 2;
 }
 
 /* Event Positioning */
 .eventBox-left {
-    left: 210px;
+  left: 210px;
 }
 
 .eventBox-right {
-    left: 430px;
+  left: 430px;
 }
 
 .eventBox-far {
-    left: 650px;
+  left: 650px;
 }
 
 /* Event Content */
 .eventContent {
-    position: relative;
-    width: 100%;
+  position: relative;
+  width: 100%;
 }
 
 .eventTitle {
-    align-items: center;
-    color: #ffffff;
-    display: flex;
-    font-size: 12px;
-    font-weight: normal;
-    gap: 6px;
-    margin: 0 0 1px 0;
-    min-width: 0;
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  font-size: 12px;
+  font-weight: normal;
+  gap: 6px;
+  margin: 0 0 1px 0;
+  min-width: 0;
 }
 
 .eventTitleText {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .eventDate {
-    color: #888;
-    font-size: 12px;
+  color: #888;
+  font-size: 12px;
 }
 
 /* Event Interactions */
 .eventBox:hover {
-    background-color: #444;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    transform: scale(1.025);
-    z-index: 5;
+  background-color: #444;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: scale(1.025);
+  z-index: 5;
 }
 
 .eventBox:hover .eventTitleText {
-    overflow: visible;
-    text-overflow: unset;
-    width: auto;
+  overflow: visible;
+  text-overflow: unset;
+  width: auto;
 }
 
 .eventBox:hover + .eventConnections .connectionLine {
-    background-color: #555;
-    transform: scaleY(2);
-    transform-origin: center;
+  background-color: #555;
+  transform: scaleY(2);
+  transform-origin: center;
 }
 
 .eventBox:hover + .eventConnections .horizontalStartLine,
 .eventBox:hover + .eventConnections .horizontalEndLine,
 .eventBox:hover + .eventConnections .eventConnector {
-    background-color: #555;
-    transform: scaleY(2);
-    transform-origin: center;
+  background-color: #555;
+  transform: scaleY(2);
+  transform-origin: center;
 }
 
 .eventBox:hover + .eventConnections .verticalLine {
-    background-color: #555;
-    transform: scaleX(2);
-    transform-origin: center;
+  background-color: #555;
+  transform: scaleX(2);
+  transform-origin: center;
 }
 
 .dragging {
-    cursor: grabbing !important;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    z-index: 1000;
+  cursor: grabbing !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  z-index: 1000;
 }
 
 .dragging:hover {
-    background-color: #444;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
+  background-color: #444;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
 
 /* Modal Styles */
 .modalOverlay {
-    align-items: center;
-    background: rgba(0, 0, 0, 0.5);
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    left: 0;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 1000;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1000;
 }
 
 .modalContent {
-    background: #1a1a1a;
-    border: 4px solid #333;
-    border-radius: 12px;
-    max-height: 60%;
-    max-width: 700px;
-    overflow-y: hidden;
-    padding: 24px;
-    position: relative;
-    scrollbar-gutter: stable;
-    width: 95%;
+  background: #1a1a1a;
+  border: 4px solid #333;
+  border-radius: 12px;
+  max-height: 60%;
+  max-width: 700px;
+  overflow-y: hidden;
+  padding: 24px;
+  position: relative;
+  scrollbar-gutter: stable;
+  width: 95%;
 }
 
 .modalContent:hover {
-    overflow-y: auto;
+  overflow-y: auto;
 }
 
 .modalHeader {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
 /* Event Type Styles */
 .eventTypeWrapper {
-    align-items: center;
-    display: inline-flex;
-    padding-right: 150px;
+  align-items: center;
+  display: inline-flex;
+  padding-right: 150px;
 }
 
 .eventType {
-    align-items: center;
-    background: #333;
-    border-radius: 4px;
-    display: flex;
-    font-size: 12px;
-    padding: 4px 12px;
+  align-items: center;
+  background: #333;
+  border-radius: 4px;
+  display: flex;
+  font-size: 12px;
+  padding: 4px 12px;
 }
 
 .discordLink {
-    align-items: center;
-    background: rgba(88, 101, 242, 0.1);
-    border-radius: 3px;
-    color: #5865F2 !important;
-    display: inline-flex;
-    font-size: 11px;
-    gap: 4px;
-    margin-left: 8px;
-    opacity: 0;
-    padding: 2px 6px;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
+  align-items: center;
+  background: rgba(88, 101, 242, 0.1);
+  border-radius: 3px;
+  color: #5865f2 !important;
+  display: inline-flex;
+  font-size: 11px;
+  gap: 4px;
+  margin-left: 8px;
+  opacity: 0;
+  padding: 2px 6px;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 .eventTypeWrapper:hover .discordLink {
-    opacity: 1;
-    pointer-events: all;
+  opacity: 1;
+  pointer-events: all;
 }
 
 .discordLink:hover {
-    background: rgba(88, 101, 242, 0.2);
+  background: rgba(88, 101, 242, 0.2);
 }
 
 /* Modal Controls */
 .modalControls {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .openButton {
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 4px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px;
 }
 
 .openButton:hover {
-    background: none;
-    color: #fff;
+  background: none;
+  color: #fff;
 }
 
 .timelineButton {
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 14px;
-    height: 32px;
-    padding: 0 16px;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-family: "Minecraft", sans-serif;
+  font-size: 14px;
+  height: 32px;
+  padding: 0 16px;
 }
 
 .timelineButton:hover {
-    background-color: #444;
+  background-color: #444;
 }
 
 /* Modal Content Styles */
 .modalTitle {
-    align-items: center;
-    color: #ffffff;
-    display: flex;
-    font-size: 24px;
-    font-weight: normal;
-    gap: 6px;
-    margin: 0 0 4px 0;
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  font-size: 24px;
+  font-weight: normal;
+  gap: 6px;
+  margin: 0 0 4px 0;
 }
 
 .modalDate {
-    color: #888;
-    font-size: 16px;
-    margin-bottom: 5px;
+  color: #888;
+  font-size: 16px;
+  margin-bottom: 5px;
 }
 
 .divider {
-    border: none;
-    border-top: 1px solid #333;
-    box-sizing: border-box;
-    margin: 10px 0;
-    width: 100%;
+  border: none;
+  border-top: 1px solid #333;
+  box-sizing: border-box;
+  margin: 10px 0;
+  width: 100%;
 }
 
 /* Tag Styles */
 .modalTags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .tagLabel {
-    color: #888;
-    font-size: 10px;
-    margin-bottom: 4px;
+  color: #888;
+  font-size: 10px;
+  margin-bottom: 4px;
 }
 
 .tag {
-    background: #333;
-    border-radius: 4px;
-    color: #888;
-    font-size: 12px;
-    padding: 4px 12px;
+  background: #333;
+  border-radius: 4px;
+  color: #888;
+  font-size: 12px;
+  padding: 4px 12px;
 }
 
 /* Side Events Styles */
 .sideEventsContainer {
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    gap: 5px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  gap: 5px;
+  width: 100%;
 }
 
 .inlineSideEventContainer {
-    margin: 1em 0;
+  margin: 1em 0;
 }
 
 .sideEvent {
-    border-radius: 4px;
-    overflow: hidden;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .sideEventHeader {
-    align-items: center;
-    background: #333;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 14px;
-    gap: 8px;
-    padding: 5px;
-    text-align: left;
-    width: 100%;
+  align-items: center;
+  background: #333;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-family: "Minecraft", sans-serif;
+  font-size: 14px;
+  gap: 8px;
+  padding: 5px;
+  text-align: left;
+  width: 100%;
 }
 
 .sideEventHeader:hover {
-    background: #444;
+  background: #444;
 }
 
 .sideEventContent {
-    background: #262626;
-    color: #888;
-    font-size: 14px;
-    line-height: 1.2;
-    padding: 8px 8px;
-  }
-  
+  background: #262626;
+  color: #888;
+  font-size: 14px;
+  line-height: 1.2;
+  padding: 8px 8px;
+}
 
 /* Table Styles */
 .modalText table {
-    border: 1px solid #444;
-    border-collapse: collapse;
-    width: 100%;
+  border: 1px solid #444;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 .modalText th,
 .modalText td {
-    border: 1px solid #444;
-    padding: 8px 12px;
-    text-align: left;
+  border: 1px solid #444;
+  padding: 8px 12px;
+  text-align: left;
 }
 
 .modalText th {
-    background: #333;
-    color: #fff;
-    font-weight: normal;
+  background: #333;
+  color: #fff;
+  font-weight: normal;
 }
 
 .modalText td {
-    color: #888;
-    position: relative;
-    transition: background-color 0.2s;
+  color: #888;
+  position: relative;
+  transition: background-color 0.2s;
 }
 
 .modalText td a,
 .modalText td a.playerLink {
-    text-decoration: none;
-    transition: color 0.2s;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
 .modalText td a:hover,
 .modalText td a.playerLink:hover {
-    color: #4499ff;
-    text-decoration: underline;
+  color: #4499ff;
+  text-decoration: underline;
 }
 
 /* Event Page Styles */
 .eventPageContent {
-    background: #1a1a1a;
-    border: 4px solid #333;
-    border-radius: 12px;
-    max-width: 800px;
-    padding: 24px;
-    position: relative;
-    width: 95%;
-    margin: 20px auto;
+  background: #1a1a1a;
+  border: 4px solid #333;
+  border-radius: 12px;
+  max-width: 800px;
+  padding: 24px;
+  position: relative;
+  width: 95%;
+  margin: 20px auto;
 }
 
 .eventNavigation {
-    display: flex;
-    gap: 5px;
-    justify-content: space-between;
-    margin-top: 10px;
+  display: flex;
+  gap: 5px;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .modalText {
-    color: #888;
-    line-height: 1.2;
-    margin: 0;
-    white-space: pre-line;
+  color: #888;
+  line-height: 1.2;
+  margin: 0;
+  white-space: pre-line;
 }
 
 .modalText:hover {
-    overflow-y: visible;
+  overflow-y: visible;
 }
 
 .modalFooter {
-    margin-top: auto;
+  margin-top: auto;
 }
 
 /* Navigation Buttons */
 .navButton {
-    align-items: center;
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 14px;
-    gap: 4px;
-    height: 32px;
-    justify-content: center;
-    padding: 0 12px;
-    position: fixed;
-    text-decoration: none;
-    top: 120px;
-    z-index: 10;
+  align-items: center;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  font-family: "Minecraft", sans-serif;
+  font-size: 14px;
+  gap: 4px;
+  height: 32px;
+  justify-content: center;
+  padding: 0 12px;
+  position: fixed;
+  text-decoration: none;
+  top: 120px;
+  z-index: 10;
 }
 
 .navButtonPrev {
-    left: 20px;
+  left: 20px;
 }
 
 .navButtonNext {
-    right: 20px;
+  right: 20px;
 }
 
 .navButton:hover {
-    background-color: #444;
+  background-color: #444;
 }
 
 .navButtonDisabled {
-    background-color: #222;
-    border-color: #333;
-    color: #444;
-    cursor: not-allowed;
+  background-color: #222;
+  border-color: #333;
+  color: #444;
+  cursor: not-allowed;
 }
 
 .navButtonDisabled:hover {
-    background-color: #222;
+  background-color: #222;
 }
 
-
-
 .imageWrapper {
-    margin: 1em auto;
-    width: 75%;
-    text-align: center;
+  margin: 1em auto;
+  width: 75%;
+  text-align: center;
 }
 
 .contentImage {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
 }
 
 .imageError {
-    color: #888;
-    font-size: 14px;
-    display: block;
-    margin: 0 auto;
-    padding: 4px;
-    text-align: center;
-    background: #262626;
-    border-radius: 4px;
+  color: #888;
+  font-size: 14px;
+  display: block;
+  margin: 0 auto;
+  padding: 4px;
+  text-align: center;
+  background: #262626;
+  border-radius: 4px;
 }
 
 .imageSubtextGroup {
-    margin: 1em auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  margin: 1em auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .imageSubtextGroup .imageWrapper {
-    margin: 0 0 0.2em;
-    width: 100% !important;
+  margin: 0 0 0.2em;
+  width: 100% !important;
 }
 
 .imageSubtextGroup > div:last-child {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    text-align: center;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  text-align: center;
 }
 
-
 .videoWrapper {
-    margin: 0;
-    position: relative;
-    padding-bottom: 56.25%;
-    width: 100%;
-    height: 0;
-    overflow: hidden;
+  margin: 0;
+  position: relative;
+  padding-bottom: 56.25%;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
 }
 
 .videoWrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .videoSubtextGroup {
-    margin: 1em auto;
-    flex-direction: column;
-    align-items: center;
+  margin: 1em auto;
+  flex-direction: column;
+  align-items: center;
 }
-  
+
 .videoSubtextGroup .videoWrapper {
-    margin: 0;
+  margin: 0;
 }
-  
+
 .videoSubtextGroup > div:last-child {
-    width: 100%;
-    padding: 0;
-    margin: 0.5em 0 0 0;
-    text-align: center;
+  width: 100%;
+  padding: 0;
+  margin: 0.5em 0 0 0;
+  text-align: center;
 }

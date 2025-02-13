@@ -1,6 +1,6 @@
- /* src/styles/admin/players.module.css */
+/* src/styles/admin/players.module.css */
 
- .searchContainer {
+.searchContainer {
   margin-bottom: 20px;
   padding: 0;
   display: flex;
@@ -77,7 +77,6 @@
   color: white;
   font-size: 12px;
 }
-
 
 .roleColor {
   display: inline-block;
@@ -162,7 +161,6 @@
   align-items: center; /* This centers items vertically */
   gap: 5px;
   transition: background-color 0.2s ease;
-
 }
 
 .pastIgnRow.dragging {
@@ -178,7 +176,7 @@
 }
 
 .addIgnButton {
-  composes: button from './buttons.module.css';
+  composes: button from "./buttons.module.css";
   width: 100%;
 }
 
@@ -215,7 +213,6 @@
 .eventLink a:hover {
   color: #2563eb;
 }
-
 
 /* Update Players */
 .updateOverlay {
@@ -287,7 +284,7 @@
   color: #ffaa00;
 }
 
-.logEntry:has(✅), 
+.logEntry:has(✅),
 .logEntry:has(✓) {
   color: #55ff55;
 }
@@ -299,7 +296,6 @@
 .logEntry:has(✨) {
   color: #ff55ff;
 }
-
 
 /* Player Selector Event Page */
 .selectorOverlay {
@@ -350,17 +346,17 @@
 }
 
 .addButton {
-  composes: button from './buttons.module.css';
+  composes: button from "./buttons.module.css";
   width: 100%;
 }
 
 .submitButton {
-  composes: button from './buttons.module.css';
+  composes: button from "./buttons.module.css";
   width: 100%;
 }
 
 .cancelButton {
-  composes: removeButton from './buttons.module.css';
+  composes: removeButton from "./buttons.module.css";
   width: 100%;
 }
 

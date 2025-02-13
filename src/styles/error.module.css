@@ -1,38 +1,38 @@
 /* src/styles/error.module.css */
 .errorContainer {
-    display: flex; 
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
 }
-  
+
 .errorContent {
-    text-align: center;
-    width: 100%;
+  text-align: center;
+  width: 100%;
 }
-  
+
 .errorTitle {
-    font-family: "Minecraft", sans-serif;
-    font-size: 32px;
-    color: #fff;
-    margin: 0 0 1rem 0;
+  font-family: "Minecraft", sans-serif;
+  font-size: 32px;
+  color: #fff;
+  margin: 0 0 1rem 0;
 }
-  
+
 .errorMessage {
-    color: #ff6666;
-    font-size: 14px;
-    margin-top: -10px;
-    min-height: 20px;
+  color: #ff6666;
+  font-size: 14px;
+  margin-top: -10px;
+  min-height: 20px;
 }
 
 .buttonWrapper {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
-  
+
 .returnButton {
-    composes: button from './controls.module.css';
-    width: 164px;
+  composes: button from "./controls.module.css";
+  width: 164px;
 }

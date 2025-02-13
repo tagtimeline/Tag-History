@@ -1,236 +1,232 @@
 /* src/styles/admin/base.module.css */
 
 .pageWrapper {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-   
+
 .mainContent {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px;
-    height: auto;
-    padding: 40px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  height: auto;
+  padding: 40px 0;
 }
-   
+
 .header {
-    width: 100%;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 800px;
+  width: 100%;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
 }
-   
+
 .title {
-    font-size: 18px;
-    margin-bottom: 15px;
-    color: #fff;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #fff;
 }
-   
+
 .successMessage,
 .errorMessage {
-    position: fixed;
-    overflow: visible;
-    top: 30px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px 40px;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 24px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+  position: fixed;
+  overflow: visible;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 40px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 24px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 }
-   
+
 .successText {
-    color: #55FF55;
+  color: #55ff55;
 }
-   
+
 .errorText {
-    color: #FF5555;
+  color: #ff5555;
 }
 
 /* Event Draft */
 .draftMessage {
-    background-color: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 4px;
-    padding: 12px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #888;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 14px;
+  background-color: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #888;
+  font-family: "Minecraft", sans-serif;
+  font-size: 14px;
 }
-  
+
 .loadDraftButton {
-    align-items: center;
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 12px;
-    height: 32px;
-    justify-content: center;
-    padding: 0 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  align-items: center;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  font-family: "Minecraft", sans-serif;
+  font-size: 12px;
+  height: 32px;
+  justify-content: center;
+  padding: 0 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-  
+
 .loadDraftButton:hover {
-    background-color: #444;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
+  background-color: #444;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
-  
+
 .loadDraftButton:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
-  
+
 .discardDraftButton {
-    align-items: center;
-    background-color: transparent;
-    border: 2px solid #555;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    color: #888;
-    cursor: pointer;
-    display: flex;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 12px;
-    height: 32px;
-    justify-content: center;
-    padding: 0 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  align-items: center;
+  background-color: transparent;
+  border: 2px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  font-family: "Minecraft", sans-serif;
+  font-size: 12px;
+  height: 32px;
+  justify-content: center;
+  padding: 0 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-  
+
 .discardDraftButton:hover {
-    background-color: #333;
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
+  background-color: #333;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
-  
+
 .discardDraftButton:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
-  
+
 .saveMessage {
-    background-color: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 4px;
-    padding: 8px;
-    margin-bottom: 16px;
-    text-align: center;
+  background-color: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 16px;
+  text-align: center;
 }
-  
+
 .saveText {
-    color: #888;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 12px;
+  color: #888;
+  font-family: "Minecraft", sans-serif;
+  font-size: 12px;
 }
-   
+
 .subtitle {
-    font-size: 20px;
-    margin: 30px 0 20px 0;
-    color: #fff;
+  font-size: 20px;
+  margin: 30px 0 20px 0;
+  color: #fff;
 }
-   
+
 .flexRow {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
-   
+
 .flexColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-   
+
 .fullWidth {
-    width: 100%;
+  width: 100%;
 }
-   
+
 .loading {
-    display: flex;
-    margin-top: 50%;
-    justify-content: center;
-    color: #fff;
-    font-family: 'Minecraft', sans-serif;
+  display: flex;
+  margin-top: 50%;
+  justify-content: center;
+  color: #fff;
+  font-family: "Minecraft", sans-serif;
 }
-
-
 
 /* Event Preview */
 .editLayout {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 0 10px;
-    align-items: stretch;
-}
-  
-.formSection {
-    width: 50%;
-    min-width: 600px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 40px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 10px;
+  align-items: stretch;
 }
 
+.formSection {
+  width: 50%;
+  min-width: 600px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
+}
 
 .previewSection {
-    width: 50%;
-    min-width: 600px;
-    flex: 1;
-    flex-direction: column;
+  width: 50%;
+  min-width: 600px;
+  flex: 1;
+  flex-direction: column;
 }
-
 
 .formSection > form,
 .previewSection > div:nth-child(2) {
-    border-radius: 4px;
-    padding: 15px;
-    height: auto;
-    overflow: visible;
+  border-radius: 4px;
+  padding: 15px;
+  height: auto;
+  overflow: visible;
 }
 
 .formSection > form {
-    margin-top: -5px;
+  margin-top: -5px;
 }
-  
+
 @media (max-width: 1280px) {
-    .editLayout {
-        flex-direction: column;
-        align-items: center;
-    }
+  .editLayout {
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .formSection {
-        width: 100%;
-        max-width: 660px;
-        min-width: auto;
-    }
+  .formSection {
+    width: 100%;
+    max-width: 660px;
+    min-width: auto;
+  }
 
-    .previewSection {
-        width: 100%;
-        padding-left: 25px;
-        max-width: 680px;
-        min-width: auto;
-        margin-bottom: 50px;
-    }
+  .previewSection {
+    width: 100%;
+    padding-left: 25px;
+    max-width: 680px;
+    min-width: auto;
+    margin-bottom: 50px;
+  }
 }

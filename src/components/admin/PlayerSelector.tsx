@@ -1,10 +1,10 @@
 // components/admin/PlayerSelector.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/../lib/firebaseConfig';
-import { updatePlayerData } from '@/../lib/playerUtils';
-import playerStyles from '@/styles/admin/players.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/../lib/firebaseConfig";
+import { updatePlayerData } from "@/../lib/playerUtils";
+import playerStyles from "@/styles/admin/players.module.css";
 
 interface Player {
   id: string;
@@ -17,57 +17,62 @@ interface PlayerSelectorProps {
   onClose: () => void;
 }
 
-const PlayerSelector: React.FC<PlayerSelectorProps> = ({ onSelect, onClose }) => {
+const PlayerSelector: React.FC<PlayerSelectorProps> = ({
+  onSelect,
+  onClose,
+}) => {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
-  const [newPlayerUuid, setNewPlayerUuid] = useState('');
-  const [error, setError] = useState('');
+  const [newPlayerUuid, setNewPlayerUuid] = useState("");
+  const [error, setError] = useState("");
   const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, 'players'),
-      (snapshot) => {
-        const playerData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Player[];
-        setPlayers(playerData.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn)));
-      }
-    );
+    const unsubscribe = onSnapshot(collection(db, "players"), (snapshot) => {
+      const playerData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Player[];
+      setPlayers(
+        playerData.sort((a, b) => a.currentIgn.localeCompare(b.currentIgn))
+      );
+    });
 
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
   const handleAddNewPlayer = async () => {
     try {
       if (!newPlayerUuid.trim()) {
-        setError('UUID is required');
+        setError("UUID is required");
         return;
       }
 
       await updatePlayerData(newPlayerUuid);
       setShowNewPlayerForm(false);
-      setNewPlayerUuid('');
-      setError('');
+      setNewPlayerUuid("");
+      setError("");
     } catch (err) {
-      setError('Failed to add player');
+      setError("Failed to add player");
     }
   };
 
-  const filteredPlayers = players.filter(player =>
+  const filteredPlayers = players.filter((player) =>
     player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -110,8 +115,8 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({ onSelect, onClose }) =>
               <button
                 onClick={() => {
                   setShowNewPlayerForm(false);
-                  setNewPlayerUuid('');
-                  setError('');
+                  setNewPlayerUuid("");
+                  setError("");
                 }}
                 className={playerStyles.cancelButton}
               >
@@ -122,7 +127,7 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({ onSelect, onClose }) =>
         )}
 
         <div className={playerStyles.playersList2}>
-          {filteredPlayers.map(player => (
+          {filteredPlayers.map((player) => (
             <div
               key={player.id}
               className={playerStyles.playerItem}

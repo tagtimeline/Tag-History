@@ -1,24 +1,24 @@
 // components/admin/EventForm.tsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { createEvent, updateEvent, deleteEvent } from '../../../lib/eventUtils';
-import { fetchCategories, type Category } from '@/config/categories';
-import { TimelineEvent, Table } from '@/data/events';
-import TableManager from './TableManager';
-import PlayerSelector from './PlayerSelector';
-import MarkdownGuidePopup from './MarkdownGuidePopup';
+import React, { useEffect, useState, useCallback } from "react";
+import { createEvent, updateEvent, deleteEvent } from "../../../lib/eventUtils";
+import { fetchCategories, type Category } from "@/config/categories";
+import { TimelineEvent, Table } from "@/data/events";
+import TableManager from "./TableManager";
+import PlayerSelector from "./PlayerSelector";
+import MarkdownGuidePopup from "./MarkdownGuidePopup";
 import {
   saveDraft,
   loadDraft,
   deleteDraft,
   hasDraft,
   isMacPlatform,
-  getSaveShortcutText
-} from '@/../lib/draftUtils';
+  getSaveShortcutText,
+} from "@/../lib/draftUtils";
 
-import baseStyles from '@/styles/admin/base.module.css';
-import buttonStyles from '@/styles/admin/buttons.module.css';
-import formStyles from '@/styles/admin/forms.module.css';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import baseStyles from "@/styles/admin/base.module.css";
+import buttonStyles from "@/styles/admin/buttons.module.css";
+import formStyles from "@/styles/admin/forms.module.css";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface SideEvent {
   id: string;
@@ -61,15 +61,15 @@ interface EventFormProps {
 }
 
 const initialFormData: EventFormData = {
-  title: '',
-  date: '',
-  endDate: '',
-  category: '',
-  description: '',
+  title: "",
+  date: "",
+  endDate: "",
+  category: "",
+  description: "",
   isSpecial: false,
   tags: [],
   sideEvents: [],
-  tables: []
+  tables: [],
 };
 
 export const EventForm: React.FC<EventFormProps> = ({
@@ -78,51 +78,60 @@ export const EventForm: React.FC<EventFormProps> = ({
   onError,
   onDelete,
   onChange,
-  formData
+  formData,
 }) => {
   const [showMarkdownGuide, setShowMarkdownGuide] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [showDraftMessage, setShowDraftMessage] = useState(false);
   const [hasDraftState, setHasDraftState] = useState(false);
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   const [showPlayerSelector, setShowPlayerSelector] = useState(false);
-  const [currentField, setCurrentField] = useState<string>('');
-  const [currentCellPosition, setCurrentCellPosition] = useState<CellPosition | null>(null);
+  const [currentField, setCurrentField] = useState<string>("");
+  const [currentCellPosition, setCurrentCellPosition] =
+    useState<CellPosition | null>(null);
 
-  const [collapsedSideEvents, setCollapsedSideEvents] = useState<Record<string, boolean>>({});
-
+  const [collapsedSideEvents, setCollapsedSideEvents] = useState<
+    Record<string, boolean>
+  >({});
 
   const insertPlayerTag = (
-    fieldName: 'description' | 'sideEvents' | 'tables', 
+    fieldName: "description" | "sideEvents" | "tables",
     index?: number,
     rowIndex?: number,
     columnIndex?: number
   ) => {
-    if (fieldName === 'tables' && typeof index === 'number' && 
-        typeof rowIndex === 'number' && typeof columnIndex === 'number') {
-      setCurrentCellPosition({ 
-        tableIndex: index, 
-        rowIndex, 
-        columnIndex 
+    if (
+      fieldName === "tables" &&
+      typeof index === "number" &&
+      typeof rowIndex === "number" &&
+      typeof columnIndex === "number"
+    ) {
+      setCurrentCellPosition({
+        tableIndex: index,
+        rowIndex,
+        columnIndex,
       });
     } else {
       setCurrentCellPosition(null);
-      const fieldId = fieldName === 'description' ? 'description' :
-                     fieldName === 'sideEvents' ? `sideEvent-${index}` :
-                     `table-${index}`;
+      const fieldId =
+        fieldName === "description"
+          ? "description"
+          : fieldName === "sideEvents"
+          ? `sideEvent-${index}`
+          : `table-${index}`;
       setCurrentField(fieldId);
     }
     setShowPlayerSelector(true);
   };
 
   const toggleSideEvent = (id: string) => {
-    setCollapsedSideEvents(prev => ({
+    setCollapsedSideEvents((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -130,16 +139,16 @@ export const EventForm: React.FC<EventFormProps> = ({
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const cats = await fetchCategories();  // Here's the fix - use fetchCategories()
+        const cats = await fetchCategories(); // Here's the fix - use fetchCategories()
         setCategories(cats);
         setIsLoadingCategories(false);
       } catch (error) {
-        console.error('Error loading categories:', error);
-        setErrorMessage('Failed to load categories');
+        console.error("Error loading categories:", error);
+        setErrorMessage("Failed to load categories");
         setIsLoadingCategories(false);
       }
     };
-    
+
     loadCategories();
   }, []);
 
@@ -149,11 +158,14 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   // Save with message (for keyboard shortcut)
-  const saveDraftWithMessage = useCallback((data: EventFormData) => {
-    saveDraft(data, selectedEvent?.id);
-    setShowDraftMessage(true);
-    setTimeout(() => setShowDraftMessage(false), 2000);
-  }, [selectedEvent?.id]);
+  const saveDraftWithMessage = useCallback(
+    (data: EventFormData) => {
+      saveDraft(data, selectedEvent?.id);
+      setShowDraftMessage(true);
+      setTimeout(() => setShowDraftMessage(false), 2000);
+    },
+    [selectedEvent?.id]
+  );
 
   // Check for existing draft on mount
   useEffect(() => {
@@ -163,19 +175,21 @@ export const EventForm: React.FC<EventFormProps> = ({
   // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((isMacPlatform() && e.metaKey && e.key === 's') || 
-          (!isMacPlatform() && e.ctrlKey && e.key === 's')) {
+      if (
+        (isMacPlatform() && e.metaKey && e.key === "s") ||
+        (!isMacPlatform() && e.ctrlKey && e.key === "s")
+      ) {
         e.preventDefault();
         saveDraftWithMessage(formData);
       }
     };
-  
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [formData, saveDraftWithMessage]);
 
   const autoResizeTextArea = (element: HTMLTextAreaElement) => {
-    element.style.height = 'auto';
+    element.style.height = "auto";
     element.style.height = `${element.scrollHeight}px`;
   };
 
@@ -183,12 +197,12 @@ export const EventForm: React.FC<EventFormProps> = ({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
   const handleFormChange = (newData: EventFormData) => {
@@ -197,31 +211,35 @@ export const EventForm: React.FC<EventFormProps> = ({
     saveDraftQuietly(newData);
   };
 
-  const handleSideEventChange = (index: number, field: keyof SideEvent, value: string) => {
+  const handleSideEventChange = (
+    index: number,
+    field: keyof SideEvent,
+    value: string
+  ) => {
     const newSideEvents = [...formData.sideEvents];
     if (!newSideEvents[index]) {
-      newSideEvents[index] = { 
-        id: `side${Date.now()}`, 
-        title: '', 
-        description: '', 
-        tables: [] 
+      newSideEvents[index] = {
+        id: `side${Date.now()}`,
+        title: "",
+        description: "",
+        tables: [],
       };
     }
     // Preserve existing tables when updating other fields
     const existingTables = newSideEvents[index].tables || [];
-    newSideEvents[index] = { 
-      ...newSideEvents[index], 
+    newSideEvents[index] = {
+      ...newSideEvents[index],
       [field]: value,
-      tables: existingTables 
+      tables: existingTables,
     };
     handleFormChange({ ...formData, sideEvents: newSideEvents });
   };
 
   const handleTablesChange = (tables: Table[], updatedDescription?: string) => {
-    handleFormChange({ 
-      ...formData, 
+    handleFormChange({
+      ...formData,
       tables,
-      ...(updatedDescription ? { description: updatedDescription } : {})
+      ...(updatedDescription ? { description: updatedDescription } : {}),
     });
     setIsDirty(true);
   };
@@ -229,15 +247,19 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
 
-    if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this event? This action cannot be undone."
+      )
+    ) {
       try {
         await deleteEvent(selectedEvent.id);
-        onSuccess('Event deleted successfully!');
+        onSuccess("Event deleted successfully!");
         onDelete(selectedEvent.id);
         deleteDraft(selectedEvent.id);
       } catch (error) {
-        console.error('Error deleting event:', error);
-        setErrorMessage('Failed to delete event. Please try again.');
+        console.error("Error deleting event:", error);
+        setErrorMessage("Failed to delete event. Please try again.");
       }
     }
   };
@@ -248,48 +270,50 @@ export const EventForm: React.FC<EventFormProps> = ({
         ...formData,
         title: `${formData.title} Copy`,
       };
-  
+
       await createEvent(duplicateData);
-      onSuccess('Event duplicated successfully!');
+      onSuccess("Event duplicated successfully!");
     } catch (error) {
-      console.error('Error duplicating event:', error);
-      setErrorMessage('Failed to duplicate event. Please try again.');
+      console.error("Error duplicating event:", error);
+      setErrorMessage("Failed to duplicate event. Please try again.");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (!formData.category) {
-        setErrorMessage('Please select a category');
+        setErrorMessage("Please select a category");
         return;
       }
-  
+
       if (!formData.tags.length) {
-        setErrorMessage('Please add at least one tag');
+        setErrorMessage("Please add at least one tag");
         return;
       }
-  
+
       const cleanData = {
         title: formData.title.trim(),
         date: formData.date,
-        ...(formData.endDate?.trim() ? { endDate: formData.endDate.trim() } : {}),
+        ...(formData.endDate?.trim()
+          ? { endDate: formData.endDate.trim() }
+          : {}),
         category: formData.category,
         description: formData.description.trim(),
         isSpecial: formData.isSpecial,
-        tags: formData.tags.filter(tag => tag.trim() !== ''),
+        tags: formData.tags.filter((tag) => tag.trim() !== ""),
         sideEvents: formData.sideEvents
-          .filter(event => event.title.trim() || event.description.trim())
-          .map(event => ({
+          .filter((event) => event.title.trim() || event.description.trim())
+          .map((event) => ({
             id: event.id,
             title: event.title.trim(),
             description: event.description.trim(),
-            tables: event.tables || []
+            tables: event.tables || [],
           })),
-        tables: formData.tables
+        tables: formData.tables,
       };
-  
+
       if (selectedEvent) {
         await updateEvent(selectedEvent.id, cleanData);
         setShowSuccessMessage(true);
@@ -298,17 +322,16 @@ export const EventForm: React.FC<EventFormProps> = ({
         setTimeout(() => setShowSuccessMessage(false), 3000);
       } else {
         await createEvent(cleanData);
-        onSuccess('Event added successfully!');
+        onSuccess("Event added successfully!");
         deleteDraft();
         onChange(initialFormData);
       }
     } catch (error) {
-      console.error('Error saving event:', error);
-      setErrorMessage('Failed to save event. Please try again.');
-      onError('Failed to save event. Please try again.');
+      console.error("Error saving event:", error);
+      setErrorMessage("Failed to save event. Please try again.");
+      onError("Failed to save event. Please try again.");
     }
   };
-  
 
   // In the EventForm component return statement:
 
@@ -353,7 +376,9 @@ export const EventForm: React.FC<EventFormProps> = ({
 
       {showSuccessMessage && (
         <div className={baseStyles.successMessage}>
-          <span className={baseStyles.successText}>Event updated successfully!</span>
+          <span className={baseStyles.successText}>
+            Event updated successfully!
+          </span>
         </div>
       )}
 
@@ -364,7 +389,9 @@ export const EventForm: React.FC<EventFormProps> = ({
       )}
 
       {/* Title */}
-      <div className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}>
+      <div
+        className={`${formStyles.formSection} ${formStyles.fullWidth} ${formStyles.titleRow}`}
+      >
         <div className={formStyles.inputContainer}>
           <label htmlFor="title">Event Title</label>
           <input
@@ -372,7 +399,9 @@ export const EventForm: React.FC<EventFormProps> = ({
             type="text"
             className={formStyles.input}
             value={formData.title}
-            onChange={(e) => handleFormChange({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              handleFormChange({ ...formData, title: e.target.value })
+            }
             required
           />
         </div>
@@ -380,7 +409,9 @@ export const EventForm: React.FC<EventFormProps> = ({
           <input
             type="checkbox"
             checked={formData.isSpecial}
-            onChange={(e) => onChange({ ...formData, isSpecial: e.target.checked })}
+            onChange={(e) =>
+              onChange({ ...formData, isSpecial: e.target.checked })
+            }
           />
           Special Event
         </div>
@@ -423,7 +454,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           disabled={isLoadingCategories}
         >
           <option value="" disabled>
-            {isLoadingCategories ? 'Loading categories...' : 'Select Category'}
+            {isLoadingCategories ? "Loading categories..." : "Select Category"}
           </option>
           {Object.entries(categories).map(([id, category]) => (
             <option key={id} value={id}>
@@ -438,7 +469,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         <div className={formStyles.labelWithButton}>
           <label htmlFor="description">
             Description
-            <button 
+            <button
               type="button"
               onClick={() => setShowMarkdownGuide(true)}
               className={buttonStyles.markdownInfoButton}
@@ -448,7 +479,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           </label>
           <button
             type="button"
-            onClick={() => insertPlayerTag('description')}
+            onClick={() => insertPlayerTag("description")}
             className={buttonStyles.addPlayerButton}
           >
             Add Player
@@ -480,27 +511,38 @@ export const EventForm: React.FC<EventFormProps> = ({
           id="tags"
           type="text"
           className={formStyles.input}
-          value={formData.tags.join(', ')}
-          onChange={(e) => onChange({ ...formData, tags: e.target.value.split(',').map(tag => tag.trim()) })}
+          value={formData.tags.join(", ")}
+          onChange={(e) =>
+            onChange({
+              ...formData,
+              tags: e.target.value.split(",").map((tag) => tag.trim()),
+            })
+          }
           placeholder="tag1, tag2, tag3"
           required
         />
       </div>
 
-
       {/* Side Events */}
       <div className={formStyles.sideEvents}>
         <div className={formStyles.sideEventsHeader}>
-            Side Events
-          <button 
+          Side Events
+          <button
             type="button"
-            onClick={() => onChange({
-              ...formData,
-              sideEvents: [
-                ...formData.sideEvents,
-                { id: `side${Date.now()}`, title: '', description: '', tables: [] }
-              ]
-            })}
+            onClick={() =>
+              onChange({
+                ...formData,
+                sideEvents: [
+                  ...formData.sideEvents,
+                  {
+                    id: `side${Date.now()}`,
+                    title: "",
+                    description: "",
+                    tables: [],
+                  },
+                ],
+              })
+            }
             className={buttonStyles.addButton}
           >
             Add Side Event
@@ -510,17 +552,17 @@ export const EventForm: React.FC<EventFormProps> = ({
         {formData.sideEvents.map((sideEvent, index) => (
           <div key={sideEvent.id} className={formStyles.sideEventGroup}>
             <div className={formStyles.sideSubEventHeader}>
-            <div 
-              onClick={() => toggleSideEvent(sideEvent.id)}
-              style={{ cursor: 'pointer' }}
-            >
-              Side {index}
-            </div>
+              <div
+                onClick={() => toggleSideEvent(sideEvent.id)}
+                style={{ cursor: "pointer" }}
+              >
+                Side {index}
+              </div>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  insertPlayerTag('sideEvents', index);
+                  insertPlayerTag("sideEvents", index);
                 }}
                 className={buttonStyles.addPlayerButton}
               >
@@ -535,7 +577,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                   className={formStyles.input}
                   placeholder="Side Event Title"
                   value={sideEvent.title}
-                  onChange={(e) => handleSideEventChange(index, 'title', e.target.value)}
+                  onChange={(e) =>
+                    handleSideEventChange(index, "title", e.target.value)
+                  }
                 />
                 <textarea
                   id={`sideEvent-${index}`}
@@ -543,10 +587,12 @@ export const EventForm: React.FC<EventFormProps> = ({
                   placeholder="Side Event Description"
                   value={sideEvent.description}
                   onChange={(e) => {
-                    handleSideEventChange(index, 'description', e.target.value);
+                    handleSideEventChange(index, "description", e.target.value);
                     autoResizeTextArea(e.target);
                   }}
-                  onInput={(e) => autoResizeTextArea(e.target as HTMLTextAreaElement)}
+                  onInput={(e) =>
+                    autoResizeTextArea(e.target as HTMLTextAreaElement)
+                  }
                   ref={(ref) => {
                     if (ref) autoResizeTextArea(ref);
                   }}
@@ -555,10 +601,14 @@ export const EventForm: React.FC<EventFormProps> = ({
             )}
 
             {!collapsedSideEvents[sideEvent.id] && (
-              <button 
+              <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('Are you sure you want to remove this side event?')) {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to remove this side event?"
+                    )
+                  ) {
                     const newSideEvents = [...formData.sideEvents];
                     newSideEvents.splice(index, 1);
                     onChange({ ...formData, sideEvents: newSideEvents });
@@ -574,7 +624,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       </div>
 
       {/* Tables */}
-      <TableManager 
+      <TableManager
         tables={formData.tables}
         currentDescription={formData.description}
         onChange={handleTablesChange}
@@ -583,38 +633,37 @@ export const EventForm: React.FC<EventFormProps> = ({
           const table = formData.tables[tableIndex];
           const lastRowIndex = table.rows.length - 1;
           const lastColumnIndex = table.rows[lastRowIndex].cells.length - 1;
-          insertPlayerTag('tables', tableIndex, lastRowIndex, lastColumnIndex);
+          insertPlayerTag("tables", tableIndex, lastRowIndex, lastColumnIndex);
         }}
       />
-
 
       {/* Divider and Buttons */}
       <hr className={formStyles.divider} />
       <div className={`${buttonStyles.buttonGroup} ${buttonStyles.alignRight}`}>
         <button type="submit" className={buttonStyles.submitButton}>
-          {selectedEvent ? 'Update Event' : 'Add Event'}
+          {selectedEvent ? "Update Event" : "Add Event"}
         </button>
         {selectedEvent ? (
           <>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleDuplicateEvent}
               className={buttonStyles.duplicateButton}
             >
               Duplicate Event
             </button>
-            <button 
-              type="button" 
-              onClick={handleDeleteEvent} 
+            <button
+              type="button"
+              onClick={handleDeleteEvent}
               className={buttonStyles.deleteButton}
             >
               Delete Event
             </button>
           </>
         ) : (
-          <button 
-            type="button" 
-            onClick={() => onChange(initialFormData)} 
+          <button
+            type="button"
+            onClick={() => onChange(initialFormData)}
             className={buttonStyles.clearButton}
           >
             Clear Event
@@ -624,66 +673,71 @@ export const EventForm: React.FC<EventFormProps> = ({
 
       {/* Player Selector Modal */}
       {showPlayerSelector && (
-      <PlayerSelector
-        onSelect={(player) => {
-          const playerTag = `<${player.currentIgn}:${player.id}>`;  // Updated format
-          
-          if (currentCellPosition) {
-            // Handle table cell updates
-            const { tableIndex, rowIndex, columnIndex } = currentCellPosition;
-            const newTables = [...formData.tables];
-            const textArea = document.getElementById(
-              `table-${tableIndex}-${rowIndex}-${columnIndex}`
-            ) as HTMLTextAreaElement;
+        <PlayerSelector
+          onSelect={(player) => {
+            const playerTag = `<${player.currentIgn}:${player.id}>`; // Updated format
 
-            const currentContent = newTables[tableIndex].rows[rowIndex].cells[columnIndex].content;
-            
-            const cursorPos = document.activeElement === textArea 
-              ? textArea.selectionStart 
-              : currentContent.length;
+            if (currentCellPosition) {
+              // Handle table cell updates
+              const { tableIndex, rowIndex, columnIndex } = currentCellPosition;
+              const newTables = [...formData.tables];
+              const textArea = document.getElementById(
+                `table-${tableIndex}-${rowIndex}-${columnIndex}`
+              ) as HTMLTextAreaElement;
 
-            const before = currentContent.substring(0, cursorPos);
-            const after = currentContent.substring(cursorPos);
-            
-            newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = 
-              `${before}${playerTag}${after}`;
-            
-            handleTablesChange(newTables);
-            
-            setTimeout(() => {
+              const currentContent =
+                newTables[tableIndex].rows[rowIndex].cells[columnIndex].content;
+
+              const cursorPos =
+                document.activeElement === textArea
+                  ? textArea.selectionStart
+                  : currentContent.length;
+
+              const before = currentContent.substring(0, cursorPos);
+              const after = currentContent.substring(cursorPos);
+
+              newTables[tableIndex].rows[rowIndex].cells[
+                columnIndex
+              ].content = `${before}${playerTag}${after}`;
+
+              handleTablesChange(newTables);
+
+              setTimeout(() => {
+                if (textArea) {
+                  textArea.focus();
+                  const newCursorPos = cursorPos + playerTag.length;
+                  textArea.setSelectionRange(newCursorPos, newCursorPos);
+                }
+              }, 0);
+            } else {
+              // Handle other text areas
+              const textArea = document.getElementById(
+                currentField
+              ) as HTMLTextAreaElement;
               if (textArea) {
-                textArea.focus();
-                const newCursorPos = cursorPos + playerTag.length;
-                textArea.setSelectionRange(newCursorPos, newCursorPos);
-              }
-            }, 0);
-          } else {
-            // Handle other text areas
-            const textArea = document.getElementById(currentField) as HTMLTextAreaElement;
-            if (textArea) {
-              const cursorPos = textArea.selectionStart;
-              const text = textArea.value;
-              const before = text.substring(0, cursorPos);
-              const after = text.substring(cursorPos);
-              const newText = `${before}${playerTag}${after}`;
-              
-              if (currentField === 'description') {
-                handleFormChange({ ...formData, description: newText });
-              } else if (currentField.startsWith('sideEvent-')) {
-                const index = parseInt(currentField.split('-')[1]);
-                handleSideEventChange(index, 'description', newText);
+                const cursorPos = textArea.selectionStart;
+                const text = textArea.value;
+                const before = text.substring(0, cursorPos);
+                const after = text.substring(cursorPos);
+                const newText = `${before}${playerTag}${after}`;
+
+                if (currentField === "description") {
+                  handleFormChange({ ...formData, description: newText });
+                } else if (currentField.startsWith("sideEvent-")) {
+                  const index = parseInt(currentField.split("-")[1]);
+                  handleSideEventChange(index, "description", newText);
+                }
               }
             }
-          }
-          setShowPlayerSelector(false);
-          setCurrentCellPosition(null);
-        }}
-        onClose={() => {
-          setShowPlayerSelector(false);
-          setCurrentCellPosition(null);
-        }}
-      />
-    )}
+            setShowPlayerSelector(false);
+            setCurrentCellPosition(null);
+          }}
+          onClose={() => {
+            setShowPlayerSelector(false);
+            setCurrentCellPosition(null);
+          }}
+        />
+      )}
     </form>
   );
 };

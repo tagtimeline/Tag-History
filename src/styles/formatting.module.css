@@ -2,129 +2,129 @@
 
 /* Text Styles */
 .text {
-    color: #888;
-    line-height: 1.2;
-    margin: 0;
-    white-space: pre-line;
+  color: #888;
+  line-height: 1.2;
+  margin: 0;
+  white-space: pre-line;
 }
 
 .bold {
-    font-family: 'Minecraft';
-    font-weight: bold;
+  font-family: "Minecraft";
+  font-weight: bold;
 }
 
 .italic {
-    font-family: 'Minecraft';
-    font-style: italic;
+  font-family: "Minecraft";
+  font-style: italic;
 }
 
 .boldItalic {
-    font-family: 'Minecraft';
-    font-style: italic;
-    font-weight: bold;
+  font-family: "Minecraft";
+  font-style: italic;
+  font-weight: bold;
 }
 
 .underline {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .strikethrough {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }
 
 /* Header Styles */
 .headertext {
-    composes: text;
-    font-size: 1.2em;
+  composes: text;
+  font-size: 1.2em;
 }
 
 .subtext {
-    color: #666;
-    composes: text;
-    font-size: 0.9em;
-    margin-top: -4px;
-    opacity: 0.8;
+  color: #666;
+  composes: text;
+  font-size: 0.9em;
+  margin-top: -4px;
+  opacity: 0.8;
 }
 
 /* Paragraph Styles */
 .paragraph {
-    margin: 0 0 1em 0;
+  margin: 0 0 1em 0;
 }
 
 .paragraph:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 /* Link Styles */
 .inlineLink {
-    align-items: center;
-    background: rgba(88, 101, 242, 0.1);
-    border-radius: 3px;
-    color: #5865F2;
-    display: inline-flex;
-    font-family: "Minecraft";
-    font-size: inherit;
-    gap: 4px;
-    margin: 0 1px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+  align-items: center;
+  background: rgba(88, 101, 242, 0.1);
+  border-radius: 3px;
+  color: #5865f2;
+  display: inline-flex;
+  font-family: "Minecraft";
+  font-size: inherit;
+  gap: 4px;
+  margin: 0 1px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .inlineLink:hover,
 .inlineLink:visited:hover {
-    background: rgba(88, 101, 242, 0.2);
-    color: #5865F2;
+  background: rgba(88, 101, 242, 0.2);
+  color: #5865f2;
 }
 
 .inlineLink:visited {
-    color: #5865F2;
+  color: #5865f2;
 }
 
 .playerLink {
-    text-decoration: none;
-    background: rgba(0, 94, 255, 0.1);
-    border-radius: 3px;
-    color: #2486ff;
-    transition: all 0.2s ease;
+  text-decoration: none;
+  background: rgba(0, 94, 255, 0.1);
+  border-radius: 3px;
+  color: #2486ff;
+  transition: all 0.2s ease;
 }
 
 .playerLink:hover,
 .playerLink:visited:hover {
-    background: rgba(0, 94, 255, 0.3);
-    color: #2486ff;
+  background: rgba(0, 94, 255, 0.3);
+  color: #2486ff;
 }
 
 .playerLink:visited {
-    color: #2486ff;
+  color: #2486ff;
 }
 
 .eventLink {
-    align-items: center;
-    background: rgba(255, 153, 0, 0.1);
-    border-radius: 3px;
-    color: #ff9900;
-    display: inline-flex;
-    font-family: "Minecraft";
-    font-size: inherit;
-    gap: 4px;
-    margin: 0 1px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+  align-items: center;
+  background: rgba(255, 153, 0, 0.1);
+  border-radius: 3px;
+  color: #ff9900;
+  display: inline-flex;
+  font-family: "Minecraft";
+  font-size: inherit;
+  gap: 4px;
+  margin: 0 1px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
-  
+
 .eventLink:hover,
 .eventLink:visited:hover {
-    background: rgba(255, 153, 0, 0.2);
-    color: #ff9900;
+  background: rgba(255, 153, 0, 0.2);
+  color: #ff9900;
 }
-  
+
 .eventLink:visited {
-    color: #ff9900;
+  color: #ff9900;
 }
 
 .eventLink svg {
-    border-radius: 3px;
-    padding: 2px;
+  border-radius: 3px;
+  padding: 2px;
 }

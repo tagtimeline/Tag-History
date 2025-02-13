@@ -1,20 +1,20 @@
 // src/components/player/PlayerSearch.tsx
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../../lib/firebaseConfig';
-import searchStyles from '../../styles/search.module.css';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../../lib/firebaseConfig";
+import searchStyles from "../../styles/search.module.css";
 
 interface Player {
-    id: string;
-    currentIgn: string;
-    uuid: string;
-    pastIgns?: string[];
+  id: string;
+  currentIgn: string;
+  uuid: string;
+  pastIgns?: string[];
 }
 
 const PlayerSearch: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [searchResults, setSearchResults] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,22 +23,22 @@ const PlayerSearch: React.FC = () => {
 
   useEffect(() => {
     const handleRouteChange = () => {
-      setSearchTerm('');
+      setSearchTerm("");
       setSearchResults([]);
       setIsFocused(false);
     };
 
-    router.events.on('routeChangeStart', handleRouteChange);
-    return () => router.events.off('routeChangeStart', handleRouteChange);
+    router.events.on("routeChangeStart", handleRouteChange);
+    return () => router.events.off("routeChangeStart", handleRouteChange);
   }, [router]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, 'players'),
+      collection(db, "players"),
       (snapshot) => {
-        const playerData = snapshot.docs.map(doc => ({
+        const playerData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         })) as Player[];
 
         // Sort players alphabetically and ensure flodlol is first
@@ -46,16 +46,16 @@ const PlayerSearch: React.FC = () => {
 
         // Sort players alphabetically and ensure flodlol is first
         playerData.sort((a, b) => {
-          if (a.currentIgn.toLowerCase() === 'flodlol') return -1;
-          if (b.currentIgn.toLowerCase() === 'flodlol') return 1;
+          if (a.currentIgn.toLowerCase() === "flodlol") return -1;
+          if (b.currentIgn.toLowerCase() === "flodlol") return 1;
           return a.currentIgn.localeCompare(b.currentIgn);
         });
-        
+
         setPlayers(playerData);
         setIsLoading(false);
       },
       (error) => {
-        console.error('Error fetching players:', error);
+        console.error("Error fetching players:", error);
         setIsLoading(false);
       }
     );
@@ -66,19 +66,19 @@ const PlayerSearch: React.FC = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     if (value.trim()) {
       const lowercaseValue = value.toLowerCase();
       // First try to find exact document ID match
-      const documentMatch = players.find(player => 
-        player.id.toLowerCase() === lowercaseValue
+      const documentMatch = players.find(
+        (player) => player.id.toLowerCase() === lowercaseValue
       );
-  
+
       if (documentMatch) {
         setSearchResults([documentMatch]);
       } else {
         // Fall back to filtering by IGN only if no document ID match
-        const filtered = players.filter(player => 
+        const filtered = players.filter((player) =>
           player?.currentIgn?.toLowerCase().startsWith(lowercaseValue)
         );
         setSearchResults(filtered);
@@ -87,12 +87,11 @@ const PlayerSearch: React.FC = () => {
       setSearchResults(players);
     }
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchTerm.trim()) {
+    if (e.key === "Enter" && searchTerm.trim()) {
       router.push(`/player/${searchTerm.trim()}`);
-      setSearchTerm('');
+      setSearchTerm("");
       setSearchResults([]);
       setIsFocused(false);
     }
@@ -101,18 +100,17 @@ const PlayerSearch: React.FC = () => {
   const handleResultClick = (player: Player) => {
     // Use document ID instead of IGN for navigation
     router.push(`/player/${player.id}`);
-    setSearchTerm('');
+    setSearchTerm("");
     setSearchResults([]);
     setIsFocused(false);
   };
 
-
   return (
     <div className={searchStyles.searchContainer}>
-      <input 
-        type="text" 
+      <input
+        type="text"
         className={searchStyles.playerSearchInput}
-        placeholder="Search players..." 
+        placeholder="Search players..."
         value={searchTerm}
         onChange={handleSearchChange}
         onKeyPress={handleKeyPress}
@@ -125,36 +123,40 @@ const PlayerSearch: React.FC = () => {
         }}
       />
       {isLoading ? (
-        <div className={searchStyles.playerSearchResults}> 
+        <div className={searchStyles.playerSearchResults}>
           <div className={searchStyles.loadingText}>Loading...</div>
         </div>
-      ) : (isFocused || searchTerm) && (
-        <div className={searchStyles.playerSearchResults}>
-          {searchResults.length > 0 ? (
-            searchResults.map(player => (
-              <div 
-                key={player.id} 
-                className={searchStyles.playerResultItem}
-                onClick={() => handleResultClick(player)}
-              >
-                <div className={searchStyles.avatarWrapper}>
-                  <Image
-                    src={`https://crafthead.net/avatar/${player.uuid}`}
-                    alt={player.currentIgn}
-                    width={24}
-                    height={24}
-                    className={searchStyles.playerAvatar}
-                  />
+      ) : (
+        (isFocused || searchTerm) && (
+          <div className={searchStyles.playerSearchResults}>
+            {searchResults.length > 0 ? (
+              searchResults.map((player) => (
+                <div
+                  key={player.id}
+                  className={searchStyles.playerResultItem}
+                  onClick={() => handleResultClick(player)}
+                >
+                  <div className={searchStyles.avatarWrapper}>
+                    <Image
+                      src={`https://crafthead.net/avatar/${player.uuid}`}
+                      alt={player.currentIgn}
+                      width={24}
+                      height={24}
+                      className={searchStyles.playerAvatar}
+                    />
+                  </div>
+                  <div className={searchStyles.playerResultTitle}>
+                    {player.currentIgn}
+                  </div>
                 </div>
-                <div className={searchStyles.playerResultTitle}>{player.currentIgn}</div>
+              ))
+            ) : (
+              <div className={searchStyles.noResults}>
+                Press enter to search for &quot;{searchTerm}&quot;
               </div>
-            ))
-          ) : (
-            <div className={searchStyles.noResults}>
-              Press enter to search for &quot;{searchTerm}&quot;
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );

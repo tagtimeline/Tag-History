@@ -1,5 +1,5 @@
-import React from 'react';
-import controlStyles from '../../styles/controls.module.css';
+import React from "react";
+import controlStyles from "../../styles/controls.module.css";
 
 interface SettingsPopupProps {
   onClose: () => void;
@@ -9,26 +9,35 @@ interface SettingsPopupProps {
   onShowEventDatesToggle: (show: boolean) => void;
 }
 
-const SettingsPopup: React.FC<SettingsPopupProps> = ({ 
-  onClose, 
-  isDraggingEnabled, 
+const SettingsPopup: React.FC<SettingsPopupProps> = ({
+  onClose,
+  isDraggingEnabled,
   onDraggingToggle,
   showEventDates,
-  onShowEventDatesToggle
+  onShowEventDatesToggle,
 }) => {
   return (
     <div className={controlStyles.settingsOverlay} onClick={onClose}>
-      <div className={controlStyles.settingsPopup} onClick={e => e.stopPropagation()}>
-        <div style={{ position: 'relative' }}>
-          <button className={controlStyles.closeButton} onClick={onClose} style={{ position: 'absolute', top: '0', right: '0' }}>×</button>
+      <div
+        className={controlStyles.settingsPopup}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ position: "relative" }}>
+          <button
+            className={controlStyles.closeButton}
+            onClick={onClose}
+            style={{ position: "absolute", top: "0", right: "0" }}
+          >
+            ×
+          </button>
           <h3 className={controlStyles.settingsTitle}>Timeline Settings</h3>
         </div>
         <hr className={controlStyles.divider} />
         <div className={controlStyles.settingsContent}>
           <div className={controlStyles.settingGroup}>
             <label className={controlStyles.checkboxLabel}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={isDraggingEnabled}
                 onChange={(e) => onDraggingToggle(e.target.checked)}
               />
@@ -38,14 +47,12 @@ const SettingsPopup: React.FC<SettingsPopupProps> = ({
               </div>
             </label>
             <label className={controlStyles.checkboxLabel}>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={showEventDates}
                 onChange={(e) => onShowEventDatesToggle(e.target.checked)}
               />
-              <div>
-                Show event dates
-              </div>
+              <div>Show event dates</div>
             </label>
           </div>
         </div>

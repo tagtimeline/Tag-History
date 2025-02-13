@@ -1,60 +1,60 @@
 /* src/styles/admin/welcome.module.css */
 .adminWelcome {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    height: calc(100vh - 120px);
-    overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  height: calc(100vh - 120px);
+  overflow: hidden;
 }
-  
+
 .welcomeContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
-  
+
 .title {
-    font-size: 32px;
-    font-weight: normal;
-    text-align: center;
-    margin-top: -5px;
+  font-size: 32px;
+  font-weight: normal;
+  text-align: center;
+  margin-top: -5px;
 }
 
 .adminInfoContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
 .adminInfo {
-    text-align: left;
-    margin: 20px 0;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+  text-align: left;
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
-  
+
 .adminInfo p {
-    margin: 5px 0;
-    color: #fff;
+  margin: 5px 0;
+  color: #fff;
 }
-  
+
 .playerHead {
-    border-radius: 4px;
-    overflow: hidden;
+  border-radius: 4px;
+  overflow: hidden;
 }
-  
+
 .playerHead img {
-    display: block;
+  display: block;
 }
-  
+
 .adminButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 30px;
 }

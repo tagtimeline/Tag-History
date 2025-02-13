@@ -1,22 +1,26 @@
 // src/pages/events.tsx
-import type { NextPage } from 'next';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
-import EventModal from '../components/timeline/EventModal';
-import EventSearch from '../components/search/EventSearch';
-import { TimelineEvent } from '../data/events';
-import styles from '../styles/eventsList.module.css';
-import eventStyles from '../styles/events.module.css';
-import controlStyles from '../styles/controls.module.css';
-import withAuth from '../components/auth/withAuth';
-import { fetchCategories, getEventStyles, Category } from '../config/categories';
-import { ALL_EVENTS_OPTION } from '../config/dropdown';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../lib/firebaseConfig';
-import { getAllEvents } from '../../lib/eventUtils';
+import type { NextPage } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import EventModal from "../components/timeline/EventModal";
+import EventSearch from "../components/search/EventSearch";
+import { TimelineEvent } from "../data/events";
+import styles from "../styles/eventsList.module.css";
+import eventStyles from "../styles/events.module.css";
+import controlStyles from "../styles/controls.module.css";
+import withAuth from "../components/auth/withAuth";
+import {
+  fetchCategories,
+  getEventStyles,
+  Category,
+} from "../config/categories";
+import { ALL_EVENTS_OPTION } from "../config/dropdown";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../lib/firebaseConfig";
+import { getAllEvents } from "../../lib/eventUtils";
 
 interface EventsPageProps extends Record<string, unknown> {
   initialEvents: TimelineEvent[];
@@ -24,12 +28,16 @@ interface EventsPageProps extends Record<string, unknown> {
 
 const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
   const [events, setEvents] = useState<TimelineEvent[]>(initialEvents);
-  const [selectedCategories, setSelectedCategories] = useState([ALL_EVENTS_OPTION.id]);
-  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState([
+    ALL_EVENTS_OPTION.id,
+  ]);
+  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(
+    null
+  );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
@@ -40,8 +48,8 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
         const cats = await fetchCategories();
         setCategories(cats);
       } catch (error) {
-        console.error('Error loading categories:', error);
-        setError('Failed to load categories');
+        console.error("Error loading categories:", error);
+        setError("Failed to load categories");
       } finally {
         setIsLoadingCategories(false);
       }
@@ -52,20 +60,22 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
   // Set up real-time listener for events
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, 'events'),
+      collection(db, "events"),
       (snapshot) => {
-        const updatedEvents = snapshot.docs.map(doc => ({
+        const updatedEvents = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         })) as TimelineEvent[];
-        
-        setEvents(updatedEvents.sort((a, b) => 
-          new Date(a.date).getTime() - new Date(b.date).getTime()
-        ));
+
+        setEvents(
+          updatedEvents.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          )
+        );
       },
       (error) => {
-        console.error('Error listening to events:', error);
-        setError('Failed to load updates');
+        console.error("Error listening to events:", error);
+        setError("Failed to load updates");
       }
     );
 
@@ -74,52 +84,59 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategories(prev => {
+    setSelectedCategories((prev) => {
       if (categoryId === ALL_EVENTS_OPTION.id) {
         return [ALL_EVENTS_OPTION.id];
       }
-      
+
       if (prev.includes(ALL_EVENTS_OPTION.id)) {
         return [categoryId];
       }
-      
+
       const newCategories = prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId];
-        
-      return newCategories.length === 0 ? [ALL_EVENTS_OPTION.id] : newCategories;
+
+      return newCategories.length === 0
+        ? [ALL_EVENTS_OPTION.id]
+        : newCategories;
     });
   };
 
   const allCategories = [ALL_EVENTS_OPTION, ...Object.values(categories)];
 
   const filteredEvents = events
-    .filter(event => 
-      selectedCategories.includes(ALL_EVENTS_OPTION.id) || 
-      selectedCategories.includes(event.category)
+    .filter(
+      (event) =>
+        selectedCategories.includes(ALL_EVENTS_OPTION.id) ||
+        selectedCategories.includes(event.category)
     )
     .sort((a, b) => {
-      const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-      return sortDirection === 'asc' ? comparison : -comparison;
+      const comparison =
+        new Date(a.date).getTime() - new Date(b.date).getTime();
+      return sortDirection === "asc" ? comparison : -comparison;
     });
 
   // Format dates on the client side only
   const formatDate = (date: string) => {
-    if (typeof window === 'undefined') return '';
-    return new Date(date).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    if (typeof window === "undefined") return "";
+    return new Date(date).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
@@ -146,40 +163,47 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
       </Header>
 
       {error && (
-        <div className="error-message" style={{ 
-          color: 'red', 
-          textAlign: 'center', 
-          padding: '10px' 
-        }}>
+        <div
+          className="error-message"
+          style={{
+            color: "red",
+            textAlign: "center",
+            padding: "10px",
+          }}
+        >
           {error}
         </div>
       )}
 
       <main className={styles.mainContent}>
         <div className={styles.eventsTitle}>Events List</div>
-        
+
         <div className={styles.eventsControls}>
           <div className={controlStyles.dropdown} ref={dropdownRef}>
-            <div 
+            <div
               className={controlStyles.dropdownHeader}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <span className={controlStyles.label}>
-                {isLoadingCategories ? 'Loading categories...' : 'Categories...'}
+                {isLoadingCategories
+                  ? "Loading categories..."
+                  : "Categories..."}
               </span>
             </div>
             {isDropdownOpen && !isLoadingCategories && (
               <ul className={controlStyles.dropdownMenu}>
                 {allCategories.map((category) => (
-                  <li 
+                  <li
                     key={category.id}
                     className={`${controlStyles.dropdownItem} ${
-                      selectedCategories.includes(category.id) ? controlStyles.selected : ''
+                      selectedCategories.includes(category.id)
+                        ? controlStyles.selected
+                        : ""
                     }`}
                     onClick={() => handleCategorySelect(category.id)}
                   >
-                    <span 
-                      className={controlStyles.categoryColor} 
+                    <span
+                      className={controlStyles.categoryColor}
                       style={{ backgroundColor: category.color }}
                     />
                     {category.name}
@@ -189,42 +213,57 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
             )}
           </div>
 
-          <EventSearch 
-            onEventSelect={setSelectedEvent}
-          />
+          <EventSearch onEventSelect={setSelectedEvent} />
 
           <button
             className={styles.sortButton}
-            onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+            onClick={() =>
+              setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
+            }
           >
-            {sortDirection === 'asc' ? '↑' : '↓'} Date
+            {sortDirection === "asc" ? "↑" : "↓"} Date
           </button>
         </div>
 
         <div className={styles.eventsList}>
-          {filteredEvents.map(event => {
+          {filteredEvents.map((event) => {
             const eventStyle = getEventStyles(event.category, event.isSpecial);
             return (
-              <div 
+              <div
                 key={event.id}
                 data-event-id={event.id}
                 className={`${styles.eventBox} ${eventStyles.eventBox}`}
                 onClick={() => setSelectedEvent(event)}
                 style={{
                   ...eventStyle,
-                  position: 'relative',
+                  position: "relative",
                   left: 0,
                   top: 0,
-                  width: '100%',
-                  cursor: 'pointer',
+                  width: "100%",
+                  cursor: "pointer",
                 }}
               >
                 <div className={eventStyles.eventContent}>
-                  <h3 className={eventStyles.eventTitle} style={{ fontSize: '14px', marginBottom: '4px' }}>
-                    {event.isSpecial && <span className={eventStyles.specialStar} style={{ fontSize: '14px' }}>⭐</span>}
-                    <span className={eventStyles.eventTitleText}>{event.title}</span>
+                  <h3
+                    className={eventStyles.eventTitle}
+                    style={{ fontSize: "14px", marginBottom: "4px" }}
+                  >
+                    {event.isSpecial && (
+                      <span
+                        className={eventStyles.specialStar}
+                        style={{ fontSize: "14px" }}
+                      >
+                        ⭐
+                      </span>
+                    )}
+                    <span className={eventStyles.eventTitleText}>
+                      {event.title}
+                    </span>
                   </h3>
-                  <div className={eventStyles.eventDate} style={{ fontSize: '12px' }}>
+                  <div
+                    className={eventStyles.eventDate}
+                    style={{ fontSize: "12px" }}
+                  >
                     {formatDate(event.date)}
                     {event.endDate && ` - ${formatDate(event.endDate)}`}
                   </div>
@@ -235,9 +274,9 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
         </div>
 
         {selectedEvent && (
-          <EventModal 
-            event={selectedEvent} 
-            onClose={() => setSelectedEvent(null)} 
+          <EventModal
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
           />
         )}
       </main>
@@ -250,18 +289,18 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
 export async function getServerSideProps() {
   try {
     const events = await getAllEvents();
-    
+
     return {
       props: {
-        initialEvents: JSON.parse(JSON.stringify(events))
-      }
+        initialEvents: JSON.parse(JSON.stringify(events)),
+      },
     };
   } catch (error) {
-    console.error('Error fetching initial events:', error);
+    console.error("Error fetching initial events:", error);
     return {
       props: {
-        initialEvents: []
-      }
+        initialEvents: [],
+      },
     };
   }
 }

@@ -10,11 +10,11 @@
 }
 
 .authBox {
-    background-color: transparent;
-    border: none;
-    max-width: 300px;
-    text-align: center;
-    width: 90%;
+  background-color: transparent;
+  border: none;
+  max-width: 300px;
+  text-align: center;
+  width: 90%;
 }
 
 .title {
@@ -29,7 +29,7 @@
 }
 
 .form {
-align-items: center;
+  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -58,7 +58,7 @@ align-items: center;
   border-radius: 4px;
   color: white;
   cursor: pointer;
-  font-family: 'Minecraft', sans-serif;
+  font-family: "Minecraft", sans-serif;
   font-size: 14px;
   padding: 8px;
   width: 320px;

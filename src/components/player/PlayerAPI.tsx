@@ -1,10 +1,10 @@
 // src/components/player/PlayerAPI.tsx
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../lib/firebaseConfig';
-import { PlayerProfile } from '../../config/players';
-import { TimelineEvent } from '../../data/events';
-import { getAllEvents } from '../../../lib/eventUtils';
-import { getAllIgnsForPlayer } from '../../../lib/playerUtils';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../../lib/firebaseConfig";
+import { PlayerProfile } from "../../config/players";
+import { TimelineEvent } from "../../data/events";
+import { getAllEvents } from "../../../lib/eventUtils";
+import { getAllIgnsForPlayer } from "../../../lib/playerUtils";
 
 interface PlayerDataResponse extends Record<string, unknown> {
   historicalIgn: string;
@@ -17,16 +17,16 @@ interface PlayerDataResponse extends Record<string, unknown> {
 export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
   try {
     // console.log(`[PlayerAPI] Starting lookup for ${ign}`);
-    
+
     // First check our database
-    const playersRef = collection(db, 'players');
-    const q = query(playersRef, where('currentIgn', '==', ign));
+    const playersRef = collection(db, "players");
+    const q = query(playersRef, where("currentIgn", "==", ign));
     const querySnapshot = await getDocs(q);
-    
+
     let dbPlayerData = null;
     if (!querySnapshot.empty) {
       dbPlayerData = querySnapshot.docs[0].data();
-     // console.log(`[PlayerAPI] Found player in database:`, dbPlayerData);
+      // console.log(`[PlayerAPI] Found player in database:`, dbPlayerData);
     } else {
       // console.log(`[PlayerAPI] Player not found in database`);
     }
@@ -42,7 +42,7 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
     // Get events and Hypixel data in parallel
     const [events, hypixelData] = await Promise.all([
       getAllEvents(),
-      fetchHypixelData(mojangData.uuid)
+      fetchHypixelData(mojangData.uuid),
     ]);
 
     // console.log(`[PlayerAPI] Successfully gathered all data for ${ign}`);
@@ -54,16 +54,16 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
       username_history: mojangData.username_history,
       textures: {
         skin: {
-          url: mojangData.textures.skin
+          url: mojangData.textures.skin,
         },
-        cape: mojangData.textures.cape
+        cape: mojangData.textures.cape,
       },
       hypixel: hypixelData,
       events: dbPlayerData?.events || [],
       role: dbPlayerData?.role || null,
       altAccounts: dbPlayerData?.altAccounts || [],
       mainAccount: dbPlayerData?.mainAccount || null,
-      pastIgns: dbPlayerData?.pastIgns || []
+      pastIgns: dbPlayerData?.pastIgns || [],
     };
 
     const allUsernames = await getAllIgnsForPlayer(mojangData.uuid);
@@ -74,10 +74,10 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
       currentIgn: mojangData.currentIgn,
       allUsernames,
       playerData,
-      initialEvents: events
+      initialEvents: events,
     };
   } catch (error) {
-    console.error('[PlayerAPI] Error in getPlayerData:', error);
+    console.error("[PlayerAPI] Error in getPlayerData:", error);
     return createErrorResponse(ign);
   }
 }
@@ -85,9 +85,11 @@ export async function getPlayerData(ign: string): Promise<PlayerDataResponse> {
 async function fetchMojangData(ign: string) {
   try {
     // console.log(`[MojangAPI] Fetching data for ${ign}`);
-    
+
     // First try official Minecraft API
-    const minecraftResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${ign}`);
+    const minecraftResponse = await fetch(
+      `https://api.mojang.com/users/profiles/minecraft/${ign}`
+    );
     let uuid;
     let currentIgn;
 
@@ -99,13 +101,15 @@ async function fetchMojangData(ign: string) {
     } else {
       // If Minecraft API fails, try Ashcon as fallback
       // console.log(`[MojangAPI] Minecraft API failed, trying Ashcon fallback`);
-      const ashconResponse = await fetch(`https://api.ashcon.app/mojang/v2/user/${ign}`);
-      
+      const ashconResponse = await fetch(
+        `https://api.ashcon.app/mojang/v2/user/${ign}`
+      );
+
       if (!ashconResponse.ok) {
         // console.log(`[MojangAPI] Ashcon API fallback failed:`, ashconResponse.status);
         return null;
       }
-      
+
       const ashconData = await ashconResponse.json();
       uuid = ashconData.uuid;
       currentIgn = ashconData.username;
@@ -113,7 +117,9 @@ async function fetchMojangData(ign: string) {
     }
 
     // Get profile data from Mojang
-    const profileResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+    const profileResponse = await fetch(
+      `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`
+    );
     if (!profileResponse.ok) {
       // console.log(`[MojangAPI] Failed to fetch profile data:`, profileResponse.status);
       return null;
@@ -121,19 +127,25 @@ async function fetchMojangData(ign: string) {
     const profileData = await profileResponse.json();
 
     // Get additional data from Ashcon (for username history and creation date)
-    const ashconDataResponse = await fetch(`https://api.ashcon.app/mojang/v2/user/${currentIgn}`);
+    const ashconDataResponse = await fetch(
+      `https://api.ashcon.app/mojang/v2/user/${currentIgn}`
+    );
     const ashconData = await ashconDataResponse.json();
 
     // Parse texture data
-    const textureProperty = profileData.properties.find((p: { name: string }) => p.name === 'textures');
-    const textureData = JSON.parse(Buffer.from(textureProperty.value, 'base64').toString());
+    const textureProperty = profileData.properties.find(
+      (p: { name: string }) => p.name === "textures"
+    );
+    const textureData = JSON.parse(
+      Buffer.from(textureProperty.value, "base64").toString()
+    );
 
     let capeUrl = null;
     try {
       const capesResponse = await fetch(`https://api.capes.dev/load/${uuid}`);
       if (capesResponse.ok) {
         const capesData = await capesResponse.json();
-        
+
         // Check for OptiFine cape
         if (capesData.optifine?.msg === "Cape found") {
           capeUrl = capesData.optifine.imageUrl;
@@ -159,14 +171,16 @@ async function fetchMojangData(ign: string) {
       uuid,
       currentIgn,
       created_at: ashconData.created_at || new Date().toISOString(),
-      username_history: ashconData.username_history || [{ username: currentIgn }],
+      username_history: ashconData.username_history || [
+        { username: currentIgn },
+      ],
       textures: {
         skin: textureData.textures.SKIN.url,
-        cape: capeUrl ? { url: capeUrl } : null
-      }
+        cape: capeUrl ? { url: capeUrl } : null,
+      },
     };
   } catch {
-    console.error('[MojangAPI] Error', );
+    console.error("[MojangAPI] Error");
     return null;
   }
 }
@@ -174,7 +188,7 @@ async function fetchMojangData(ign: string) {
 async function fetchHypixelData(uuid: string) {
   const HYPIXEL_API_KEY = process.env.HYPIXEL_API_KEY;
   if (!HYPIXEL_API_KEY) {
-    console.error('Hypixel API key not found');
+    console.error("Hypixel API key not found");
     return null;
   }
 
@@ -182,65 +196,72 @@ async function fetchHypixelData(uuid: string) {
     // Fetch player and guild data in parallel
     const [playerResponse, guildResponse] = await Promise.all([
       fetch(`https://api.hypixel.net/player?uuid=${uuid}`, {
-        headers: { 'API-Key': HYPIXEL_API_KEY }
+        headers: { "API-Key": HYPIXEL_API_KEY },
       }),
       fetch(`https://api.hypixel.net/guild?player=${uuid}`, {
-        headers: { 'API-Key': HYPIXEL_API_KEY }
-      })
+        headers: { "API-Key": HYPIXEL_API_KEY },
+      }),
     ]);
 
     const playerData = await playerResponse.json();
     if (!playerData.success || !playerData.player) return null;
-    
+
     const guildData = await guildResponse.json();
     const player = playerData.player;
 
     // Calculate stats
     const networkExp = player.networkExp || 0;
-    const networkLevel = Math.floor((Math.sqrt(networkExp + 15312.5) - 125/Math.sqrt(2))/(25*Math.sqrt(2)));
+    const networkLevel = Math.floor(
+      (Math.sqrt(networkExp + 15312.5) - 125 / Math.sqrt(2)) /
+        (25 * Math.sqrt(2))
+    );
 
     const tntGames = player.stats?.TNTGames || {};
     const tntWins = tntGames.wins_tntag || 0;
     const tntKills = tntGames.kills_tntag || 0;
     const tntDeaths = tntGames.deaths_tntag || 0;
-    const tntKdr = tntDeaths === 0 ? tntKills : Number((tntKills / tntDeaths).toFixed(2));
-    const tntPlaytimeMinutes = player.achievements?.tntgames_tnt_triathlon || null;
-    const tntPlaytime = tntPlaytimeMinutes ? Math.round(tntPlaytimeMinutes / 60) : 'N/A';
+    const tntKdr =
+      tntDeaths === 0 ? tntKills : Number((tntKills / tntDeaths).toFixed(2));
+    const tntPlaytimeMinutes =
+      player.achievements?.tntgames_tnt_triathlon || null;
+    const tntPlaytime = tntPlaytimeMinutes
+      ? Math.round(tntPlaytimeMinutes / 60)
+      : "N/A";
 
     // Get guild info
     let guildInfo = null;
     if (guildData.success && guildData.guild) {
-      const hypixelUuid = uuid.replace(/-/g, '');
+      const hypixelUuid = uuid.replace(/-/g, "");
       const member = guildData.guild.members.find(
         (m: { uuid: string }) => m.uuid === hypixelUuid
       );
 
       guildInfo = {
         name: guildData.guild.name,
-        rank: member?.rank || null
+        rank: member?.rank || null,
       };
     }
 
     return {
-      rank: player.rank || 
-            (player.monthlyPackageRank !== 'NONE' ? 'SUPERSTAR' : null) || 
-            player.newPackageRank || 
-            'DEFAULT',
+      rank:
+        player.rank ||
+        (player.monthlyPackageRank !== "NONE" ? "SUPERSTAR" : null) ||
+        player.newPackageRank ||
+        "DEFAULT",
       rankPlusColor: player.rankPlusColor || null,
-      monthlyPackageRank: player.monthlyPackageRank || '',
-      newPackageRank: player.newPackageRank || '',
+      monthlyPackageRank: player.monthlyPackageRank || "",
+      newPackageRank: player.newPackageRank || "",
       networkLevel,
       guild: guildInfo,
       tntGames: {
         wins_tntag: tntWins,
         playtime: tntPlaytime,
-        kdr: tntKdr
+        kdr: tntKdr,
       },
-      discord: player.socialMedia?.links?.DISCORD || null
+      discord: player.socialMedia?.links?.DISCORD || null,
     };
-
   } catch {
-    console.error('Error fetching Hypixel data');
+    console.error("Error fetching Hypixel data");
     return null;
   }
 }
@@ -251,6 +272,6 @@ function createErrorResponse(ign: string): PlayerDataResponse {
     currentIgn: null,
     allUsernames: [],
     playerData: null,
-    initialEvents: []
+    initialEvents: [],
   };
 }

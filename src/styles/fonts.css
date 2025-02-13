@@ -2,47 +2,47 @@
 
 /* Minecraft Regular */
 @font-face {
-    font-family: "Minecraft";
-    font-style: normal;
-    font-weight: normal;
-    src: url("../assets/fonts/MinecraftRegular-Bmg3.otf") format("truetype");
+  font-family: "Minecraft";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../assets/fonts/MinecraftRegular-Bmg3.otf") format("truetype");
 }
 
 /* Minecraft Bold */
 @font-face {
-    font-family: "Minecraft";
-    font-style: normal;
-    font-weight: bold;
-    src: url("../assets/fonts/MinecraftBold-nMK1.otf") format("opentype");
+  font-family: "Minecraft";
+  font-style: normal;
+  font-weight: bold;
+  src: url("../assets/fonts/MinecraftBold-nMK1.otf") format("opentype");
 }
 
 /* Minecraft Italic */
 @font-face {
-    font-family: "Minecraft";
-    font-style: italic;
-    font-weight: normal;
-    src: url("../assets/fonts/MinecraftItalic-R8Mo.otf") format("opentype");
+  font-family: "Minecraft";
+  font-style: italic;
+  font-weight: normal;
+  src: url("../assets/fonts/MinecraftItalic-R8Mo.otf") format("opentype");
 }
 
 /* Minecraft Bold Italic */
 @font-face {
-    font-family: "Minecraft";
-    font-style: italic;
-    font-weight: bold;
-    src: url("../assets/fonts/MinecraftBoldItalic-1y1e.otf") format("opentype");
+  font-family: "Minecraft";
+  font-style: italic;
+  font-weight: bold;
+  src: url("../assets/fonts/MinecraftBoldItalic-1y1e.otf") format("opentype");
 }
 
 /* Global Font Styles */
 body {
-    font-family: "Minecraft", "Courier New", Courier, monospace;
+  font-family: "Minecraft", "Courier New", Courier, monospace;
 }
 
 strong {
-    font-family: 'Minecraft';
-    font-weight: bold;
+  font-family: "Minecraft";
+  font-weight: bold;
 }
 
 em {
-    font-family: 'Minecraft';
-    font-style: italic;
+  font-family: "Minecraft";
+  font-style: italic;
 }

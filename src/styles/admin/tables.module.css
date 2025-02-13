@@ -1,151 +1,146 @@
 /* src/styles/admin/tables.module.css */
 .tableWrapper {
-    background-color: #1a1a1a;
-    border: 1px solid #444;
-    border-radius: 4px;
-    padding: 5px;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 5px;
 }
 
 .tables {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .tablesHeader {
-    display: flex;
-    margin: 0;
-    color: white;
-    margin-top: 5px;
-    font-size: 18px;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  margin: 0;
+  color: white;
+  margin-top: 5px;
+  font-size: 18px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .tableButton {
-    composes: button from './buttons.module.css';
-    height: 32px;
-    width: max-content;
-    min-width: fit-content;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 128px;
-
+  composes: button from "./buttons.module.css";
+  height: 32px;
+  width: max-content;
+  min-width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 128px;
 }
 
 .alignDropdown {
-    composes: button from './buttons.module.css';
-    min-width: 128px;
-
+  composes: button from "./buttons.module.css";
+  min-width: 128px;
 }
 
 .tableControls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 
 .tableEditor {
-    padding: 5px;
-    overflow-x: auto;
+  padding: 5px;
+  overflow-x: auto;
 }
 
 .tableGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 5px;
 }
 
 .headerCell {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
 }
 
 .widthInput {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .widthInput input {
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 4px;
-    color: white;
-    font-family: "Minecraft", sans-serif;
-    padding: 4px;
-    width: 50px;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: white;
+  font-family: "Minecraft", sans-serif;
+  padding: 4px;
+  width: 50px;
 }
 
 .removeColumnButton,
 .removeRowButton {
-    position: absolute;
-    top: 0px;
-    right: -5px;
-    background: #444;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
-    height: 15px;
-    width: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+  position: absolute;
+  top: 0px;
+  right: -5px;
+  background: #444;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  height: 15px;
+  width: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .tableRow {
-    display: contents;
+  display: contents;
 }
 
 .tableCell {
-    position: relative;
+  position: relative;
 }
 
 .tableCell textarea {
-    width: 100%;
-    min-height: 60px;
-    resize: vertical;
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
 }
 
 .cellControls {
-    display: flex;
-    gap: 5px;
-    width: 100%;
-    position: relative;
-  }
-  
-.cellControls textarea {
-    flex: 1;
-    min-height: 60px;
-    resize: vertical;
-    margin-bottom: 5px;
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  position: relative;
 }
-  
+
+.cellControls textarea {
+  flex: 1;
+  min-height: 60px;
+  resize: vertical;
+  margin-bottom: 5px;
+}
+
 .cellControls button {
-    align-self: flex-start;
-    white-space: nowrap;
+  align-self: flex-start;
+  white-space: nowrap;
 }
 
 .tableSubHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #242424;
-    border: 1px solid #333;
-    padding-left: 10px;
-    padding-right: 5px;
-    padding-top: 5px;
-    border-radius: 4px;
-  }
-  
-
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #242424;
+  border: 1px solid #333;
+  padding-left: 10px;
+  padding-right: 5px;
+  padding-top: 5px;
+  border-radius: 4px;
+}

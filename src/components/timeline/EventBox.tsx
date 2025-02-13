@@ -1,10 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import styles from '../../styles/events.module.css';  
-import { TimelineEvent } from '../../data/events';
-import EventModal from './EventModal';
-import { Category, fetchCategories, getEventStyles } from '../../config/categories';
-import { EVENT_CARD_WIDTH } from '../../config/timelineControls';
-
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import styles from "../../styles/events.module.css";
+import { TimelineEvent } from "../../data/events";
+import EventModal from "./EventModal";
+import {
+  Category,
+  fetchCategories,
+  getEventStyles,
+} from "../../config/categories";
+import { EVENT_CARD_WIDTH } from "../../config/timelineControls";
 
 interface EventBoxProps {
   event: TimelineEvent;
@@ -12,18 +21,22 @@ interface EventBoxProps {
   column: number;
   isDraggingEnabled: boolean;
   showEventDates: boolean;
-  onUpdateColumn: (eventId: string, newColumn: number, position: number) => void;
+  onUpdateColumn: (
+    eventId: string,
+    newColumn: number,
+    position: number
+  ) => void;
   getEventPosition?: (date: string) => number;
 }
 
-const EventBox: React.FC<EventBoxProps> = ({ 
-  event, 
-  position, 
-  column, 
+const EventBox: React.FC<EventBoxProps> = ({
+  event,
+  position,
+  column,
   isDraggingEnabled,
   onUpdateColumn,
   getEventPosition,
-  showEventDates
+  showEventDates,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -58,14 +71,17 @@ const EventBox: React.FC<EventBoxProps> = ({
       setTitleWidth(rect.width);
     }
   }, [event.title]);
-  
+
   // Calculate initial card position only once
   const initialCardPosition = useMemo(() => {
     if (event.endDate && getEventPosition) {
-      return (getEventPosition(event.date) + getEventPosition(event.endDate)) / 2 - (eventBoxHeight / 2);
+      return (
+        (getEventPosition(event.date) + getEventPosition(event.endDate)) / 2 -
+        eventBoxHeight / 2
+      );
     }
     // For single day events, center on the position
-    return position - (eventBoxHeight / 2);
+    return position - eventBoxHeight / 2;
   }, [event, position, getEventPosition, eventBoxHeight]);
 
   useEffect(() => {
@@ -78,10 +94,12 @@ const EventBox: React.FC<EventBoxProps> = ({
     }
   }, [eventBoxHeight, showEventDates]);
 
-  const baseOffset = 210;
-  const columnWidth = 220;
-  const leftPosition = baseOffset + (column * columnWidth);
-  
+  const baseOffset = 280;
+  const columnWidth = 300;
+  const eventCardWidth = EVENT_CARD_WIDTH;
+  const leftPosition =
+    baseOffset + column * columnWidth + (columnWidth - eventCardWidth) / 2;
+
   const connectionLineWidth = leftPosition - 100;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -92,131 +110,184 @@ const EventBox: React.FC<EventBoxProps> = ({
     }
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging && eventBoxRef.current) {
-      const deltaX = e.clientX - startX - leftPosition;
-  
-      if (eventBoxRef.current) {
-        // Transform the event box
-        eventBoxRef.current.style.transform = `translateX(${deltaX}px)`;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging && eventBoxRef.current) {
+        const deltaX = e.clientX - startX - leftPosition;
 
-        // Different handling for multi-day and single-day events
-        if (event.endDate && getEventPosition) {
-          // Multi-day event connector logic
-          const verticalLineLeft = (leftPosition - 100) / 2 + 100;
-          const startPosition = getEventPosition(event.date);
-          const endPosition = getEventPosition(event.endDate);
+        if (eventBoxRef.current) {
+          // Transform the event box
+          eventBoxRef.current.style.transform = `translateX(${deltaX}px)`;
 
-          const parentElement = eventBoxRef.current.parentElement;
-          if (parentElement) {
-            // Vertical Line
-            const verticalLine = parentElement.querySelector(`.${styles.verticalLine}`);
-            if (verticalLine instanceof HTMLElement) {
-              const newLeft = verticalLineLeft + deltaX / 2;
-              verticalLine.style.left = `${newLeft}px`;
-              
-              verticalLine.style.top = `${Math.min(startPosition, endPosition)}px`;
-              verticalLine.style.height = `${Math.abs(endPosition - startPosition)}px`;
+          // Different handling for multi-day and single-day events
+          if (event.endDate && getEventPosition) {
+            // Multi-day event connector logic
+            const verticalLineLeft = (leftPosition - 100) / 2 + 100;
+            const startPosition = getEventPosition(event.date);
+            const endPosition = getEventPosition(event.endDate);
+
+            const parentElement = eventBoxRef.current.parentElement;
+            if (parentElement) {
+              // Vertical Line
+              const verticalLine = parentElement.querySelector(
+                `.${styles.verticalLine}`
+              );
+              if (verticalLine instanceof HTMLElement) {
+                const newLeft = verticalLineLeft + deltaX / 2;
+                verticalLine.style.left = `${newLeft}px`;
+
+                verticalLine.style.top = `${Math.min(
+                  startPosition,
+                  endPosition
+                )}px`;
+                verticalLine.style.height = `${Math.abs(
+                  endPosition - startPosition
+                )}px`;
+              }
+
+              // Horizontal Start and End Lines
+              const startLine = parentElement.querySelector(
+                `.${styles.horizontalStartLine}`
+              );
+              const endLine = parentElement.querySelector(
+                `.${styles.horizontalEndLine}`
+              );
+              if (
+                startLine instanceof HTMLElement &&
+                endLine instanceof HTMLElement
+              ) {
+                const newStartWidth = verticalLineLeft - 100 + deltaX / 2;
+                const newEndWidth = verticalLineLeft - 100 + deltaX / 2;
+
+                startLine.style.width = `${newStartWidth}px`;
+                startLine.style.top = `${startPosition}px`;
+
+                endLine.style.width = `${newEndWidth}px`;
+                endLine.style.top = `${endPosition}px`;
+              }
+
+              // Event Connector
+              const eventConnector = parentElement.querySelector(
+                `.${styles.eventConnector}`
+              );
+              if (eventConnector instanceof HTMLElement) {
+                const centerPosition =
+                  Math.min(startPosition, endPosition) +
+                  Math.abs(endPosition - startPosition) / 2;
+
+                const newLeft = verticalLineLeft + deltaX / 2;
+                const newWidth = leftPosition - verticalLineLeft + deltaX / 2;
+
+                eventConnector.style.left = `${newLeft}px`;
+                eventConnector.style.width = `${newWidth}px`;
+                eventConnector.style.top = `${centerPosition}px`;
+              }
             }
+          } else {
+            const connectorElement =
+              eventBoxRef.current.nextElementSibling?.querySelector(
+                `.${styles.connectionLine}`
+              ) as HTMLElement;
 
-            // Horizontal Start and End Lines
-            const startLine = parentElement.querySelector(`.${styles.horizontalStartLine}`);
-            const endLine = parentElement.querySelector(`.${styles.horizontalEndLine}`);
-            if (startLine instanceof HTMLElement && endLine instanceof HTMLElement) {
-              const newStartWidth = verticalLineLeft - 100 + deltaX / 2;
-              const newEndWidth = verticalLineLeft - 100 + deltaX / 2;
-              
-              startLine.style.width = `${newStartWidth}px`;
-              startLine.style.top = `${startPosition}px`;
+            if (connectorElement) {
+              const newWidth = leftPosition + deltaX - 100;
+              connectorElement.style.width = `${newWidth}px`;
 
-              endLine.style.width = `${newEndWidth}px`;
-              endLine.style.top = `${endPosition}px`;
+              connectorElement.style.transition = "none";
             }
-
-            // Event Connector
-            const eventConnector = parentElement.querySelector(`.${styles.eventConnector}`);
-            if (eventConnector instanceof HTMLElement) {
-              const centerPosition = Math.min(startPosition, endPosition) + Math.abs(endPosition - startPosition) / 2;
-              
-              const newLeft = verticalLineLeft + deltaX / 2;
-              const newWidth = leftPosition - verticalLineLeft + deltaX / 2;
-              
-              eventConnector.style.left = `${newLeft}px`;
-              eventConnector.style.width = `${newWidth}px`;
-              eventConnector.style.top = `${centerPosition}px`;
-            }
-          }
-        } else {
-          const connectorElement = eventBoxRef.current.nextElementSibling?.querySelector(`.${styles.connectionLine}`) as HTMLElement;
-          
-          if (connectorElement) {
-            const newWidth = leftPosition + deltaX - 100;
-            connectorElement.style.width = `${newWidth}px`;
-
-            connectorElement.style.transition = 'none';
           }
         }
       }
-    }
-  }, [isDragging, startX, leftPosition, event, getEventPosition]);
-  
-  const handleMouseUp = useCallback((e: MouseEvent) => {
-    if (isDragging) {
-      setIsDragging(false);
-      const finalX = e.clientX - startX;
-      
-      // Calculate new column based on final position
-      const relativeX = finalX - baseOffset;
-      const newColumn = Math.round(relativeX / columnWidth);
-      const boundedColumn = Math.max(0, Math.min(newColumn, 19)); // Assuming 20 columns (0-19)
-      
-      if (boundedColumn !== column) {
-        // Use the original position, not adjusted by eventBoxHeight
-        onUpdateColumn(event.id, boundedColumn, position);
-      }
+    },
+    [isDragging, startX, leftPosition, event, getEventPosition]
+  );
 
-      if (eventBoxRef.current) {
-        // Reset transform
-        eventBoxRef.current.style.transform = 'none';
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging) {
+        setIsDragging(false);
+        const finalX = e.clientX - startX;
 
-        // Different handling for multi-day and single-day events
-        if (event.endDate && getEventPosition) {
-          const verticalLineLeft = (leftPosition - 100) / 2 + 100;
-          const parentElement = eventBoxRef.current.parentElement;
-          
-          if (parentElement) {
-            // Vertical Line
-            const verticalLine = parentElement.querySelector(`.${styles.verticalLine}`);
-            if (verticalLine instanceof HTMLElement) {
-              verticalLine.style.left = `${verticalLineLeft}px`;
-            }
+        // Calculate new column based on final position
+        const relativeX = finalX - baseOffset;
+        const newColumn = Math.round(relativeX / columnWidth);
+        const boundedColumn = Math.max(0, Math.min(newColumn, 19)); // Assuming 20 columns (0-19)
 
-            // Horizontal Lines and Event Connector reset
-            const startLine = parentElement.querySelector(`.${styles.horizontalStartLine}`);
-            const endLine = parentElement.querySelector(`.${styles.horizontalEndLine}`);
-            const eventConnector = parentElement.querySelector(`.${styles.eventConnector}`);
+        if (boundedColumn !== column) {
+          // Use the original position, not adjusted by eventBoxHeight
+          onUpdateColumn(event.id, boundedColumn, position);
+        }
 
-            if (startLine instanceof HTMLElement) {
-              startLine.style.width = `${verticalLineLeft - 100}px`;
+        if (eventBoxRef.current) {
+          // Reset transform
+          eventBoxRef.current.style.transform = "none";
+
+          // Different handling for multi-day and single-day events
+          if (event.endDate && getEventPosition) {
+            const verticalLineLeft = (leftPosition - 100) / 2 + 100;
+            const parentElement = eventBoxRef.current.parentElement;
+
+            if (parentElement) {
+              // Vertical Line
+              const verticalLine = parentElement.querySelector(
+                `.${styles.verticalLine}`
+              );
+              if (verticalLine instanceof HTMLElement) {
+                verticalLine.style.left = `${verticalLineLeft}px`;
+              }
+
+              // Horizontal Lines and Event Connector reset
+              const startLine = parentElement.querySelector(
+                `.${styles.horizontalStartLine}`
+              );
+              const endLine = parentElement.querySelector(
+                `.${styles.horizontalEndLine}`
+              );
+              const eventConnector = parentElement.querySelector(
+                `.${styles.eventConnector}`
+              );
+
+              if (startLine instanceof HTMLElement) {
+                startLine.style.width = `${verticalLineLeft - 100}px`;
+              }
+              if (endLine instanceof HTMLElement) {
+                endLine.style.width = `${verticalLineLeft - 100}px`;
+              }
+              if (eventConnector instanceof HTMLElement) {
+                eventConnector.style.width = `${
+                  leftPosition - verticalLineLeft
+                }px`;
+              }
             }
-            if (endLine instanceof HTMLElement) {
-              endLine.style.width = `${verticalLineLeft - 100}px`;
+          } else {
+            // Single-day event connector reset
+            const connectorElement =
+              eventBoxRef.current.nextElementSibling?.querySelector(
+                `.${styles.connectionLine}`
+              ) as HTMLElement;
+            if (connectorElement) {
+              connectorElement.style.width = `${connectionLineWidth}px`;
+              connectorElement.style.transition = "";
             }
-            if (eventConnector instanceof HTMLElement) {
-              eventConnector.style.width = `${leftPosition - verticalLineLeft}px`;
-            }
-          }
-        } else {
-          // Single-day event connector reset
-          const connectorElement = eventBoxRef.current.nextElementSibling?.querySelector(`.${styles.connectionLine}`) as HTMLElement;
-          if (connectorElement) {
-            connectorElement.style.width = `${connectionLineWidth}px`;
-            connectorElement.style.transition = '';
           }
         }
       }
-    }
-  }, [isDragging, startX, baseOffset, columnWidth, column, event.id, event.endDate, position, getEventPosition, leftPosition, onUpdateColumn, connectionLineWidth]);
+    },
+    [
+      isDragging,
+      startX,
+      baseOffset,
+      columnWidth,
+      column,
+      event.id,
+      event.endDate,
+      position,
+      getEventPosition,
+      leftPosition,
+      onUpdateColumn,
+      connectionLineWidth,
+    ]
+  );
 
   const handleClick = () => {
     if (!isDraggingEnabled && !isDragging) {
@@ -226,15 +297,14 @@ const EventBox: React.FC<EventBoxProps> = ({
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-
 
   // Render connections based on single or multi-day event
   const renderConnections = () => {
@@ -245,7 +315,7 @@ const EventBox: React.FC<EventBoxProps> = ({
             className={styles.connectionLine}
             style={{
               width: `${connectionLineWidth}px`,
-              top: `${position}px`
+              top: `${position}px`,
             }}
           />
         </div>
@@ -261,24 +331,24 @@ const EventBox: React.FC<EventBoxProps> = ({
     const verticalLineHeight = Math.abs(endPosition - startPosition);
     const verticalLineTop = Math.min(startPosition, endPosition);
     const verticalLineLeft = (leftPosition - 100) / 2 + 100;
-    const centerPosition = verticalLineTop + (verticalLineHeight / 2);
+    const centerPosition = verticalLineTop + verticalLineHeight / 2;
 
     return (
       <div className={styles.eventConnections}>
-        <div 
-          className={styles.horizontalStartLine} 
-          style={{ 
+        <div
+          className={styles.horizontalStartLine}
+          style={{
             top: `${startPosition}px`,
             width: `${verticalLineLeft - 100 + horizontalLineWidth}px`,
-            left: '100px'
-          }} 
+            left: "100px",
+          }}
         />
-        <div 
-          className={styles.horizontalEndLine} 
-          style={{ 
+        <div
+          className={styles.horizontalEndLine}
+          style={{
             top: `${endPosition}px`,
             width: `${verticalLineLeft - 100 + horizontalLineWidth}px`,
-            left: '100px'
+            left: "100px",
           }}
         />
         <div
@@ -286,7 +356,7 @@ const EventBox: React.FC<EventBoxProps> = ({
           style={{
             top: `${verticalLineTop}px`,
             height: `${verticalLineHeight}px`,
-            left: `${verticalLineLeft}px`
+            left: `${verticalLineLeft}px`,
           }}
         />
         <div
@@ -294,7 +364,7 @@ const EventBox: React.FC<EventBoxProps> = ({
           style={{
             width: `${leftPosition - verticalLineLeft}px`,
             top: `${centerPosition}px`,
-            left: `${verticalLineLeft}px`
+            left: `${verticalLineLeft}px`,
           }}
         />
       </div>
@@ -303,18 +373,23 @@ const EventBox: React.FC<EventBoxProps> = ({
 
   return (
     <>
-      <div 
+      <div
         ref={eventBoxRef}
-        className={`${styles.eventBox} ${isDragging ? styles.dragging : ''}`}
-        style={{ 
+        className={`${styles.eventBox} ${isDragging ? styles.dragging : ""}`}
+        style={{
           top: `${initialCardPosition}px`,
           left: `${leftPosition}px`,
-          cursor: isDraggingEnabled ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
-          width: isHovered && titleWidth > MIN_BOX_CONTENT_WIDTH ? 
-            `${titleWidth}px` : 
-            `${EVENT_CARD_WIDTH}px`,
+          cursor: isDraggingEnabled
+            ? isDragging
+              ? "grabbing"
+              : "grab"
+            : "pointer",
+          width:
+            isHovered && titleWidth > MIN_BOX_CONTENT_WIDTH
+              ? `${titleWidth}px`
+              : `${EVENT_CARD_WIDTH}px`,
           zIndex: isHovered ? 5 : 3,
-          ...eventStyles
+          ...eventStyles,
         }}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
@@ -330,19 +405,17 @@ const EventBox: React.FC<EventBoxProps> = ({
           {showEventDates && (
             <div className={styles.eventDate}>
               {new Date(event.date).toLocaleDateString()}
-              {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+              {event.endDate &&
+                ` - ${new Date(event.endDate).toLocaleDateString()}`}
             </div>
           )}
         </div>
       </div>
-     
+
       {renderConnections()}
-      
+
       {isModalOpen && (
-        <EventModal 
-          event={event} 
-          onClose={() => setIsModalOpen(false)} 
-        />
+        <EventModal event={event} onClose={() => setIsModalOpen(false)} />
       )}
     </>
   );

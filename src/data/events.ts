@@ -2,7 +2,7 @@
 
 export interface TableCell {
   content: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 export interface TableRow {
@@ -12,7 +12,7 @@ export interface TableRow {
 export interface Table {
   headers: string[];
   rows: TableRow[];
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   columnWidths?: string[];
 }
 
@@ -27,7 +27,7 @@ export interface Player {
   uuid: string;
   currentIgn: string;
   pastIgns: string[];
-  events: string[]; 
+  events: string[];
   lastUpdated: Date;
 }
 
@@ -44,5 +44,5 @@ export interface TimelineEvent {
   sideEvents?: SideEvent[];
   createdAt?: Date;
   updatedAt?: Date;
-  playerIds?: string[];  // Optional array of player document IDs involved in the event
+  playerIds?: string[]; // Optional array of player document IDs involved in the event
 }

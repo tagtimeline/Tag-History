@@ -23,5 +23,5 @@ export const zoomOut = (currentSpacing: number): number => {
 
 export const getDefaultTimelineState = (): TimelineState => ({
   yearSpacing: DEFAULT_YEAR_SPACING,
-  selectedCategories: ['all']
+  selectedCategories: ["all"],
 });

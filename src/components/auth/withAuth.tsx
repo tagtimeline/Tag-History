@@ -1,7 +1,7 @@
 // src/components/auth/withAuth.tsx
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import type { NextPage } from 'next';
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import type { NextPage } from "next";
 
 const withAuth = <P extends Record<string, unknown>>(
   WrappedComponent: NextPage<P>
@@ -11,10 +11,10 @@ const withAuth = <P extends Record<string, unknown>>(
 
     useEffect(() => {
       // Check if we're in the browser
-      if (typeof window !== 'undefined') {
-        const isAuthenticated = localStorage.getItem('isAuthenticated');
+      if (typeof window !== "undefined") {
+        const isAuthenticated = localStorage.getItem("isAuthenticated");
         if (!isAuthenticated) {
-          router.replace('/password');
+          router.replace("/password");
         }
       }
     }, [router]);
@@ -23,7 +23,7 @@ const withAuth = <P extends Record<string, unknown>>(
   };
 
   // Copy getInitialProps from WrappedComponent
-  if ('getInitialProps' in WrappedComponent) {
+  if ("getInitialProps" in WrappedComponent) {
     AuthComponent.getInitialProps = WrappedComponent.getInitialProps;
   }
 

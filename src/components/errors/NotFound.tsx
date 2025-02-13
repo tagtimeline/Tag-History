@@ -1,27 +1,27 @@
 // src/components/errors/NotFound.tsx
-import Link from 'next/link';
-import Head from 'next/head';
-import Header from '../layout/Header';
-import Footer from '../layout/Footer';
-import styles from '../../styles/error.module.css';
-import controlStyles from '../../styles/controls.module.css';
-import headerStyles from '../../styles/header.module.css';
+import Link from "next/link";
+import Head from "next/head";
+import Header from "../layout/Header";
+import Footer from "../layout/Footer";
+import styles from "../../styles/error.module.css";
+import controlStyles from "../../styles/controls.module.css";
+import headerStyles from "../../styles/header.module.css";
 
 interface NotFoundProps {
   title?: string;
   message?: string;
 }
 
-const NotFound: React.FC<NotFoundProps> = ({ 
-  title = "Page Not Found", 
-  message = "The page you're looking for doesn't exist."
+const NotFound: React.FC<NotFoundProps> = ({
+  title = "Page Not Found",
+  message = "The page you're looking for doesn't exist.",
 }) => {
   return (
     <>
       <Head>
         <title>{title} - TNT Tag History</title>
       </Head>
-      
+
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/timeline">
@@ -36,8 +36,8 @@ const NotFound: React.FC<NotFoundProps> = ({
         </div>
       </Header>
 
-      <div className={headerStyles['info-box']}>Version: Beta 1.0</div>
-      
+      <div className={headerStyles["info-box"]}>Version: Beta 1.0</div>
+
       <main className="centered">
         <div className={styles.errorContainer}>
           <div className={styles.errorContent}>
@@ -46,7 +46,9 @@ const NotFound: React.FC<NotFoundProps> = ({
           </div>
           <div className={styles.buttonWrapper}>
             <Link href="/timeline">
-              <button className={styles.returnButton}>Return to Timeline</button>
+              <button className={styles.returnButton}>
+                Return to Timeline
+              </button>
             </Link>
           </div>
         </div>

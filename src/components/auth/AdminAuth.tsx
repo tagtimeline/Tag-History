@@ -1,14 +1,14 @@
 // components/auth/AdminAuth.tsx
-import { useState } from 'react';
-import '../../../lib/firebaseConfig';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { useRouter } from 'next/router';
+import { useState } from "react";
+import "../../../lib/firebaseConfig";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/router";
 
-import styles from '../../styles/admin/auth.module.css';
+import styles from "../../styles/admin/auth.module.css";
 
 const AdminAuth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
   const auth = getAuth();
   const router = useRouter();
@@ -16,15 +16,15 @@ const AdminAuth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowError(false);
-  
+
     try {
-      console.log('Attempting login...');
+      console.log("Attempting login...");
       const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Login successful:', result.user);
-      localStorage.setItem('adminLoginTime', Date.now().toString());
-      router.push('/admin');
+      console.log("Login successful:", result.user);
+      localStorage.setItem("adminLoginTime", Date.now().toString());
+      router.push("/admin");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       setShowError(true);
     }
   };
@@ -57,7 +57,9 @@ const AdminAuth = () => {
             Login
           </button>
         </form>
-        <div className={`${styles.error} ${showError ? styles.errorVisible : ''}`}>
+        <div
+          className={`${styles.error} ${showError ? styles.errorVisible : ""}`}
+        >
           Invalid credentials
         </div>
       </div>

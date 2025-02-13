@@ -1,21 +1,21 @@
 // pages/index.tsx
-import type { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import Link from 'next/link';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
-import TimelineContainer from '../components/timeline/TimelineContainer';
-import EventSearch from '../components/search/EventSearch';
-import PlayerSearch from '../components/search/PlayerSearch'
-import { AUTH_CONFIG } from '../config/auth';
-import { useEffect, useState } from 'react';
-import styles from '../styles/home.module.css';
-import controlStyles from '../styles/controls.module.css';
-import { TimelineEvent } from '../data/events';
-import { DEFAULT_YEAR_SPACING } from '../config/timelineControls';
-import { ALL_EVENTS_OPTION } from '../config/dropdown';
-import { getAllEvents } from '../../lib/eventUtils';
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import Link from "next/link";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import TimelineContainer from "../components/timeline/TimelineContainer";
+import EventSearch from "../components/search/EventSearch";
+import PlayerSearch from "../components/search/PlayerSearch";
+import { AUTH_CONFIG } from "../config/auth";
+import { useEffect, useState } from "react";
+import styles from "../styles/home.module.css";
+import controlStyles from "../styles/controls.module.css";
+import { TimelineEvent } from "../data/events";
+import { DEFAULT_YEAR_SPACING } from "../config/timelineControls";
+import { ALL_EVENTS_OPTION } from "../config/dropdown";
+import { getAllEvents } from "../../lib/eventUtils";
 
 interface HomeProps {
   initialEvents: TimelineEvent[];
@@ -27,10 +27,10 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
 
   useEffect(() => {
     if (AUTH_CONFIG.enablePasswordProtection) {
-      const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+      const authStatus = localStorage.getItem("isAuthenticated") === "true";
       setIsAuthenticated(authStatus);
       if (!authStatus) {
-        router.replace('/password');
+        router.replace("/password");
       }
     } else {
       setIsAuthenticated(true);
@@ -39,7 +39,7 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
 
   const handleTimelineClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push('/timeline');
+    router.push("/timeline");
   };
 
   if (!isAuthenticated) {
@@ -50,7 +50,10 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
     <>
       <Head>
         <title>Welcome - TNT Tag History</title>
-        <meta name="description" content="An interactive journey through the TNT Tag History" />
+        <meta
+          name="description"
+          content="An interactive journey through the TNT Tag History"
+        />
       </Head>
 
       <Header>
@@ -81,12 +84,12 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
             </div>
           </div>
 
-          <Link 
-            href="/timeline" 
+          <Link
+            href="/timeline"
             className={styles.previewContainer}
             onClick={handleTimelineClick}
           >
-            <TimelineContainer 
+            <TimelineContainer
               events={initialEvents}
               selectedCategories={[ALL_EVENTS_OPTION.id]}
               isDraggingEnabled={false}
@@ -96,7 +99,9 @@ const Home: NextPage<HomeProps> = ({ initialEvents }) => {
               isPreview={true}
             />
             <div className={styles.previewOverlay}>
-              <span className={styles.previewText}>Click to explore the full timeline</span>
+              <span className={styles.previewText}>
+                Click to explore the full timeline
+              </span>
             </div>
           </Link>
         </div>
@@ -112,15 +117,15 @@ export async function getServerSideProps() {
     const events = await getAllEvents();
     return {
       props: {
-        initialEvents: JSON.parse(JSON.stringify(events))
-      }
+        initialEvents: JSON.parse(JSON.stringify(events)),
+      },
     };
   } catch (error) {
-    console.error('Error fetching initial events:', error);
+    console.error("Error fetching initial events:", error);
     return {
       props: {
-        initialEvents: []
-      }
+        initialEvents: [],
+      },
     };
   }
 }

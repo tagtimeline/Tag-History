@@ -1,17 +1,21 @@
 // Modified TableManager.tsx
-import React, { useState } from 'react';
-import { Table } from '@/data/events';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState } from "react";
+import { Table } from "@/data/events";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-import tableStyles from '@/styles/admin/tables.module.css';
-import formStyles from '@/styles/admin/forms.module.css';
-import buttonStyles from '@/styles/admin/buttons.module.css';
+import tableStyles from "@/styles/admin/tables.module.css";
+import formStyles from "@/styles/admin/forms.module.css";
+import buttonStyles from "@/styles/admin/buttons.module.css";
 
 interface TableManagerProps {
   tables: Table[];
   onChange: (tables: Table[], description?: string) => void;
   currentDescription: string;
-  onAddPlayer: (tableIndex: number, rowIndex?: number, columnIndex?: number) => void;
+  onAddPlayer: (
+    tableIndex: number,
+    rowIndex?: number,
+    columnIndex?: number
+  ) => void;
   // New props for side event support
   isSideEvent?: boolean;
   sideEventIndex?: number;
@@ -19,28 +23,36 @@ interface TableManagerProps {
   onSideEventChange?: (index: number, description: string) => void;
 }
 
-const insertTableMarker = (description: string, tableIndex: number, isSideEvent: boolean, sideEventIndex?: number) => {
-  const marker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${tableIndex}]`;
-  return description + (description.endsWith('\n') ? '' : '\n') + marker + '\n';
+const insertTableMarker = (
+  description: string,
+  tableIndex: number,
+  isSideEvent: boolean,
+  sideEventIndex?: number
+) => {
+  const marker = `[TABLE-${
+    isSideEvent ? `S${sideEventIndex}-` : ""
+  }${tableIndex}]`;
+  return description + (description.endsWith("\n") ? "" : "\n") + marker + "\n";
 };
 
-
-export const TableManager: React.FC<TableManagerProps> = ({ 
-  tables, 
-  onChange, 
+export const TableManager: React.FC<TableManagerProps> = ({
+  tables,
+  onChange,
   currentDescription,
   onAddPlayer,
   isSideEvent = false,
   sideEventIndex,
   sideEventDescription,
-  onSideEventChange
+  onSideEventChange,
 }) => {
-  const [collapsedTables, setCollapsedTables] = useState<Record<number, boolean>>({});
+  const [collapsedTables, setCollapsedTables] = useState<
+    Record<number, boolean>
+  >({});
 
   const toggleTable = (index: number) => {
-    setCollapsedTables(prev => ({
+    setCollapsedTables((prev) => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !prev[index],
     }));
   };
 
@@ -48,24 +60,28 @@ export const TableManager: React.FC<TableManagerProps> = ({
     const newTables = [
       ...tables,
       {
-        headers: ['Column 1'],
-        rows: [{ cells: [{ content: '' }] }],
-        align: 'left' as const,
-        columnWidths: ['100%'] as string[]
-      }
+        headers: ["Column 1"],
+        rows: [{ cells: [{ content: "" }] }],
+        align: "left" as const,
+        columnWidths: ["100%"] as string[],
+      },
     ];
 
     // Add table marker to the appropriate description
     const description = isSideEvent ? sideEventDescription : currentDescription;
     if (description !== undefined) {
       const updatedDescription = insertTableMarker(
-        description, 
-        tables.length, 
-        isSideEvent, 
+        description,
+        tables.length,
+        isSideEvent,
         sideEventIndex
       );
-      
-      if (isSideEvent && onSideEventChange && typeof sideEventIndex === 'number') {
+
+      if (
+        isSideEvent &&
+        onSideEventChange &&
+        typeof sideEventIndex === "number"
+      ) {
         onSideEventChange(sideEventIndex, updatedDescription);
       } else {
         onChange(newTables, updatedDescription);
@@ -76,24 +92,38 @@ export const TableManager: React.FC<TableManagerProps> = ({
   };
 
   const confirmRemove = (tableIndex: number) => {
-    if (window.confirm('Are you sure you want to remove this table? This cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to remove this table? This cannot be undone."
+      )
+    ) {
       const newTables = [...tables];
       newTables.splice(tableIndex, 1);
-      
+
       // Update description by removing the table marker and updating remaining ones
       let description = isSideEvent ? sideEventDescription : currentDescription;
       if (description) {
-        const oldMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${tableIndex}]`;
-        description = description.replace(oldMarker + '\n', '');
-        
+        const oldMarker = `[TABLE-${
+          isSideEvent ? `S${sideEventIndex}-` : ""
+        }${tableIndex}]`;
+        description = description.replace(oldMarker + "\n", "");
+
         // Update remaining table markers
         for (let i = tableIndex + 1; i < tables.length; i++) {
-          const oldTableMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${i}]`;
-          const newTableMarker = `[TABLE-${isSideEvent ? `S${sideEventIndex}-` : ''}${i - 1}]`;
+          const oldTableMarker = `[TABLE-${
+            isSideEvent ? `S${sideEventIndex}-` : ""
+          }${i}]`;
+          const newTableMarker = `[TABLE-${
+            isSideEvent ? `S${sideEventIndex}-` : ""
+          }${i - 1}]`;
           description = description.replace(oldTableMarker, newTableMarker);
         }
-        
-        if (isSideEvent && onSideEventChange && typeof sideEventIndex === 'number') {
+
+        if (
+          isSideEvent &&
+          onSideEventChange &&
+          typeof sideEventIndex === "number"
+        ) {
           onSideEventChange(sideEventIndex, description);
         } else {
           onChange(newTables, description);
@@ -107,34 +137,34 @@ export const TableManager: React.FC<TableManagerProps> = ({
   const addColumn = (tableIndex: number) => {
     const newTables = [...tables];
     const table = newTables[tableIndex];
-    
+
     table.headers.push(`Column ${table.headers.length + 1}`);
-    
+
     const newWidth = Math.floor(100 / table.headers.length);
-    const remainder = 100 - (newWidth * table.headers.length);
-    table.columnWidths = table.headers.map((_, index) => 
-      `${newWidth + (index === 0 ? remainder : 0)}%`
+    const remainder = 100 - newWidth * table.headers.length;
+    table.columnWidths = table.headers.map(
+      (_, index) => `${newWidth + (index === 0 ? remainder : 0)}%`
     );
-    
-    table.rows.forEach(row => {
-      row.cells.push({ content: '' });
+
+    table.rows.forEach((row) => {
+      row.cells.push({ content: "" });
     });
-    
+
     onChange(newTables);
   };
 
   const removeColumn = (tableIndex: number, columnIndex: number) => {
     const newTables = [...tables];
     const table = newTables[tableIndex];
-    
+
     if (table.headers.length > 1) {
       table.headers.splice(columnIndex, 1);
       if (!table.columnWidths) {
         table.columnWidths = [];
       }
       table.columnWidths.splice(columnIndex, 1);
-      table.rows.forEach(row => row.cells.splice(columnIndex, 1));
-      
+      table.rows.forEach((row) => row.cells.splice(columnIndex, 1));
+
       onChange(newTables);
     }
   };
@@ -142,11 +172,11 @@ export const TableManager: React.FC<TableManagerProps> = ({
   const addRow = (tableIndex: number) => {
     const newTables = [...tables];
     const table = newTables[tableIndex];
-    
+
     table.rows.push({
-      cells: table.headers.map(() => ({ content: '' }))
+      cells: table.headers.map(() => ({ content: "" })),
     });
-    
+
     onChange(newTables);
   };
 
@@ -156,10 +186,14 @@ export const TableManager: React.FC<TableManagerProps> = ({
     onChange(newTables);
   };
 
-  const updateColumnWidth = (tableIndex: number, columnIndex: number, width: string) => {
+  const updateColumnWidth = (
+    tableIndex: number,
+    columnIndex: number,
+    width: string
+  ) => {
     const newTables = [...tables];
-    const numWidth = Number(width.replace('%', ''));
-    
+    const numWidth = Number(width.replace("%", ""));
+
     if (!isNaN(numWidth) && numWidth > 0 && numWidth <= 100) {
       if (!newTables[tableIndex].columnWidths) {
         newTables[tableIndex].columnWidths = [];
@@ -173,34 +207,34 @@ export const TableManager: React.FC<TableManagerProps> = ({
     <div className={tableStyles.tables}>
       <div className={tableStyles.tablesHeader}>
         Tables
-        <button 
-          type="button" 
-          onClick={addTable} 
+        <button
+          type="button"
+          onClick={addTable}
           className={buttonStyles.addButton}
         >
           Add Table
         </button>
       </div>
-  
+
       {tables.map((table, tableIndex) => (
         <div key={tableIndex} className={tableStyles.tableWrapper}>
           <div className={tableStyles.tableSubHeader}>
-            <div 
+            <div
               className={tableStyles.tableIdentifier}
               onClick={() => toggleTable(tableIndex)}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               Table {tableIndex}
             </div>
             <div className={tableStyles.tableControls}>
-              <button 
+              <button
                 type="button"
                 onClick={() => addColumn(tableIndex)}
                 className={tableStyles.tableButton}
               >
                 Add Column
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => addRow(tableIndex)}
                 className={tableStyles.tableButton}
@@ -212,7 +246,10 @@ export const TableManager: React.FC<TableManagerProps> = ({
                 value={table.align}
                 onChange={(e) => {
                   const newTables = [...tables];
-                  newTables[tableIndex].align = e.target.value as 'left' | 'center' | 'right';
+                  newTables[tableIndex].align = e.target.value as
+                    | "left"
+                    | "center"
+                    | "right";
                   onChange(newTables);
                 }}
               >
@@ -220,7 +257,7 @@ export const TableManager: React.FC<TableManagerProps> = ({
                 <option value="center">Center</option>
                 <option value="right">Right</option>
               </select>
-              <button 
+              <button
                 type="button"
                 onClick={() => onAddPlayer(tableIndex)}
                 className={tableStyles.tableButton}
@@ -242,24 +279,42 @@ export const TableManager: React.FC<TableManagerProps> = ({
                         value={header}
                         onChange={(e) => {
                           const newTables = [...tables];
-                          newTables[tableIndex].headers[columnIndex] = e.target.value;
+                          newTables[tableIndex].headers[columnIndex] =
+                            e.target.value;
                           onChange(newTables);
                         }}
                         placeholder="Header"
                       />
                       <div className={tableStyles.widthInput}>
-                        Width <input
+                        Width{" "}
+                        <input
                           type="text"
                           className={formStyles.input}
-                          value={table.columnWidths?.[columnIndex]?.replace(/%$/, '') || ''}
-                          onChange={(e) => updateColumnWidth(tableIndex, columnIndex, e.target.value)}
+                          value={
+                            table.columnWidths?.[columnIndex]?.replace(
+                              /%$/,
+                              ""
+                            ) || ""
+                          }
+                          onChange={(e) =>
+                            updateColumnWidth(
+                              tableIndex,
+                              columnIndex,
+                              e.target.value
+                            )
+                          }
                           placeholder="Width"
-                        /> %
+                        />{" "}
+                        %
                         {table.headers.length > 1 && (
                           <button
                             type="button"
                             onClick={() => {
-                              if (window.confirm('Are you sure you want to remove this column? This will delete all data in the column.')) {
+                              if (
+                                window.confirm(
+                                  "Are you sure you want to remove this column? This will delete all data in the column."
+                                )
+                              ) {
                                 removeColumn(tableIndex, columnIndex);
                               }
                             }}
@@ -271,7 +326,7 @@ export const TableManager: React.FC<TableManagerProps> = ({
                       </div>
                     </div>
                   ))}
-  
+
                   {table.rows.map((row, rowIndex) => (
                     <div key={rowIndex} className={tableStyles.tableRow}>
                       {row.cells.map((cell, columnIndex) => (
@@ -290,7 +345,9 @@ export const TableManager: React.FC<TableManagerProps> = ({
                               value={cell.content}
                               onChange={(e) => {
                                 const newTables = [...tables];
-                                newTables[tableIndex].rows[rowIndex].cells[columnIndex].content = e.target.value;
+                                newTables[tableIndex].rows[rowIndex].cells[
+                                  columnIndex
+                                ].content = e.target.value;
                                 onChange(newTables);
                               }}
                               placeholder="Cell content"
@@ -300,7 +357,11 @@ export const TableManager: React.FC<TableManagerProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                if (window.confirm('Are you sure you want to remove this row? This cannot be undone.')) {
+                                if (
+                                  window.confirm(
+                                    "Are you sure you want to remove this row? This cannot be undone."
+                                  )
+                                ) {
                                   removeRow(tableIndex, rowIndex);
                                 }
                               }}
@@ -313,7 +374,7 @@ export const TableManager: React.FC<TableManagerProps> = ({
                       ))}
                     </div>
                   ))}
-            </div>
+                </div>
               </div>
               <button
                 type="button"

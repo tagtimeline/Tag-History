@@ -1,11 +1,11 @@
-import type { NextPage } from 'next'
-import Link from 'next/link'
-import Head from 'next/head'
-import Header from '../components/layout/Header'
-import Footer from '../components/layout/Footer'
-import styles from '../styles/donate.module.css'
-import controlStyles from '../styles/controls.module.css'
-import withAuth from '../components/auth/withAuth'
+import type { NextPage } from "next";
+import Link from "next/link";
+import Head from "next/head";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import styles from "../styles/donate.module.css";
+import controlStyles from "../styles/controls.module.css";
+import withAuth from "../components/auth/withAuth";
 
 const DonatePage: NextPage = () => {
   const features = [
@@ -14,14 +14,17 @@ const DonatePage: NextPage = () => {
     "Get a special 'Supporter' role in our Discord server",
     "Access to exclusive Discord channels",
     "Early access to new features and updates",
-    "Your name in the supporters list on the website"
-  ]
+    "Your name in the supporters list on the website",
+  ];
 
   return (
     <>
       <Head>
         <title>Donate - TNT Tag History</title>
-        <meta name="description" content="Support the TNT Tag History project" />
+        <meta
+          name="description"
+          content="Support the TNT Tag History project"
+        />
       </Head>
 
       <Header>
@@ -42,7 +45,11 @@ const DonatePage: NextPage = () => {
         <div className={styles.mainContent}>
           <h1 className={styles.title}>Support the Project</h1>
           <div className={styles.description}>
-            <p>Your contribution helps cover hosting costs and supports the continued development of TNT Tag History. Every donation makes a difference in keeping this project running and improving.</p>
+            <p>
+              Your contribution helps cover hosting costs and supports the
+              continued development of TNT Tag History. Every donation makes a
+              difference in keeping this project running and improving.
+            </p>
           </div>
 
           <div className={styles.featuresContainer}>
@@ -54,19 +61,15 @@ const DonatePage: NextPage = () => {
                 </li>
               ))}
             </ul>
-            
-            <a 
-            href="https://ko-fi.com/tagtimeline" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.donateButton}
+
+            <a
+              href="https://ko-fi.com/tagtimeline"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.donateButton}
             >
-            <img 
-                src="/ko-fi.png" 
-                alt="Ko-fi" 
-                className={styles.kofiLogo}
-            />
-            Support me
+              <img src="/ko-fi.png" alt="Ko-fi" className={styles.kofiLogo} />
+              Support me
             </a>
           </div>
 
@@ -78,7 +81,7 @@ const DonatePage: NextPage = () => {
 
       <Footer />
     </>
-  )
-}
+  );
+};
 
-export default withAuth(DonatePage)
+export default withAuth(DonatePage);

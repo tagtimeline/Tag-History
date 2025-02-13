@@ -2,159 +2,163 @@
 
 /* CSS Variables */
 :root {
-    --footer-height: 64px;
-    --header-height: 62px;
+  --footer-height: 42px;
+  --header-height: 62px;
 }
 
 /* Base Reset */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Body Styles */
 body {
-    font-family: "Minecraft", sans-serif;
-    background-color: #202020;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    overflow: hidden;
-    position: relative;
+  font-family: "Minecraft", sans-serif;
+  background-color: #202020;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Selection Styles */
 ::selection {
-    background-color: #1a4a8e;
-    color: #fff;
+  background-color: #1a4a8e;
+  color: #fff;
 }
 
 ::-moz-selection {
-    background-color: #1a4a8e;
-    color: #fff;
+  background-color: #1a4a8e;
+  color: #fff;
 }
 
 /* Main Content Area */
 main {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    max-height: calc(100vh - var(--header-height));
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    overflow-y: auto;
-    padding: 0;
-    padding-bottom: calc(var(--footer-height) + 20px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-height: calc(100vh - var(--header-height));
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  overflow-y: auto;
+  padding: 0;
+  padding-bottom: calc(var(--footer-height) + 20px);
 }
 
 main.centered {
-    align-items: center;
-    justify-content: center;
-    padding: 20px 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 40px;
 }
 
 /* Scrollbar Styles */
 main::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 main {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 * {
-    scrollbar-width: thin;
-    scrollbar-color: #555 transparent;
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
 }
 
 *::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
+  height: 8px;
+  width: 8px;
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: #555;
-    border-radius: 4px;
+  background-color: #555;
+  border-radius: 4px;
 }
 
 *::-webkit-scrollbar-track {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: #666;
+  background-color: #666;
 }
 
 *::-webkit-scrollbar-thumb:active {
-    background-color: #777;
+  background-color: #777;
 }
 
 /* Link Styles */
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 a:visited {
-    color: inherit;
+  color: inherit;
 }
 
-a:hover, 
+a:hover,
 a:active {
-    color: inherit;
+  color: inherit;
 }
 
 /* Button Styles */
 a button {
-    background: #444;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
-    font-family: 'Minecraft', sans-serif;
-    font-size: 1rem;
-    padding: 10px 20px;
-    transition: background-color 0.3s;
+  background: #444;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  font-family: "Minecraft", sans-serif;
+  font-size: 1rem;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
 }
 
 a button:hover {
-    background: #555;
+  background: #555;
 }
 
 a button:active {
-    background: #666;
+  background: #666;
 }
-
 
 /* Loading Spinner */
 .loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #333;
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s linear infinite;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #333;
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Container for centering the spinner */
 .loading-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(32, 32, 32, 0.8);
-    z-index: 9999;
-    pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(32, 32, 32, 0.8);
+  z-index: 9999;
+  pointer-events: none;
 }

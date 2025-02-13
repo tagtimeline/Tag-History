@@ -6,7 +6,7 @@
   border-radius: 4px;
   color: white;
   cursor: pointer;
-  font-family: 'Minecraft', sans-serif;
+  font-family: "Minecraft", sans-serif;
   font-size: 14px;
   height: 32px;
   min-width: 128px;
@@ -33,13 +33,13 @@
 .deleteButton,
 .clearButton {
   composes: button;
-  color: #FF5555;
+  color: #ff5555;
 }
 
 .hideButton {
   composes: button;
   width: 128px !important;
-  color: #AAAAAA;
+  color: #aaaaaa;
 }
 
 .hideButton.hidden {
@@ -62,7 +62,7 @@
 }
 
 .markdownInfoButton {
-  font-family: 'Minecraft', sans-serif;
+  font-family: "Minecraft", sans-serif;
   background: none;
   border: none;
   color: #888;

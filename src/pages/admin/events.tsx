@@ -1,20 +1,20 @@
 // pages/admin/events.tsx
-import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/../lib/firebaseConfig';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/../lib/firebaseConfig";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import EventsList from '@/components/admin/EventsList';
-import { TimelineEvent } from '@/data/events';
-import { handleAdminLogout } from '@/components/admin/AuthHandler';
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import EventsList from "@/components/admin/EventsList";
+import { TimelineEvent } from "@/data/events";
+import { handleAdminLogout } from "@/components/admin/AuthHandler";
 
-import baseStyles from '@/styles/admin/base.module.css';
-import controlStyles from '@/styles/controls.module.css';
+import baseStyles from "@/styles/admin/base.module.css";
+import controlStyles from "@/styles/controls.module.css";
 
 export default function AdminEvents() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function AdminEvents() {
       if (user) {
         setIsAuthenticated(true);
       } else {
-        router.replace('/admin/password');
+        router.replace("/admin/password");
       }
       setIsLoading(false);
     });
@@ -37,14 +37,16 @@ export default function AdminEvents() {
   }, [router]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'events'), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
       try {
         const eventData = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent))
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .map((doc) => ({ id: doc.id, ...doc.data() } as TimelineEvent))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
         setEvents(eventData);
       } catch (snapshotError) {
-        console.error('Error in events listener:', snapshotError);
+        console.error("Error in events listener:", snapshotError);
       }
     });
 
@@ -73,7 +75,10 @@ export default function AdminEvents() {
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/admin">
-            <button className={controlStyles.headerButton} style={{ width: 'auto' }}>
+            <button
+              className={controlStyles.headerButton}
+              style={{ width: "auto" }}
+            >
               Dashboard
             </button>
           </Link>
@@ -82,12 +87,9 @@ export default function AdminEvents() {
           </button>
         </div>
       </Header>
-      
+
       <main className={baseStyles.mainContent}>
-        <EventsList 
-          events={events}
-          onEventSelect={handleEventSelect}
-        />
+        <EventsList events={events} onEventSelect={handleEventSelect} />
       </main>
 
       <Footer />

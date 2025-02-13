@@ -2,36 +2,36 @@
 
 /* Header Container */
 .header {
-    background-color: #151515;
-    border-bottom: 2px solid #505050;
-    box-sizing: border-box;
-    color: white;
-    height: var(--header-height);
-    padding: 15px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+  background-color: #151515;
+  border-bottom: 2px solid #505050;
+  box-sizing: border-box;
+  color: white;
+  height: var(--header-height);
+  padding: 15px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 /* Header Layout */
 .header-content {
-    align-items: center;
-    display: flex;
-    height: 100%;
-    justify-content: space-between;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: space-between;
 }
 
 .header-left {
-    align-items: center;
-    display: flex;
-    font-size: 16px;
-    gap: 5px;
-    height: 100%;
+  align-items: center;
+  display: flex;
+  font-size: 16px;
+  gap: 5px;
+  height: 100%;
 }
 
 .header-right {
-    align-items: center;
-    display: flex;
-    gap: 10px;
-    height: 100%;
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  height: 100%;
 }

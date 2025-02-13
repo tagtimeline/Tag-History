@@ -1,6 +1,6 @@
 // src/pages/_error.tsx
-import { NextPage } from 'next';
-import NotFound from '../components/errors/NotFound';
+import { NextPage } from "next";
+import NotFound from "../components/errors/NotFound";
 
 interface ErrorProps {
   statusCode?: number;
@@ -8,12 +8,12 @@ interface ErrorProps {
 
 const Error: NextPage<ErrorProps> = ({ statusCode }) => {
   return (
-    <NotFound 
+    <NotFound
       title="Error Occurred"
       message={
         statusCode
           ? `An error ${statusCode} occurred on server`
-          : 'An error occurred on client'
+          : "An error occurred on client"
       }
     />
   );

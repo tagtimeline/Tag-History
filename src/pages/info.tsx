@@ -1,23 +1,26 @@
 // src/pages/info.tsx
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Link from 'next/link'
-import Image from 'next/image';
-import Header from '../components/layout/Header'
-import Footer from '../components/layout/Footer'
-import styles from '../styles/info.module.css'
-import controlStyles from '../styles/controls.module.css';
-import withAuth from '../components/auth/withAuth'
-import { getDevelopers, getRoleColor } from '../data/affiliates';
+import type { NextPage } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import styles from "../styles/info.module.css";
+import controlStyles from "../styles/controls.module.css";
+import withAuth from "../components/auth/withAuth";
+import { getDevelopers, getRoleColor } from "../data/affiliates";
 
 const InfoPage: NextPage = () => {
   return (
     <>
       <Head>
         <title>Info - TNT Tag History</title>
-        <meta name="description" content="Learn more about the TNT Tag History project" />
+        <meta
+          name="description"
+          content="Learn more about the TNT Tag History project"
+        />
       </Head>
-      
+
       <Header>
         <div className={controlStyles.headerControls}>
           <Link href="/timeline">
@@ -31,14 +34,17 @@ const InfoPage: NextPage = () => {
           </Link>
         </div>
       </Header>
-            
+
       <main className="centered">
         <div className={styles.mainContent}>
           <title>The TNT Tag History Project</title>
           <p>
-            The project is still under development,<br />
-            and updates are being added frequently.<br />
-            This website is an interactive timeline that aims to<br />
+            The project is still under development,
+            <br />
+            and updates are being added frequently.
+            <br />
+            This website is an interactive timeline that aims to
+            <br />
             document the history of TNT Tag on Hypixel.
           </p>
           <div className={styles.spacing}></div>
@@ -61,19 +67,30 @@ const InfoPage: NextPage = () => {
                 />
                 <div className={styles.profileInfo}>
                   <p>
-                    <b>{ign}</b><br />
-                    {data.discord}<br /><br />
-                    <span 
+                    <b>{ign}</b>
+                    <br />
+                    {data.discord}
+                    <br />
+                    <br />
+                    <span
                       className={styles.developerTag}
-                      style={{ color: getRoleColor(data.roles.includes('HeadDeveloper') ? 'HeadDeveloper' : 'Developer') }}
+                      style={{
+                        color: getRoleColor(
+                          data.roles.includes("HeadDeveloper")
+                            ? "HeadDeveloper"
+                            : "Developer"
+                        ),
+                      }}
                     >
-                      {data.roles.includes('HeadDeveloper') ? 'Head Developer' : 'Developer'}
+                      {data.roles.includes("HeadDeveloper")
+                        ? "Head Developer"
+                        : "Developer"}
                     </span>
                     <br />
                   </p>
                 </div>
               </div>
-          ))}
+            ))}
           </section>
           <div className={styles.spacing}></div>
           <section>
@@ -83,9 +100,11 @@ const InfoPage: NextPage = () => {
               <br />
               Or do you just want to stay <b>updated</b>?
             </p>
-            <button 
+            <button
               className={styles.discordButton}
-              onClick={() => window.open('https://discord.gg/tEtay34xPv', '_blank')}
+              onClick={() =>
+                window.open("https://discord.gg/tEtay34xPv", "_blank")
+              }
             >
               Join Our Discord
             </button>
@@ -98,7 +117,7 @@ const InfoPage: NextPage = () => {
 
       <Footer />
     </>
-  )
-}
+  );
+};
 
 export default withAuth(InfoPage);

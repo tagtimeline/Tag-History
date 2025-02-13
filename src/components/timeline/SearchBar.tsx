@@ -1,9 +1,13 @@
 // src/components/timeline/SearchBar.tsx
-import { useEffect, useState } from 'react';
-import { TimelineEvent } from '../../data/events';
-import { searchEvents } from '../../config/search';
-import { Category, fetchCategories, getCategoryColor } from '../../config/categories';
-import searchStyles from '../../styles/search.module.css';
+import { useEffect, useState } from "react";
+import { TimelineEvent } from "../../data/events";
+import { searchEvents } from "../../config/search";
+import {
+  Category,
+  fetchCategories,
+  getCategoryColor,
+} from "../../config/categories";
+import searchStyles from "../../styles/search.module.css";
 
 interface SearchBarProps {
   events: TimelineEvent[];
@@ -11,7 +15,7 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<TimelineEvent[]>([]);
   const [, setCategories] = useState<Record<string, Category>>({});
 
@@ -23,7 +27,7 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
 
   const handleResultClick = (event: TimelineEvent) => {
     onResultClick(event);
-    setSearchTerm('');
+    setSearchTerm("");
     setSearchResults([]);
   };
 
@@ -37,22 +41,22 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
 
   return (
     <div className={searchStyles.searchContainer}>
-      <input 
-        type="text" 
-        className={searchStyles.searchInput} 
-        placeholder="Search events..." 
+      <input
+        type="text"
+        className={searchStyles.searchInput}
+        placeholder="Search events..."
         value={searchTerm}
         onChange={handleSearchChange}
       />
       {searchTerm && searchResults.length > 0 && (
         <div className={searchStyles.searchResults}>
-          {searchResults.map(event => (
-            <div 
-              key={event.id} 
+          {searchResults.map((event) => (
+            <div
+              key={event.id}
               className={searchStyles.resultItem}
               onClick={() => handleResultClick(event)}
             >
-              <span 
+              <span
                 className={searchStyles.categoryColor}
                 style={{ backgroundColor: getCategoryColor(event.category) }}
               />
@@ -60,8 +64,11 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
                 <div className={searchStyles.resultTitle}>{event.title}</div>
                 <div className={searchStyles.eventDate}>
                   {new Date(event.date).toLocaleDateString()}
-                  {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
-                  {event.isSpecial && <span className={searchStyles.specialStar}>⭐</span>}
+                  {event.endDate &&
+                    ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                  {event.isSpecial && (
+                    <span className={searchStyles.specialStar}>⭐</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -70,9 +77,7 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
       )}
       {searchTerm && searchResults.length === 0 && (
         <div className={searchStyles.searchResults}>
-          <div className={searchStyles.noResults}>
-            No events found
-          </div>
+          <div className={searchStyles.noResults}>No events found</div>
         </div>
       )}
     </div>

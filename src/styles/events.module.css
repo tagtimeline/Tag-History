@@ -384,18 +384,6 @@
   transition: background-color 0.2s;
 }
 
-.modalText td a,
-.modalText td a.playerLink {
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.modalText td a:hover,
-.modalText td a.playerLink:hover {
-  color: #4499ff;
-  text-decoration: underline;
-}
-
 /* Event Page Styles */
 .eventPageContent {
   background: #1a1a1a;

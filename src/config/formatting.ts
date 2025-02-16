@@ -4,7 +4,6 @@ export const patterns = {
   boldItalics: /\*\*\*(.*?)\*\*\*/g,
   bold: /\*\*(.*?)\*\*/g,
   italic: /\*(.*?)\*/g,
-  italicUnderscore: /_(.*?)_/g,
   underline: /__(.*?)__/g,
   strikethrough: /~~(.*?)~~/g,
   spoiler: /\|\|(.*?)\|\|/g,
@@ -46,7 +45,6 @@ export const formatText = (text: string): string => {
     .replace(patterns.boldItalics, "<strong><em>$1</em></strong>")
     .replace(patterns.bold, "<strong>$1</strong>")
     .replace(patterns.italic, "<em>$1</em>")
-    .replace(patterns.italicUnderscore, "<em>$1</em>")
     .replace(patterns.underline, "<u>$1</u>")
     .replace(patterns.strikethrough, "<del>$1</del>")
     .replace(patterns.spoiler, '<span class="spoiler">$1</span>');

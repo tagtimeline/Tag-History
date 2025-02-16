@@ -83,20 +83,16 @@
 
 .playerLink {
   text-decoration: none;
-
   border-radius: 3px;
-  color: #c0c0c0;
   transition: all 0.2s ease;
 }
 
 .playerLink:hover,
 .playerLink:visited:hover {
-  color: #c0c0c0;
   text-decoration: underline;
 }
 
 .playerLink:visited {
-  color: #a2a2a2;
 }
 
 .eventLink {

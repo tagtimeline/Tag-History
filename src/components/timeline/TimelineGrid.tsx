@@ -66,26 +66,27 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
 
   const monthSpacing = yearSpacing / 12;
 
-  const getEventPosition = useCallback(
-    (eventDate: string) => {
-      const date = new Date(eventDate);
-      const startDate = new Date(2013, 9, 1);
+const getEventPosition = useCallback(
+  (eventDate: string) => {
+    if (typeof eventDate !== "string") return 0; // Handle non-string case
+    const date = new Date(eventDate);
+    const startDate = new Date(2013, 9, 1);
 
-      const monthsDiff =
-        (date.getFullYear() - startDate.getFullYear()) * 12 +
-        (date.getMonth() - startDate.getMonth());
+    const monthsDiff =
+      (date.getFullYear() - startDate.getFullYear()) * 12 +
+      (date.getMonth() - startDate.getMonth());
 
-      const daysInMonth = new Date(
-        date.getFullYear(),
-        date.getMonth() + 1,
-        0
-      ).getDate();
-      const dayOffset = (date.getDate() / daysInMonth) * monthSpacing;
+    const daysInMonth = new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0
+    ).getDate();
+    const dayOffset = (date.getDate() / daysInMonth) * monthSpacing;
 
-      return 10 + monthsDiff * monthSpacing + dayOffset;
-    },
-    [monthSpacing]
-  );
+    return 10 + monthsDiff * monthSpacing + dayOffset;
+  },
+  [monthSpacing]
+);
 
   const filteredEvents = useMemo(() => {
     const hasAll = visibleCategories.includes("all");
@@ -170,7 +171,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
           : getEventPosition(event.date);
 
         const eventStartDate = new Date(event.date);
-        const eventEndDate = event.endDate
+        const eventEndDate = event.endDate && typeof event.endDate === 'string'
           ? new Date(event.endDate)
           : eventStartDate;
 
@@ -204,8 +205,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                 return Math.abs(existing.position - position) < 60;
               }
 
-              const eventEnd = event.endDate
-                ? new Date(event.endDate)
+              const eventEnd = (event.endDate && typeof event.endDate === 'string')
+                ? new Date(event.endDate as string)
                 : eventStartDate;
               return (
                 (eventStartDate <= existing.endDate &&

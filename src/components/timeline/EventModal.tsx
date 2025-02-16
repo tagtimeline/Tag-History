@@ -79,7 +79,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
         </h2>
         <div className={styles.modalDate}>
           {new Date(event.date).toLocaleDateString()}
-          {event.endDate && (
+          {event.endDate && typeof event.endDate === "string" && (
             <span> - {new Date(event.endDate).toLocaleDateString()}</span>
           )}
         </div>

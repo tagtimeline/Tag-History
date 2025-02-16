@@ -47,6 +47,7 @@ const PlayerEventsList: React.FC<PlayerEventsListProps> = ({
                 <div className={eventStyles.eventDate}>
                   {new Date(event.date).toLocaleDateString()}
                   {event.endDate &&
+                    typeof event.endDate === "string" &&
                     ` - ${new Date(event.endDate).toLocaleDateString()}`}
                 </div>
               </div>

@@ -43,6 +43,7 @@ const PlayerEvents: React.FC<PlayerEventsProps> = ({
                 <div className={searchStyles.eventDate}>
                   {new Date(event.date).toLocaleDateString()}
                   {event.endDate &&
+                    typeof event.endDate === "string" &&
                     ` - ${new Date(event.endDate).toLocaleDateString()}`}
                   {event.isSpecial && (
                     <span className={searchStyles.specialStar}>⭐</span>

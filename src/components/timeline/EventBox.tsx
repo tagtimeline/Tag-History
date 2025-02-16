@@ -74,7 +74,7 @@ const EventBox: React.FC<EventBoxProps> = ({
 
   // Calculate initial card position only once
   const initialCardPosition = useMemo(() => {
-    if (event.endDate && getEventPosition) {
+    if (event.endDate && typeof event.endDate === 'string' && getEventPosition) {
       return (
         (getEventPosition(event.date) + getEventPosition(event.endDate)) / 2 -
         eventBoxHeight / 2
@@ -124,7 +124,7 @@ const EventBox: React.FC<EventBoxProps> = ({
             // Multi-day event connector logic
             const verticalLineLeft = (leftPosition - 100) / 2 + 100;
             const startPosition = getEventPosition(event.date);
-            const endPosition = getEventPosition(event.endDate);
+            const endPosition = typeof event.endDate === 'string' ? getEventPosition(event.endDate) : 0;
 
             const parentElement = eventBoxRef.current.parentElement;
             if (parentElement) {
@@ -327,7 +327,7 @@ const EventBox: React.FC<EventBoxProps> = ({
     const horizontalLineWidth = isHovered ? 3 : 2;
 
     const startPosition = getEventPosition(event.date);
-    const endPosition = getEventPosition(event.endDate);
+    const endPosition = typeof event.endDate === 'string' ? getEventPosition(event.endDate) : 0;
     const verticalLineHeight = Math.abs(endPosition - startPosition);
     const verticalLineTop = Math.min(startPosition, endPosition);
     const verticalLineLeft = (leftPosition - 100) / 2 + 100;
@@ -406,6 +406,7 @@ const EventBox: React.FC<EventBoxProps> = ({
             <div className={styles.eventDate}>
               {new Date(event.date).toLocaleDateString()}
               {event.endDate &&
+                typeof event.endDate === "string" &&
                 ` - ${new Date(event.endDate).toLocaleDateString()}`}
             </div>
           )}

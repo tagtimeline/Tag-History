@@ -185,6 +185,7 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
               day: "2-digit",
             })}
             {event.endDate &&
+              typeof event.endDate === "string" &&
               ` - ${new Date(event.endDate).toLocaleDateString("en-GB", {
                 year: "numeric",
                 month: "2-digit",

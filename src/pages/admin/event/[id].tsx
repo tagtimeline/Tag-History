@@ -91,7 +91,7 @@ export default function AdminEventEdit() {
             setFormData({
               title: eventData.title || "",
               date: eventData.date || "",
-              endDate: eventData.endDate || "",
+              endDate: typeof eventData.endDate === 'string' ? eventData.endDate : undefined,
               category: eventData.category || "",
               description: eventData.description || "",
               isSpecial: eventData.isSpecial || false,
@@ -228,12 +228,13 @@ export default function AdminEventEdit() {
               <div className={eventStyles.modalDate}>
                 {previewEvent.date &&
                   new Date(previewEvent.date).toLocaleDateString()}
-                {previewEvent.endDate && (
-                  <span>
-                    {" "}
-                    - {new Date(previewEvent.endDate).toLocaleDateString()}
-                  </span>
-                )}
+                {previewEvent.endDate &&
+                  typeof previewEvent.endDate === "string" && (
+                    <span>
+                      {" "}
+                      - {new Date(previewEvent.endDate).toLocaleDateString()}
+                    </span>
+                  )}
               </div>
               <hr className={eventStyles.divider} />
               <EventContent event={previewEvent} />

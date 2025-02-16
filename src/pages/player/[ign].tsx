@@ -218,9 +218,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
     });
   }, []);
 
-  if (isLoadingCategories) {
-    return <div>Loading...</div>;
-  }
+  if (isLoadingCategories) return null;
 
   if (!currentIgn || !playerData) {
     return (

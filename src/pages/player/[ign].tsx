@@ -36,16 +36,6 @@ interface PlayerPageProps extends Record<string, unknown> {
   initialEvents: TimelineEvent[];
 }
 
-const preloadPlayerPage = (
-  uuid: string,
-  players: { currentIgn: string; uuid: string }[]
-) => {
-  const player = players.find((p) => p.uuid === uuid);
-  if (player) {
-    router.prefetch(`/player/${encodeURIComponent(player.currentIgn)}`);
-  }
-};
-
 
 const PlayerPage: NextPage<PlayerPageProps> = ({
   historicalIgn,
@@ -74,6 +64,7 @@ const PlayerPage: NextPage<PlayerPageProps> = ({
   const [isNameHistoryExpanded, setIsNameHistoryExpanded] = useState(false);
   const [isAltAccountsExpanded, setIsAltAccountsExpanded] = useState(false);
   const [isMainAccountExpanded, setIsMainAccountExpanded] = useState(false);
+
 
   // Function to preload a player page
   const preloadPlayerPage = useCallback(

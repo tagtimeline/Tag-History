@@ -61,20 +61,19 @@ const PlayerSearch: React.FC = () => {
 
       const lowercaseValue = value.toLowerCase();
 
-      // First check exact matches in our lookup
-      const exactMatch = playerLookup[lowercaseValue];
-      if (exactMatch) {
-        setSearchResults([exactMatch]);
-        return;
-      }
-
-      // If no exact match, filter players that start with the search term
-      const filtered = players.filter((player) =>
-        player.currentIgn.toLowerCase().startsWith(lowercaseValue)
+      // Filter players by current IGN or past IGNs
+      const filtered = players.filter(
+        (player) =>
+          player.currentIgn.toLowerCase().includes(lowercaseValue) ||
+          player.pastIgns?.some((ign) =>
+            (typeof ign === "string" ? ign : ign.name)
+              .toLowerCase()
+              .includes(lowercaseValue)
+          )
       );
       setSearchResults(filtered);
     },
-    [players, playerLookup]
+    [players]
   );
 
   // Debounce the search for better performance

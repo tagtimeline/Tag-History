@@ -6,10 +6,15 @@ import { db } from "@/../lib/firebaseConfig";
 import { updatePlayerData } from "@/../lib/playerUtils";
 import playerStyles from "@/styles/admin/players.module.css";
 
+interface PastIgn {
+  name: string;
+}
+
 interface Player {
   id: string;
   currentIgn: string;
   uuid: string;
+  pastIgns?: (string | PastIgn)[];
 }
 
 interface PlayerSelectorProps {
@@ -72,8 +77,14 @@ const PlayerSelector: React.FC<PlayerSelectorProps> = ({
     }
   };
 
-  const filteredPlayers = players.filter((player) =>
-    player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPlayers = players.filter(
+    (player) =>
+      player.currentIgn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      player.pastIgns?.some((ign) =>
+        (typeof ign === "string" ? ign : ign.name)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
   );
 
   return (

@@ -13,6 +13,13 @@ export default function App({ Component, pageProps }: AppProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Prefetch all essential pages
+    router.prefetch("/timeline");
+    router.prefetch("/events");
+    router.prefetch("/info");
+  }, [router]);
+
+  useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleComplete = () => setLoading(false);
 

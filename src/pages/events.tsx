@@ -265,7 +265,7 @@ const EventsPage: NextPage<EventsPageProps> = ({ initialEvents }) => {
                     style={{ fontSize: "12px" }}
                   >
                     {formatDate(event.date)}
-                    {event.endDate && ` - ${formatDate(event.endDate)}`}
+                    {typeof event.endDate === 'string' && event.endDate && ` - ${formatDate(event.endDate)}`}
                   </div>
                 </div>
               </div>

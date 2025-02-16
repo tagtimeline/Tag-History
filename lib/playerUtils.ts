@@ -48,7 +48,18 @@ async function fetchCraftyData(
       console.log(`[CraftyAPI] Failed to fetch data for UUID ${uuid}`);
       return null;
     }
-    const data = await response.json();
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      console.error(
+        `[CraftyAPI] Error parsing JSON response for UUID ${uuid}:`,
+        error
+      );
+      return null;
+    }
+
     return data;
   } catch (error) {
     console.error("[CraftyAPI] Error fetching data:", error);

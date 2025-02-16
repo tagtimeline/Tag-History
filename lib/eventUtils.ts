@@ -8,11 +8,12 @@ import {
   query,
   where,
   updateDoc,
+  deleteField,
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { TimelineEvent } from "@/data/events";
 import { extractPlayersFromEvent } from "../src/config/players";
-import { updatePlayerData, updatePlayerEvents } from "./playerUtils";
+import { updatePlayerEvents } from "./playerUtils";
 
 export async function getAllEvents(): Promise<TimelineEvent[]> {
   try {
@@ -164,29 +165,28 @@ export async function updateEvent(
       throw new Error("Event not found");
     }
 
-    const newEventData = {
-      ...oldEvent,
+    // Create update object, explicitly handling endDate
+    const updateData = {
       ...eventData,
+      updatedAt: new Date(),
     };
 
-    // Get both old and new sets of player mentions
-    const oldPlayers = extractPlayersFromEvent(oldEvent);
-    const newPlayers = extractPlayersFromEvent(newEventData);
+    // If endDate is empty string, use deleteField() to remove it completely
+    if (eventData.endDate === "") {
+      updateData.endDate = deleteField();
+    }
 
-    console.log("Old player IDs:", oldPlayers);
-    console.log("New player IDs:", newPlayers);
+    const oldPlayers = extractPlayersFromEvent(oldEvent);
+    const newPlayers = extractPlayersFromEvent({ ...oldEvent, ...updateData });
 
     const batch = writeBatch(db);
     const eventRef = doc(db, "events", id);
 
-    batch.update(eventRef, {
-      ...eventData,
-      updatedAt: new Date(),
-    });
+    batch.update(eventRef, updateData);
 
     await batch.commit();
 
-    // Remove event from players no longer mentioned
+    // Handle player updates...
     const removedPlayers = oldPlayers.filter(
       (playerId) => !newPlayers.includes(playerId)
     );
@@ -198,13 +198,10 @@ export async function updateEvent(
       }
     }
 
-    // Add event to newly mentioned players
     const addedPlayers = newPlayers.filter(
       (playerId) => !oldPlayers.includes(playerId)
     );
-    console.log("Added players:", addedPlayers);
     for (const playerId of addedPlayers) {
-      console.log(`Updating events for player ${playerId}`);
       try {
         await updatePlayerEvents(playerId, id, "add");
       } catch (error) {

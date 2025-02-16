@@ -93,12 +93,27 @@ export default function EventsList({ events, onEventSelect }: EventsListProps) {
 
   return (
     <div className={listStyles.eventsList}>
-      <div className={baseStyles.header}>
-        <div className={baseStyles.title}>Event Management</div>
-        <Link href="/admin/event/new">
-          <button className={buttonStyles.addButton}>Create New Event</button>
-        </Link>
+      <div
+        className={baseStyles.header}
+        style={{
+          marginLeft: "auto",
+          marginRight: "auto",
+          maxWidth: "650px",
+        }}
+      >
+        <div>
+          <div className={baseStyles.title}>Event Management</div>
+          <div style={{ fontSize: "10px", color: "#888", marginTop: "-15px" }}>
+            Total: {events.length}
+          </div>
+        </div>
+        <div className={buttonStyles.headerButtons}>
+          <Link href="/admin/event/new">
+            <button className={buttonStyles.addButton}>Create New Event</button>
+          </Link>
+        </div>
       </div>
+
       <div className={baseStyles.title}>Existing Events</div>
 
       <div className={listStyles.eventsControls}>
@@ -150,12 +165,8 @@ export default function EventsList({ events, onEventSelect }: EventsListProps) {
 
       <div className={listStyles.eventsGrid}>
         {filteredEvents.map((event) => {
-          const eventStyle = {
-            ...getEventStyles(event.category),
-            borderLeft: `3px solid ${
-              categories[event.category]?.color || "#555"
-            }`,
-          };
+        const eventStyle = getEventStyles(event.category, event.isSpecial);
+
 
           return (
             <div
@@ -177,7 +188,7 @@ export default function EventsList({ events, onEventSelect }: EventsListProps) {
                 </h3>
                 <div className={eventStyles.eventDate}>
                   {new Date(event.date).toLocaleDateString()}
-                  {event.endDate &&
+                  {typeof event.endDate === 'string' && event.endDate &&
                     ` - ${new Date(event.endDate).toLocaleDateString()}`}
                 </div>
               </div>

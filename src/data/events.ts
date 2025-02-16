@@ -1,5 +1,7 @@
 // src/data/events.ts
 
+import { FieldValue } from "firebase/firestore";
+
 export interface TableCell {
   content: string;
   align?: "left" | "center" | "right";
@@ -36,7 +38,7 @@ export interface TimelineEvent {
   title: string;
   description: string;
   date: string;
-  endDate?: string;
+  endDate?: string | FieldValue;
   category: string;
   tags: string[];
   isSpecial?: boolean;

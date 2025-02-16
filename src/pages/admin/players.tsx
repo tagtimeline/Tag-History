@@ -162,13 +162,13 @@ export default function PlayerManagement() {
         return;
       }
 
-      const existingPlayer = players.find(
-        (p) => p.uuid === playerForm.uuid && !selectedPlayer
-      );
-
-      if (existingPlayer) {
-        setError("This player already exists in the database");
-        return;
+      // Check for existing player only if this is a new player
+      if (!selectedPlayer) {
+        const existingPlayer = players.find((p) => p.uuid === playerForm.uuid);
+        if (existingPlayer) {
+          setError("This player already exists in the database");
+          return;
+        }
       }
 
       const cleanPastIgns = (playerForm.pastIgns || [])
@@ -188,6 +188,7 @@ export default function PlayerManagement() {
       const cleanAltAccounts =
         playerForm.altAccounts?.filter((alt) => alt.trim() !== "") || [];
 
+      // Get current data from Crafty API
       const craftyResponse = await fetch(
         `https://api.crafty.gg/api/v2/players/${playerForm.uuid}`
       );
@@ -246,9 +247,9 @@ export default function PlayerManagement() {
       }
 
       const playerData = {
-        currentIgn: currentIgn,
+        currentIgn,
         uuid: playerForm.uuid.trim(),
-        pastIgns: mergedPastIgns
+        pastIgns: (playerForm.pastIgns || [])
           .map((ign, index, array) => ({
             ...ign,
             number: array.length - 1 - index,
@@ -256,7 +257,8 @@ export default function PlayerManagement() {
           }))
           .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)),
         role: playerForm.role || null,
-        altAccounts: cleanAltAccounts,
+        altAccounts:
+          playerForm.altAccounts?.filter((alt) => alt.trim() !== "") || [],
         events: playerForm.events || [],
         lastUpdated: new Date(),
         mainAccount: playerForm.mainAccount || null,
@@ -266,12 +268,7 @@ export default function PlayerManagement() {
         const playerRef = doc(db, "players", selectedPlayer.id);
         await setDoc(playerRef, playerData);
       } else {
-        const docRef = await addDoc(collection(db, "players"), playerData);
-        await updatePlayerData(
-          currentIgn,
-          playerForm.role || null,
-          cleanAltAccounts
-        );
+        await addDoc(collection(db, "players"), playerData);
       }
 
       setSuccess(
@@ -295,113 +292,123 @@ export default function PlayerManagement() {
     setSearchTerm(e.target.value);
   };
 
-  const fetchPlayerData = async (input: string) => {
-    try {
-      // Check if input is UUID format
-      const uuidRegex =
-        /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
-      let uuid;
+const fetchPlayerData = async (input: string) => {
+  try {
+    // Clean input by removing UUID and extra spaces if present
+    const cleanInput = input.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
-      if (uuidRegex.test(input.replace(/-/g, ""))) {
-        // Input is UUID, format it properly
-        uuid = input
-          .replace(/-/g, "")
-          .replace(
-            /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
-            "$1-$2-$3-$4-$5"
-          );
-      } else {
-        // Input is IGN, need to lookup UUID first
-        const searchResponse = await fetch(
-          `https://api.crafty.gg/api/v2/players/search?username=${input}`
-        );
-        if (!searchResponse.ok) {
-          throw new Error("Failed to find player");
-        }
-        const searchData = (await searchResponse.json()) as {
-          success: boolean;
-          data?: CraftySearchResult[];
-        };
-        if (!searchData.success || !searchData.data?.length) {
-          throw new Error("Player not found");
-        }
-        // Find exact username match
-        const player = searchData.data?.find(
-          (p: CraftySearchResult) =>
-            p.username.toLowerCase() === input.toLowerCase()
-        );
-        if (!player) {
-          throw new Error("Player not found");
-        }
-        uuid = player.uuid;
-      }
+    // Don't process if input is too short
+    if (cleanInput.length < 3) return;
 
-      // Get full player data from Crafty API
-      const craftyResponse = await fetch(
-        `https://api.crafty.gg/api/v2/players/${uuid}`
-      );
-      if (!craftyResponse.ok) {
-        throw new Error("Failed to fetch player data");
-      }
-
-      const craftyData = await craftyResponse.json();
-      if (!craftyData.success || !craftyData.data) {
-        throw new Error("Failed to fetch player data");
-      }
-
-      const currentIgn = craftyData.data.username;
-
-      // Process past IGNs from Crafty
-      const craftyPastIgns = craftyData.data.usernames
-        .map((nameObj: any) => nameObj.username)
-        .filter(
-          (name: string) => name.toLowerCase() !== currentIgn.toLowerCase()
+    // First check if this player exists in our database
+    const existingPlayer = players.find(
+      (p) =>
+        p.currentIgn.toLowerCase() === cleanInput.toLowerCase() ||
+        p.pastIgns?.some(
+          (ign) =>
+            (typeof ign === "string" ? ign : ign.name).toLowerCase() ===
+            cleanInput.toLowerCase()
         )
-        .map((name: string, index: number, array: string[]) => ({
-          name,
-          hidden: false,
-          number: array.length - 1 - index,
-        }));
+    );
 
-      setPlayerForm((prev) => {
-        // Start with existing past IGNs
-        const existingPastIgns = [...(prev.pastIgns || [])];
-
-        // Add new IGNs from Crafty that aren't already in the list
-        craftyPastIgns.forEach(
-          (newIgn: { name: string; hidden: boolean; number: number }) => {
-            if (
-              !existingPastIgns.some(
-                (existing) =>
-                  existing.name.toLowerCase() === newIgn.name.toLowerCase()
-              )
-            ) {
-              existingPastIgns.push({
-                ...newIgn,
-                number: existingPastIgns.length, // New IGN gets next number
-              });
-            }
-          }
-        );
-
-        // Return updated form with merged IGNs
-        return {
-          ...prev,
-          currentIgn: currentIgn,
-          uuid: uuid,
-          pastIgns: existingPastIgns
-            .map((ign, index, array) => ({
-              ...ign,
-              number: array.length - 1 - index,
-            }))
-            .sort((a, b) => (b.number ?? 0) - (a.number ?? 0)),
-        };
-      });
-    } catch (error) {
-      console.error("Error fetching player data:", error);
-      setError("Failed to fetch player data");
+    if (existingPlayer) {
+      setPlayerForm((prev) => ({
+        ...prev,
+        currentIgn: existingPlayer.currentIgn,
+        uuid: existingPlayer.uuid,
+        pastIgns: existingPlayer.pastIgns || [],
+        role: existingPlayer.role || null,
+        altAccounts: existingPlayer.altAccounts || [],
+        events: existingPlayer.events || [],
+        mainAccount: existingPlayer.mainAccount || null,
+      }));
+      return;
     }
-  };
+
+    // Check if input is UUID format
+    const uuidRegex =
+      /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+    let uuid;
+
+    if (uuidRegex.test(cleanInput.replace(/-/g, ""))) {
+      // Input is UUID, format it properly
+      uuid = cleanInput
+        .replace(/-/g, "")
+        .replace(
+          /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+          "$1-$2-$3-$4-$5"
+        );
+    } else {
+      // Input is IGN, need to lookup UUID first
+      const searchResponse = await fetch(
+        `https://api.crafty.gg/api/v2/players/search?username=${cleanInput}`
+      );
+      if (!searchResponse.ok) {
+        throw new Error("Failed to find player");
+      }
+      const searchData = (await searchResponse.json()) as {
+        success: boolean;
+        data?: CraftySearchResult[];
+      };
+      if (!searchData.success || !searchData.data?.length) {
+        throw new Error("Player not found");
+      }
+      // Find exact username match
+      const player = searchData.data?.find(
+        (p: CraftySearchResult) =>
+          p.username.toLowerCase() === cleanInput.toLowerCase()
+      );
+      if (!player) {
+        throw new Error("Player not found");
+      }
+      uuid = player.uuid;
+    }
+
+    // Get full player data from Crafty API
+    const craftyResponse = await fetch(
+      `https://api.crafty.gg/api/v2/players/${uuid}`
+    );
+    if (!craftyResponse.ok) {
+      throw new Error("Failed to fetch player data");
+    }
+
+    const craftyData = await craftyResponse.json();
+    if (!craftyData.success || !craftyData.data) {
+      throw new Error("Failed to fetch player data");
+    }
+
+    const currentIgn = craftyData.data.username;
+
+    // Process past IGNs from Crafty
+    const craftyPastIgns = craftyData.data.usernames
+      .map((nameObj: any) => nameObj.username)
+      .filter((name: string) => name.toLowerCase() !== currentIgn.toLowerCase())
+      .map((name: string, index: number, array: string[]) => ({
+        name,
+        hidden: false,
+        number: array.length - 1 - index,
+      }));
+
+    // Reset the form with new data
+    setPlayerForm({
+      currentIgn,
+      uuid,
+      pastIgns: craftyPastIgns,
+      role: null,
+      altAccounts: [],
+      events: [],
+      mainAccount: null,
+    });
+  } catch (error) {
+    console.error("Error fetching player data:", error);
+    setError("Player not found");
+    // Clear UUID if there's an error to prevent issues
+    setPlayerForm((prev) => ({
+      ...prev,
+      uuid: "",
+    }));
+  }
+};
 
   const filteredPlayers = players.filter(
     (player) =>
@@ -461,7 +468,12 @@ export default function PlayerManagement() {
                 maxWidth: "650px",
               }}
             >
-              <div className={baseStyles.title}>Players List</div>
+              <div>
+                <div className={baseStyles.title}>Players List</div>
+                <div style={{ fontSize: '10px', color: '#888', marginTop: '-15px' }}>
+                  Total: {players.length}
+                </div>
+              </div>
               <div className={playerStyles.headerButtons}>
                 <button
                   type="button"
@@ -595,7 +607,10 @@ export default function PlayerManagement() {
                     }}
                     onBlur={async (e) => {
                       const inputValue = e.target.value;
-                      const cleanInput = inputValue.split("(")[0].trim();
+                      // Remove any existing UUID in parentheses and trim
+                      const cleanInput = inputValue
+                        .replace(/\s*\([^)]*\)\s*$/, "")
+                        .trim();
 
                       // Don't try to fetch if input is too short or empty
                       if (cleanInput.length < 3) return;
@@ -603,47 +618,45 @@ export default function PlayerManagement() {
                       const uuidRegex =
                         /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
 
-                      // First check if the input is a UUID
-                      if (uuidRegex.test(inputValue.replace(/-/g, ""))) {
-                        // Format UUID properly
-                        const formattedUUID = inputValue
-                          .replace(/-/g, "")
-                          .replace(
-                            /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
-                            "$1-$2-$3-$4-$5"
-                          );
-                        await fetchPlayerData(formattedUUID);
-                      } else {
-                        // Check if this player exists in our database
-                        const player = players.find(
-                          (p) =>
-                            p.currentIgn.toLowerCase() ===
-                              cleanInput.toLowerCase() ||
-                            p.pastIgns?.some(
-                              (ign) =>
-                                (typeof ign === "string"
-                                  ? ign
-                                  : ign.name
-                                ).toLowerCase() === cleanInput.toLowerCase()
-                            )
-                        );
-
-                        if (player) {
-                          // If found in database, use their data
-                          setPlayerForm((prev) => ({
-                            ...prev,
-                            currentIgn: player.currentIgn,
-                            uuid: player.uuid,
-                            pastIgns: player.pastIgns || [],
-                          }));
+                      try {
+                        if (uuidRegex.test(cleanInput.replace(/-/g, ""))) {
+                          // Format UUID properly
+                          const formattedUUID = cleanInput
+                            .replace(/-/g, "")
+                            .replace(
+                              /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/i,
+                              "$1-$2-$3-$4-$5"
+                            );
+                          await fetchPlayerData(formattedUUID);
                         } else {
-                          // If not found, try to fetch from API
-                          try {
+                          // Check if this player exists in our database
+                          const player = players.find(
+                            (p) =>
+                              p.currentIgn.toLowerCase() ===
+                                cleanInput.toLowerCase() ||
+                              p.pastIgns?.some(
+                                (ign) =>
+                                  (typeof ign === "string"
+                                    ? ign
+                                    : ign.name
+                                  ).toLowerCase() === cleanInput.toLowerCase()
+                              )
+                          );
+
+                          if (player) {
+                            setPlayerForm((prev) => ({
+                              ...prev,
+                              currentIgn: player.currentIgn,
+                              uuid: player.uuid,
+                              pastIgns: player.pastIgns || [],
+                            }));
+                          } else {
+                            // If not found, try to fetch from API
                             await fetchPlayerData(cleanInput);
-                          } catch (error) {
-                            setError("Player not found");
                           }
                         }
+                      } catch (error) {
+                        setError("Player not found");
                       }
                     }}
                     placeholder="Enter username or UUID"

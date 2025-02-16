@@ -64,7 +64,7 @@ const SearchBar = ({ events, onResultClick }: SearchBarProps) => {
                 <div className={searchStyles.resultTitle}>{event.title}</div>
                 <div className={searchStyles.eventDate}>
                   {new Date(event.date).toLocaleDateString()}
-                  {event.endDate &&
+                  {event.endDate && typeof event.endDate === 'string' &&
                     ` - ${new Date(event.endDate).toLocaleDateString()}`}
                   {event.isSpecial && (
                     <span className={searchStyles.specialStar}>⭐</span>

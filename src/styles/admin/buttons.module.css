@@ -21,6 +21,12 @@
   transform: scale(1.02);
 }
 
+.headerButtons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
 .controlButton,
 .addButton,
 .addPlayerButton,

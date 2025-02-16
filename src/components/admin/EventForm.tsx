@@ -296,9 +296,10 @@ export const EventForm: React.FC<EventFormProps> = ({
       const cleanData = {
         title: formData.title.trim(),
         date: formData.date,
+        // Only include endDate if it has a non-empty value
         ...(formData.endDate?.trim()
           ? { endDate: formData.endDate.trim() }
-          : {}),
+          : { endDate: "" }), // explicitly set empty string to trigger removal
         category: formData.category,
         description: formData.description.trim(),
         isSpecial: formData.isSpecial,

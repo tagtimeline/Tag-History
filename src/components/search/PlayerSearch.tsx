@@ -138,10 +138,7 @@ const PlayerSearch: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim()) {
-      const player = playerLookup[searchTerm.toLowerCase()];
-      if (player) {
-        router.push(`/player/${player.id}`);
-      }
+      router.push(`/player/${encodeURIComponent(searchTerm)}`);
       setSearchTerm("");
       setSearchResults([]);
       setIsFocused(false);
@@ -149,7 +146,7 @@ const PlayerSearch: React.FC = () => {
   };
 
   const handleResultClick = (player: Player) => {
-    router.push(`/player/${player.id}`);
+    router.push(`/player/${encodeURIComponent(player.currentIgn)}`);
     setSearchTerm("");
     setSearchResults([]);
     setIsFocused(false);

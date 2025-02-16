@@ -21,6 +21,16 @@ const PlayerSearch: React.FC = () => {
   const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
 
+  // Preload player pages for search results
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      // Preload the first 5 search results
+      searchResults.slice(0, 5).forEach((player) => {
+        router.prefetch(`/player/${player.id}`);
+      });
+    }
+  }, [searchResults, router]);
+
   useEffect(() => {
     const handleRouteChange = () => {
       setSearchTerm("");

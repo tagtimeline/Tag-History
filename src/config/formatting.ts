@@ -50,6 +50,28 @@ export const formatText = (text: string): string => {
     .replace(patterns.spoiler, '<span class="spoiler">$1</span>');
 };
 
+export const extractReferences = (content: string) => {
+  const playerPattern = /<([^:]+):([^>]+)>/g;
+  const eventPattern = /\[EVENT-([^\]]+)\]/g;
+
+  const playerIds = new Set<string>();
+  const eventIds = new Set<string>();
+
+  let match;
+
+  // Extract player IDs
+  while ((match = playerPattern.exec(content)) !== null) {
+    playerIds.add(match[2]); // match[2] contains the player document ID
+  }
+
+  // Extract event IDs
+  while ((match = eventPattern.exec(content)) !== null) {
+    eventIds.add(match[1]);
+  }
+
+  return { playerIds: Array.from(playerIds), eventIds: Array.from(eventIds) };
+};
+
 export const extractLinks = (text: string): Link[] => {
   const links: Link[] = [];
   let match;

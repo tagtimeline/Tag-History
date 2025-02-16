@@ -4,7 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
@@ -15,6 +15,7 @@ import { fetchCategories, Category } from "../../config/categories";
 import EventContent from "../../components/timeline/EventContent";
 import { getEventById, getAllEvents } from "../../../lib/eventUtils";
 import { db } from "../../../lib/firebaseConfig";
+import { extractReferences } from "../../config/formatting";
 
 import styles from "../../styles/eventPage.module.css";
 import eventStyles from "../../styles/events.module.css";
@@ -31,6 +32,71 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Preload nearby and referenced events/players
+  useEffect(() => {
+    // Preload nearby events
+    const sortedEvents = [...allEvents].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    const currentIndex = sortedEvents.findIndex((e) => e.id === id);
+
+    // Get indices for nearby events
+    const nearbyIndices = [
+      currentIndex - 2,
+      currentIndex - 1,
+      currentIndex + 1,
+      currentIndex + 2,
+    ].filter((index) => index >= 0 && index < sortedEvents.length);
+
+    // Preload each nearby event
+    nearbyIndices.forEach((index) => {
+      const eventToPreload = sortedEvents[index];
+      if (eventToPreload) {
+        router.prefetch(`/event/${eventToPreload.id}`);
+      }
+    });
+
+    // Preload referenced content
+    if (event) {
+      // Get all content including side events
+      const getAllContent = (event: TimelineEvent) => {
+        let content = event.description;
+
+        // Add side event content
+        event.sideEvents?.forEach((sideEvent) => {
+          content += "\n" + sideEvent.description;
+        });
+
+        // Add table content
+        event.tables?.forEach((table) => {
+          table.rows.forEach((row) => {
+            row.cells.forEach((cell) => {
+              content += "\n" + cell.content;
+            });
+          });
+        });
+
+        return content;
+      };
+
+      const content = getAllContent(event);
+      const { playerIds, eventIds } = extractReferences(content);
+
+      // Preload player pages
+      playerIds.forEach((playerId) => {
+        router.prefetch(`/player/${encodeURIComponent(playerId)}`);
+      });
+
+      // Preload event pages
+      eventIds.forEach((eventId) => {
+        if (eventId !== id) {
+          // Don't preload current event
+          router.prefetch(`/event/${eventId}`);
+        }
+      });
+    }
+  }, [id, event, allEvents, router]);
 
   // Load categories
   useEffect(() => {
@@ -78,18 +144,33 @@ const EventPage: NextPage<EventPageProps> = ({ initialEvent, allEvents }) => {
     [allEvents]
   );
 
-  const sortedEvents = [...allEvents].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  const sortedEvents = useMemo(
+    () =>
+      [...allEvents].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      ),
+    [allEvents]
   );
 
-  const currentIndex = sortedEvents.findIndex((e) => e.id === id);
-  const prevEvent = currentIndex > 0 ? sortedEvents[currentIndex - 1] : null;
-  const nextEvent =
-    currentIndex < sortedEvents.length - 1
-      ? sortedEvents[currentIndex + 1]
-      : null;
+  const currentIndex = useMemo(
+    () => sortedEvents.findIndex((e) => e.id === id),
+    [sortedEvents, id]
+  );
 
-  if (!event || isLoadingCategories) return <div>Loading...</div>;
+  const prevEvent = useMemo(
+    () => (currentIndex > 0 ? sortedEvents[currentIndex - 1] : null),
+    [currentIndex, sortedEvents]
+  );
+
+  const nextEvent = useMemo(
+    () =>
+      currentIndex < sortedEvents.length - 1
+        ? sortedEvents[currentIndex + 1]
+        : null,
+    [currentIndex, sortedEvents]
+  );
+
+  if (!event || isLoadingCategories) return null;
 
   return (
     <>
@@ -222,13 +303,14 @@ export async function getServerSideProps({
   params: { id: string };
 }) {
   try {
-    const event = await getEventById(params.id);
+    const [event, allEvents] = await Promise.all([
+      getEventById(params.id),
+      getAllEvents(),
+    ]);
 
     if (!event) {
       return { notFound: true };
     }
-
-    const allEvents = await getAllEvents();
 
     const serializedEvent = {
       id: event.id,

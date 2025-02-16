@@ -61,7 +61,7 @@ export default function AdminWelcome() {
 
   const handleLogout = () => handleAdminLogout(router);
 
-  if (isLoading) return <div className={baseStyles.loading}>Loading...</div>;
+  if (isLoading) return null;
   if (!isAuthenticated) return null;
 
   return (

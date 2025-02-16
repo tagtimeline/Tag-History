@@ -59,13 +59,8 @@ export default function AdminEvents() {
     router.push(`/admin/event/${event.id}`);
   };
 
-  if (isLoading) {
-    return <div className={baseStyles.loading}>Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (isLoading) return null;
+  if (!isAuthenticated)return null;
 
   return (
     <div className={baseStyles.pageWrapper}>

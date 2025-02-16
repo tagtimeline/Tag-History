@@ -66,27 +66,27 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
 
   const monthSpacing = yearSpacing / 12;
 
-const getEventPosition = useCallback(
-  (eventDate: string) => {
-    if (typeof eventDate !== "string") return 0; // Handle non-string case
-    const date = new Date(eventDate);
-    const startDate = new Date(2013, 9, 1);
+  const getEventPosition = useCallback(
+    (eventDate: string) => {
+      if (typeof eventDate !== "string") return 0;
+      const date = new Date(eventDate);
+      const startDate = new Date(2013, 9, 1);
 
-    const monthsDiff =
-      (date.getFullYear() - startDate.getFullYear()) * 12 +
-      (date.getMonth() - startDate.getMonth());
+      const monthsDiff =
+        (date.getFullYear() - startDate.getFullYear()) * 12 +
+        (date.getMonth() - startDate.getMonth());
 
-    const daysInMonth = new Date(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      0
-    ).getDate();
-    const dayOffset = (date.getDate() / daysInMonth) * monthSpacing;
+      const daysInMonth = new Date(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        0
+      ).getDate();
+      const dayOffset = (date.getDate() / daysInMonth) * monthSpacing;
 
-    return 10 + monthsDiff * monthSpacing + dayOffset;
-  },
-  [monthSpacing]
-);
+      return 10 + monthsDiff * monthSpacing + dayOffset;
+    },
+    [monthSpacing]
+  );
 
   const filteredEvents = useMemo(() => {
     const hasAll = visibleCategories.includes("all");
@@ -97,7 +97,7 @@ const getEventPosition = useCallback(
   const timelineMarkers = useMemo(() => {
     const endDate = new Date();
     const futureDate = new Date();
-    futureDate.setMonth(endDate.getMonth() + 5); // Show 5 months into the future
+    futureDate.setMonth(endDate.getMonth() + 5);
     const markers: MarkerType[] = [];
     let totalHeight = 10;
 
@@ -154,95 +154,97 @@ const getEventPosition = useCallback(
   );
 
   const assignEventPositions = useCallback(
-    (events: TimelineEvent[]) => {
-      const sortedEvents = [...events].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+  (events: TimelineEvent[]) => {
+    const BUFFER_ZONE = 2;
+    const MIN_VERTICAL_SPACING = 60;  // Base spacing without buffer
 
-      const positions: EventPosition[] = [];
-      const occupiedSpaces: Record<
-        number,
-        Array<{ startDate: Date; endDate: Date; position: number }>
-      > = {};
+    // Sort all events prioritizing multi-day events first, then by date
+    const sortedEvents = [...events].sort((a, b) => {
+      const aIsMultiDay = Boolean(a.endDate);
+      const bIsMultiDay = Boolean(b.endDate);
+      if (aIsMultiDay !== bIsMultiDay) {
+        return bIsMultiDay ? -1 : 1; // Multi-day events first
+      }
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
 
-      for (const event of sortedEvents) {
-        const position = customPositions[event.id]
-          ? (customPositions[event.id] * yearSpacing) / DEFAULT_YEAR_SPACING
-          : getEventPosition(event.date);
+    const positions: EventPosition[] = [];
+    const occupiedSpaces: Record<number, Array<{ startDate: Date; endDate: Date; position: number }>> = {};
 
-        const eventStartDate = new Date(event.date);
-        const eventEndDate = event.endDate && typeof event.endDate === 'string'
+    for (const event of sortedEvents) {
+      const position = customPositions[event.id]
+        ? (customPositions[event.id] * yearSpacing) / DEFAULT_YEAR_SPACING
+        : getEventPosition(event.date);
+
+      const eventStartDate = new Date(event.date);
+      const eventEndDate =
+        event.endDate && typeof event.endDate === "string"
           ? new Date(event.endDate)
           : eventStartDate;
 
-        const existingColumn = eventColumns[event.id];
+      const existingColumn = eventColumns[event.id];
 
-        if (existingColumn !== undefined) {
-          positions.push({
-            event,
-            position,
-            column: existingColumn,
-          });
+      if (existingColumn !== undefined) {
+        positions.push({ event, position, column: existingColumn });
+        if (!occupiedSpaces[existingColumn]) {
+          occupiedSpaces[existingColumn] = [];
+        }
+        occupiedSpaces[existingColumn].push({
+          startDate: eventStartDate,
+          endDate: eventEndDate,
+          position,
+        });
+        continue;
+      }
 
-          if (!occupiedSpaces[existingColumn]) {
-            occupiedSpaces[existingColumn] = [];
+      let placed = false;
+      let colIndex = 0;
+
+      while (!placed) {
+        const hasOverlap = occupiedSpaces[colIndex]?.some((existing) => {
+          // Add buffer to positions
+          const positionWithBuffer = Math.abs(existing.position - position);
+          const isWithinBuffer = positionWithBuffer < (MIN_VERTICAL_SPACING + (BUFFER_ZONE * 2));
+
+          // Add buffer to dates
+          const eventEnd = typeof event.endDate === 'string' ? new Date(event.endDate) : eventStartDate;
+          const bufferStart = new Date(eventStartDate);
+          const bufferEnd = new Date(eventEnd);
+          bufferStart.setDate(bufferStart.getDate() - BUFFER_ZONE);
+          bufferEnd.setDate(bufferEnd.getDate() + BUFFER_ZONE);
+
+          const dateOverlap = (
+            (bufferStart <= existing.endDate && bufferEnd >= existing.startDate) ||
+            (existing.startDate <= bufferEnd && existing.endDate >= bufferStart)
+          );
+
+          // If either position or date is within buffer zone, consider it an overlap
+          return isWithinBuffer || dateOverlap;
+        });
+
+        if (!hasOverlap) {
+          if (!occupiedSpaces[colIndex]) {
+            occupiedSpaces[colIndex] = [];
           }
-          occupiedSpaces[existingColumn].push({
+          
+          occupiedSpaces[colIndex].push({
             startDate: eventStartDate,
             endDate: eventEndDate,
             position,
           });
+
+          positions.push({ event, position, column: colIndex });
+          placed = true;
         } else {
-          let colIndex = 0;
-          let placed = false;
-
-          while (!placed) {
-            const hasOverlap = occupiedSpaces[colIndex]?.some((existing) => {
-              if (
-                !event.endDate &&
-                existing.endDate.getTime() === existing.startDate.getTime()
-              ) {
-                return Math.abs(existing.position - position) < 60;
-              }
-
-              const eventEnd = (event.endDate && typeof event.endDate === 'string')
-                ? new Date(event.endDate as string)
-                : eventStartDate;
-              return (
-                (eventStartDate <= existing.endDate &&
-                  eventEnd >= existing.startDate) ||
-                (existing.startDate <= eventEnd &&
-                  existing.endDate >= eventStartDate)
-              );
-            });
-
-            if (!hasOverlap) {
-              if (!occupiedSpaces[colIndex]) {
-                occupiedSpaces[colIndex] = [];
-              }
-              occupiedSpaces[colIndex].push({
-                startDate: eventStartDate,
-                endDate: eventEndDate,
-                position,
-              });
-
-              positions.push({
-                event,
-                position,
-                column: colIndex,
-              });
-              placed = true;
-            } else {
-              colIndex++;
-            }
-          }
+          colIndex++;
         }
       }
+    }
 
-      return positions;
-    },
-    [customPositions, eventColumns, getEventPosition, yearSpacing]
-  );
+    return positions;
+  },
+  [customPositions, eventColumns, getEventPosition, yearSpacing]
+);
 
   const totalHeight = Math.max(
     timelineMarkers[timelineMarkers.length - 1]?.position + monthSpacing + 60 ||

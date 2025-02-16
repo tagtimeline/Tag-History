@@ -12,6 +12,8 @@ import {
 } from "../../config/categories";
 import EventContent from "./EventContent";
 import { getAllEvents } from "../../../lib/eventUtils";
+import { extractReferences } from "@/config/formatting";
+import router from "next/router";
 
 interface EventModalProps {
   event: TimelineEvent;
@@ -22,6 +24,35 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
   // Get all events as an array
   const [allEvents, setAllEvents] = React.useState<TimelineEvent[]>([]);
   const [, setCategories] = useState<Record<string, Category>>({});
+
+  // Add preloading effect
+  useEffect(() => {
+    // Function to get all content including side events
+    const getAllContent = (event: TimelineEvent) => {
+      let content = event.description;
+
+      // Add side event content
+      event.sideEvents?.forEach((sideEvent) => {
+        content += "\n" + sideEvent.description;
+      });
+
+      return content;
+    };
+
+    // Extract and preload
+    const content = getAllContent(event);
+    const { playerIds, eventIds } = extractReferences(content);
+
+    // Preload player pages
+    playerIds.forEach((playerId) => {
+      router.prefetch(`/player/${encodeURIComponent(playerId)}`);
+    });
+
+    // Preload event pages
+    eventIds.forEach((eventId) => {
+      router.prefetch(`/event/${eventId}`);
+    });
+  }, [event]);
 
   useEffect(() => {
     getAllEvents().then((events) => setAllEvents(events));

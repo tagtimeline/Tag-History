@@ -143,7 +143,7 @@ const TimelinePage: NextPage<TimelinePageProps> = ({ initialEvents }) => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   return (

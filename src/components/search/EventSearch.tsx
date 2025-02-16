@@ -153,47 +153,44 @@ const EventSearch: React.FC<EventSearchProps> = ({
           setTimeout(() => setIsFocused(false), 200);
         }}
       />
-      {isLoading ? (
-        <div className={searchStyles.eventSearchResults}>
-          <div className={searchStyles.loadingText}>Loading...</div>
-        </div>
-      ) : (
-        (isFocused || searchTerm) && (
-          <div className={searchStyles.eventSearchResults}>
-            {searchResults.length > 0 ? (
-              searchResults.map((event) => (
-                <div
-                  key={event.id}
-                  className={searchStyles.eventResultItem}
-                  onClick={() => handleResultClick(event)}
-                >
-                  <span
-                    className={searchStyles.categoryColor}
-                    style={{
-                      backgroundColor: getCategoryColor(event.category),
-                    }}
-                  />
-                  <div>
-                    <div className={searchStyles.eventResultTitle}>
-                      {event.title}
-                    </div>
-                    <div className={searchStyles.eventDate}>
-                      {new Date(event.date).toLocaleDateString()}
-                      {event.endDate && typeof event.endDate === 'string' &&
-                        ` - ${new Date(event.endDate).toLocaleDateString()}`}
-                      {event.isSpecial && (
-                        <span className={searchStyles.specialStar}>⭐</span>
-                      )}
+      {isLoading
+        ? null
+        : (isFocused || searchTerm) && (
+            <div className={searchStyles.eventSearchResults}>
+              {searchResults.length > 0 ? (
+                searchResults.map((event) => (
+                  <div
+                    key={event.id}
+                    className={searchStyles.eventResultItem}
+                    onClick={() => handleResultClick(event)}
+                  >
+                    <span
+                      className={searchStyles.categoryColor}
+                      style={{
+                        backgroundColor: getCategoryColor(event.category),
+                      }}
+                    />
+                    <div>
+                      <div className={searchStyles.eventResultTitle}>
+                        {event.title}
+                      </div>
+                      <div className={searchStyles.eventDate}>
+                        {new Date(event.date).toLocaleDateString()}
+                        {typeof event.endDate === "string" &&
+                          event.endDate &&
+                          ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                        {event.isSpecial && (
+                          <span className={searchStyles.specialStar}>⭐</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className={searchStyles.noResults}>No events found</div>
-            )}
-          </div>
-        )
-      )}
+                ))
+              ) : (
+                <div className={searchStyles.noResults}>No events found</div>
+              )}
+            </div>
+          )}
     </div>
   );
 };

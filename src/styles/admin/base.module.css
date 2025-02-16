@@ -163,14 +163,6 @@
   width: 100%;
 }
 
-.loading {
-  display: flex;
-  margin-top: 50%;
-  justify-content: center;
-  color: #fff;
-  font-family: "Minecraft", sans-serif;
-}
-
 /* Event Preview */
 .editLayout {
   display: flex;

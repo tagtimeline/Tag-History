@@ -229,6 +229,17 @@
   z-index: 1000;
 }
 
+.progressIndicator {
+  position: sticky;
+  top: 0;
+  border-radius: 4px;
+  font-weight: normal;
+  font-family: "Minecraft", sans-serif;
+  color: #55ff55;
+  z-index: 10;
+  text-align: right;
+}
+
 .logsContainer {
   position: fixed;
   top: 50%;

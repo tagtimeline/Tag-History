@@ -42,6 +42,18 @@
   color: #ff5555;
 }
 
+.controlButtonDisabled {
+  composes: button;
+  background-color: #222;
+  border-color: #333;
+  color: #444;
+  cursor: not-allowed;
+}
+
+.controlButtonDisabled:hover {
+  background-color: #222;
+}
+
 .hideButton {
   composes: button;
   width: 128px !important;

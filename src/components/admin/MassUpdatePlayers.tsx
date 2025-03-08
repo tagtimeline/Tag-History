@@ -8,13 +8,22 @@ import playerStyles from "@/styles/admin/players.module.css";
 interface UpdateLogProps {
   logs: string[];
   onClear: () => void;
+  onStop: () => void;
+  isUpdating: boolean;
+  progress: { current: number; total: number };
 }
 
 interface CraftyUsername {
   username: string;
 }
 
-const UpdateLog: React.FC<UpdateLogProps> = ({ logs, onClear }) => {
+const UpdateLog: React.FC<UpdateLogProps> = ({
+  logs,
+  onClear,
+  onStop,
+  isUpdating,
+  progress,
+}) => {
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,11 +35,37 @@ const UpdateLog: React.FC<UpdateLogProps> = ({ logs, onClear }) => {
       <div className={playerStyles.logsContainer}>
         <div className={playerStyles.logsHeader}>
           Update Logs
-          <button className={buttonStyles.clearButton} onClick={onClear}>
-            Clear
-          </button>
+          <div className={playerStyles.headerButtons}>
+            <button
+              className={
+                isUpdating
+                  ? buttonStyles.controlButton
+                  : buttonStyles.controlButtonDisabled
+              }
+              onClick={onStop}
+              disabled={!isUpdating}
+            >
+              Stop
+            </button>
+            <button
+              className={
+                isUpdating
+                  ? buttonStyles.controlButtonDisabled
+                  : buttonStyles.controlButton
+              }
+              onClick={onClear}
+              disabled={isUpdating}
+            >
+              Done
+            </button>
+          </div>
         </div>
         <div className={playerStyles.logs}>
+          {progress.total > 0 && (
+            <div className={playerStyles.progressIndicator}>
+              Player {progress.current}/{progress.total}
+            </div>
+          )}
           {logs.map((log, index) => (
             <div key={index} className={playerStyles.logEntry}>
               {log}
@@ -46,6 +81,21 @@ const UpdateLog: React.FC<UpdateLogProps> = ({ logs, onClear }) => {
 export default function MassUpdatePlayers() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [loadingIndicator, setLoadingIndicator] = useState("");
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (isUpdating) {
+      const loadingStates = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+      let i = 0;
+      const interval = setInterval(() => {
+        setLoadingIndicator(loadingStates[i % loadingStates.length]);
+        i++;
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isUpdating]);
 
   const addLog = (message: string) => {
     setLogs((prev) => [
@@ -62,9 +112,27 @@ export default function MassUpdatePlayers() {
     )}-${uuid.slice(16, 20)}-${uuid.slice(20)}`;
   };
 
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      addLog("❌ Process stopped by user");
+      setIsUpdating(false);
+    }
+  };
+
+  const handleClear = () => {
+    if (!isUpdating) {
+      setLogs([]);
+    }
+  };
+
   const handleMassUpdate = async () => {
     setIsUpdating(true);
     setLogs([]);
+    setProgress({ current: 0, total: 0 });
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     let totalPlayers = 0;
     let uuidUpdates = 0;
@@ -77,9 +145,17 @@ export default function MassUpdatePlayers() {
       const querySnapshot = await getDocs(query(playersRef));
       const players = querySnapshot.docs;
       totalPlayers = players.length;
+      setProgress({ current: 0, total: totalPlayers });
 
-      for (const playerDoc of players) {
+      for (let i = 0; i < players.length; i++) {
+        // Check if process was aborted
+        if (signal.aborted) {
+          break;
+        }
+
+        const playerDoc = players[i];
         const playerData = playerDoc.data();
+        setProgress({ current: i + 1, total: totalPlayers });
         addLog(`Processing ${playerData.currentIgn}...`);
 
         try {
@@ -122,6 +198,9 @@ export default function MassUpdatePlayers() {
             }
           }
 
+          // Check if aborted before making network request
+          if (signal.aborted) break;
+
           // Fetch Crafty.gg data
           const craftyResponse = await fetch(
             `https://api.crafty.gg/api/v2/players/${playerData.uuid}`
@@ -151,6 +230,17 @@ export default function MassUpdatePlayers() {
             continue;
           }
 
+          // Find highest past IGN number for proper numbering
+          const highestPastIgnNumber = playerData.pastIgns?.length
+            ? Math.max(
+                ...playerData.pastIgns.map((ign: any) =>
+                  typeof ign === "object" && ign.number !== undefined
+                    ? ign.number
+                    : 0
+                )
+              )
+            : -1;
+
           // Extract current IGN and past usernames
           const currentIgn = craftyData.data.username;
           const pastIgns = Array.from(
@@ -176,13 +266,7 @@ export default function MassUpdatePlayers() {
                 .map((name: string) => ({
                   name,
                   hidden: false,
-                  number: playerData.pastIgns?.length
-                    ? Math.max(
-                        ...playerData.pastIgns.map((ign: any) =>
-                          typeof ign === "object" ? ign.number ?? 0 : 0
-                        )
-                      ) + 1
-                    : 0,
+                  number: highestPastIgnNumber + 1, // Use the highest number + 1 for new IGNs
                 })),
             ])
           );
@@ -206,10 +290,20 @@ export default function MassUpdatePlayers() {
               );
             }
             if (pastIgnsDifferent) {
-              updates.pastIgns = pastIgns.map((ign, index, array) => ({
-                ...ign,
-                number: array.length - 1 - index,
-              }));
+              // Sort and renumber pastIgns to ensure proper ordering
+              const sortedPastIgns = [...pastIgns].sort((a, b) => {
+                const aNum =
+                  typeof a === "object" && a.number !== undefined
+                    ? a.number
+                    : 0;
+                const bNum =
+                  typeof b === "object" && b.number !== undefined
+                    ? b.number
+                    : 0;
+                return bNum - aNum; // Sort in descending order
+              });
+
+              updates.pastIgns = sortedPastIgns;
 
               const newIgns = pastIgns
                 .filter(
@@ -232,6 +326,9 @@ export default function MassUpdatePlayers() {
 
             updates.lastUpdated = new Date();
 
+            // Check if aborted before making database update
+            if (signal.aborted) break;
+
             await updateDoc(playerDoc.ref, updates);
             if (needsUuidUpdate) uuidUpdates++;
             if (needsNameUpdate) nameUpdates++;
@@ -240,22 +337,30 @@ export default function MassUpdatePlayers() {
             addLog(`✅ ${playerData.currentIgn} is up to date`);
           }
         } catch (error) {
+          if (signal.aborted) break;
           addLog(`❌ Error processing ${playerData.currentIgn}: ${error}`);
         }
 
         // Small delay to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (!signal.aborted) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
       }
 
-      addLog(`📊 Summary:`);
-      addLog(`Total players checked: ${totalPlayers}`);
-      addLog(`Players with UUID updates: ${uuidUpdates}`);
-      addLog(`Players with name updates: ${nameUpdates}`);
-      addLog(`✨ Mass update completed successfully!`);
+      if (!signal.aborted) {
+        addLog(`📊 Summary:`);
+        addLog(`Total players checked: ${progress.current}`);
+        addLog(`Players with UUID updates: ${uuidUpdates}`);
+        addLog(`Players with name updates: ${nameUpdates}`);
+        addLog(`✨ Mass update completed successfully!`);
+      }
     } catch (error) {
-      addLog(`❌ Fatal error during mass update: ${error}`);
+      if (!signal.aborted) {
+        addLog(`❌ Fatal error during mass update: ${error}`);
+      }
     } finally {
       setIsUpdating(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -266,10 +371,18 @@ export default function MassUpdatePlayers() {
         onClick={handleMassUpdate}
         disabled={isUpdating}
       >
-        {isUpdating ? "Updating..." : "Update All Names"}
+        {isUpdating ? `Updating ${loadingIndicator}` : "Update All Names"}
       </button>
 
-      {logs.length > 0 && <UpdateLog logs={logs} onClear={() => setLogs([])} />}
+      {logs.length > 0 && (
+        <UpdateLog
+          logs={logs}
+          onClear={handleClear}
+          onStop={handleStop}
+          isUpdating={isUpdating}
+          progress={progress}
+        />
+      )}
     </>
   );
 }
